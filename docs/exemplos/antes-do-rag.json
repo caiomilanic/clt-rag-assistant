@@ -1,0 +1,19 @@
+{
+  "_contexto": {
+    "data": "2026-11-05",
+    "endpoint": "POST /api/smoke/chat (sem RAG)",
+    "pergunta": "Quantos dias de férias o trabalhador tem direito por ano?",
+    "analise": [
+      "Acertou: 30 dias.",
+      "Errou: os 30 dias estão no Art. 130 da CLT, não no Art. 133 (que trata da perda do direito a férias).",
+      "Errou: o terço é adicional garantido pela Constituição (art. 7º, XVII), não 'adiantamento'; o prazo de pagamento está no Art. 145 da CLT.",
+      "Errou: o período concessivo de 12 meses está no Art. 134, não no 'Art. 133, §2º'."
+    ]
+  },
+  "answer": "O trabalhador brasileiro tem direito a **30 dias de férias anuais**, conforme previsto no **Artigo 133 da CLT**. Além disso, o empregador deve pagar **1/3 (um terço)** do salário do trabalhador como **adiantamento de férias**, que é incorporado ao salário durante o período de folga. \n\nEsses 30 dias devem ser gozados em um período de **12 meses** após o exercício do direito, conforme o disposto no **Artigo 133, §2º** da CLT. \n\n**Observação:** Empresas podem oferecer mais dias de férias, mas a legislação mínima garante 30 dias.",
+  "model": "qwen3:8b",
+  "latencyMs": 111575,
+  "promptTokens": 100,
+  "completionTokens": 606,
+  "disclaimer": "Ferramenta informativa baseada no texto da CLT. Não é aconselhamento jurídico. Para o seu caso concreto, consulte um advogado trabalhista, o sindicato da sua categoria ou a Defensoria Pública."
+}

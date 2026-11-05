@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: cltrag-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-cltrag}
+      POSTGRES_USER: ${POSTGRES_USER:-cltrag}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cltrag}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cltrag} -d ${POSTGRES_DB:-cltrag}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Opcional. Recomendado é rodar o Ollama nativo na máquina (usa GPU / Apple Silicon
+  # direto). Use este serviço só se preferir tudo em container:
+  #   docker compose --profile ollama-docker up -d
+  ollama:
+    image: ollama/ollama:latest
+    container_name: cltrag-ollama
+    profiles: ["ollama-docker"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+
+volumes:
+  pgdata:
+  ollama:
