@@ -1,0 +1,26 @@
+{
+  "_contexto": {
+    "data": "2026-11-12",
+    "endpoint": "POST /api/smoke/chat (aplicação, com prompt de sistema, temperatura 0.2, sem RAG)",
+    "modelo": "qwen3:4b-instruct-2507-q4_K_M",
+    "pergunta": "Quantos dias de férias o trabalhador tem direito por ano?",
+    "analise": [
+      "Citou o artigo certo (Art. 130) com a regra errada: '12 dias úteis'. O Art. 130 garante 30 dias corridos para quem não teve mais de 5 faltas.",
+      "Inventou um '13º dia de férias' pago como adicional, que não existe.",
+      "É o padrão inverso do qwen3:8b com prompt (regra certa, artigo errado), e é mais perigoso: a citação correta dá credibilidade ao conteúdo falso.",
+      "Consequência para o eval: conferir só se o artigo citado está certo não basta. É preciso conferir se a resposta é fiel ao trecho citado."
+    ],
+    "metricas": {
+      "latencyMs": 6902,
+      "promptTokens": 98,
+      "completionTokens": 295,
+      "processador": "100% GPU (RTX 3060 Laptop, 6 GB)"
+    }
+  },
+  "answer": "O trabalhador tem direito a **12 dias úteis de férias por ano**, conforme previsto no **Artigo 130 da CLT** (Consolidação das Leis do Trabalho).\n\nEssas férias são garantidas por lei e devem ser proporcionadas ao trabalhador, com **13º dia de férias** (ou seja, 12 dias úteis + 1 dia de férias remunerada) por ano de trabalho.\n\nAlém disso, o trabalhador tem direito a **13º dia de férias remunerado**, que é pago em forma de adicional, e o valor é calculado com base no salário de referência.\n\n> ⚠️ **Observação**: O número de dias pode variar conforme o regime de trabalho (por exemplo, trabalhadores com contrato de trabalho com horário fixo podem ter férias de 12 dias, mas em casos especiais, como trabalhadores autônomos ou com regime de trabalho diferente, pode haver variações). No entanto, para o trabalhador comum em regime CLT, o padrão é de **12 dias úteis de férias por ano**.\n\nPortanto, a resposta é: **12 dias úteis de férias por ano**.",
+  "model": "qwen3:4b-instruct-2507-q4_K_M",
+  "latencyMs": 6902,
+  "promptTokens": 98,
+  "completionTokens": 295,
+  "disclaimer": "Ferramenta informativa baseada no texto da CLT. Não é aconselhamento jurídico. Para o seu caso concreto, consulte um advogado trabalhista, o sindicato da sua categoria ou a Defensoria Pública."
+}

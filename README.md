@@ -38,6 +38,7 @@
 |---|---|---|
 | Every answer cites its source, or explicitly says nothing was found | 100% of eval answers | Not measured yet (step 6) |
 | The expected article is among the retrieved excerpts | ≥ 90% of eval questions (top-5) | Not measured yet (step 6) |
+| The answer says only what the cited excerpts support | 100% of eval answers | Not measured yet (step 6) |
 | No external network calls in the `offline` profile | 0 calls | By design; to be verified in step 9 |
 | Response time on a 6 GB consumer GPU | ≤ 15 s per answer, including retrieval | Model alone: ~5 s on GPU, down from ~90 s on CPU (see [performance](#model-choice-and-performance)); full RAG not measured yet |
 
@@ -86,7 +87,7 @@ It got the number right and every citation wrong. With no system prompt at all, 
 | With a system prompt | Gets the rule right, makes up the articles ([`antes-do-rag.json`](docs/exemplos/antes-do-rag.json)) |
 | With RAG | *Goal:* answers from the retrieved articles and cites the correct source (measured by the eval set) |
 
-The made-up answers also **change from run to run and from model to model**. Asked the same question without a system prompt, the 8B model has also answered "3 days for up to 12 months of service", and the smaller 4B model answered "13 business days under Law No. 6,015/1973" (Brazil's public registries law). Three runs without a system prompt, three different made-up rules, all stated with confidence. The model's own memory can't be trusted for legal facts; it has to read them from the source.
+The made-up answers also **change from run to run and from model to model**. Asked the same question without a system prompt, the 8B model has also answered "3 days for up to 12 months of service", and the smaller 4B model answered "13 business days under Law No. 6,015/1973" (Brazil's public registries law). Three runs without a system prompt, three different made-up rules, all stated with confidence. The model's own memory can't be trusted for legal facts; it has to read them from the source. Even with the system prompt, the 4B model cited **the right article (Art. 130) with the wrong rule** ("12 business days"). A correct citation attached to a false claim is the most dangerous failure, which is why the eval checks that each answer is supported by its excerpts, not just that it cites the right article ([example](docs/exemplos/com-prompt-4b-instruct.json)).
 
 **The solution:** RAG (*Retrieval-Augmented Generation*). Before answering, the system retrieves the relevant excerpts from a vector database and requires the model to answer **only from them**, citing the source.
 

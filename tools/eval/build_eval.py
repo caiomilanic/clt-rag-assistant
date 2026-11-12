@@ -163,7 +163,7 @@ def main(arts_path, corpus_path, dst):
         perguntas.append(item)
 
     out = {
-        "versao": "0.1",
+        "versao": "0.2",
         "descricao": "Eval set do assistente de normas trabalhistas. Perguntas na linguagem do analista de RH/DP, com o artigo esperado e o trecho da CLT que justifica a resposta.",
         "corpus": {
             "fonte": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm",
@@ -182,6 +182,7 @@ def main(arts_path, corpus_path, dst):
         "metricas": {
             "acerto_recuperacao": "Fração das perguntas (exceto fora_do_escopo) em que todos os artigos_esperados aparecem entre os k trechos recuperados (k = 5). Meta: >= 90%.",
             "citacao": "Fração das respostas que citam ao menos um artigo esperado, ou, em fora_do_escopo, que declaram não ter encontrado a resposta sem citar artigos. Meta: 100%.",
+            "fidelidade": "Fração das respostas cujo conteúdo é sustentado pelos trechos citados (sem regra inventada ao lado de um artigo correto). Avaliada à mão numa amostra na v0.1; candidata a avaliação automática com um modelo juiz. Meta: 100%.",
         },
         "perguntas": perguntas,
     }

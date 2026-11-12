@@ -118,6 +118,10 @@ Todas sem prompt de sistema, mesma pergunta de férias:
 
 Conclusão para o README: a resposta inventada muda de execução para execução e de modelo para modelo, e o modelo menor alucina tão livremente quanto o maior. A memória do modelo não serve como fonte, e é exatamente isso que o RAG resolve.
 
+### Teste pela aplicação
+`/api/smoke/chat` com o modelo novo (prompt de sistema, temperatura 0.2): **6,9 s**, 98 tokens de entrada e 295 de saída (antes: 111 s e 606). A aplicação sobe e funciona com o modelo novo.
+
+A resposta trouxe um tipo novo de erro: **artigo certo, regra errada**. "12 dias úteis de férias, conforme o Art. 130", mais um "13º dia de férias" inventado. É o inverso do `qwen3:8b` com prompt, que acertou a regra e errou o artigo, e é mais perigoso, porque a citação correta dá credibilidade ao erro. Por isso o eval ganhou a métrica de **fidelidade** (v0.2): além de citar o artigo certo, a resposta precisa dizer só o que o trecho sustenta. Registrado em [exemplos/com-prompt-4b-instruct.json](exemplos/com-prompt-4b-instruct.json).
+
 ### Pendências
-- O teste de latência pela aplicação (`/api/smoke/chat`) com o modelo novo ainda não foi feito; até aqui as medições foram direto na API do Ollama.
 - Aumentar o contexto (`num_ctx`) no passo 4 e conferir se os dois modelos continuam cabendo na VRAM.

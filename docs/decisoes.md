@@ -96,6 +96,7 @@ Registro curto das decisões do projeto: o que foi escolhido, por quê e o que f
 - `cobertura_parcial` e `fora_do_escopo`: medem honestidade. O teste da linha de base mostrou que o problema do modelo não é não saber, é inventar com segurança. Por isso há perguntas trabalhistas cuja resposta o modelo "sabe" mas que não estão no corpus (alíquota do FGTS, aviso prévio proporcional).
 
 **Métricas:** acerto de recuperação (artigo esperado entre os 5 trechos recuperados, meta ≥ 90%) e citação (100%).
+**Atualização (v0.2):** entrou a métrica de **fidelidade** (o conteúdo da resposta é sustentado pelo trecho citado). Motivo: o `qwen3:4b-instruct` citou o Art. 130 corretamente e afirmou "12 dias úteis". Citação certa com conteúdo errado é o pior caso, porque a fonte dá credibilidade ao erro, e a métrica de citação sozinha não pega.
 
 ### D15. Modelo de chat: `qwen3:4b-instruct-2507` (2026-11-12)
 **Escolha:** `qwen3:4b-instruct-2507-q4_K_M` (Qwen3 4B, variante *instruct*, quantização de 4 bits) como padrão. Os embeddings ficam com o `bge-m3`. Os dois rodam 100% na GPU (RTX 3060 Laptop, 6 GB): 3,2 GB + 0,7 GB.
