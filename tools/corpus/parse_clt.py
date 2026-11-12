@@ -38,6 +38,8 @@ def norm(text: str) -> str:
     text = re.sub(r"\s+", " ", text).strip()
     # "§ 1 o" / "Art. 1 o" (sobrescrito quebrado) -> "§ 1º"
     text = re.sub(r"((?:§|Art\.)\s*\d+)\s*[oº°]\b", r"\1º", text)
+    # "Lei no 8.036" / "Lei n o 8.036" -> "Lei nº 8.036" (mesma regra do parser Java)
+    text = re.sub(r"\b(Lei|Decreto-[Ll]ei|Decreto|Medida Provis[óo]ria|Lei Complementar)\s+n\s*[oº°]\s*(?=\d)", r"\1 nº ", text)
     return re.sub(r"\s+([,.;:])", r"\1", text)
 
 

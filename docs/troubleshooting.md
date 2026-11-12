@@ -126,3 +126,16 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/smoke/chat `
 ### `release version 25 not supported`
 **Causa:** o Maven está usando um JDK mais antigo.
 **Solução:** confira `java -version` e `mvn -v`. O Maven usa o `JAVA_HOME`, não o JDK configurado na IDE.
+
+## Ingestão e busca
+
+### `HTML da CLT não encontrado em …`
+**Causa:** o caminho do corpus (`app.corpus.clt`, padrão `corpus/clt/DEL5452.html`) é relativo ao diretório de onde a aplicação foi iniciada.
+**Solução:** iniciar a aplicação na raiz do projeto (no IntelliJ: *Run → Edit Configurations → Working directory*) ou definir `CORPUS_CLT` com o caminho absoluto. O mesmo vale para o eval (`EVAL_ARQUIVO`).
+
+### Erro de dimensão do vetor (`expected 1024 dimensions` ou parecido)
+**Causa:** a tabela foi criada com outro modelo de embeddings, ou `dimensions` não bate com o modelo.
+**Solução:** o `bge-m3` gera 1024 dimensões. Ao trocar de modelo de embeddings, apague a tabela (`DROP TABLE trechos_normativos;`), ajuste `spring.ai.vectorstore.pgvector.dimensions` e rode a ingestão de novo.
+
+### `model "bge-m3" not found`
+**Solução:** `ollama pull bge-m3`.

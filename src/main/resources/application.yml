@@ -9,19 +9,36 @@ spring:
 
   ai:
     model:
-      # Desligado até o passo 3, quando o provedor de embeddings passa a ser configurado por perfil
-      # (offline: bge-m3 no Ollama; cloud: Voyage AI).
-      embedding: none
+      # Perfil offline (D9): embeddings no Ollama. O perfil cloud (Voyage AI) entra no passo 6.
+      embedding: ollama
     ollama:
       base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      embedding:
+        options:
+          # Multilíngue, bom em português, 1024 dimensões; cabe na GPU junto com o modelo de chat.
+          model: ${OLLAMA_EMBEDDING_MODEL:bge-m3}
       chat:
         options:
           # Variante instruct: sem modo de raciocínio, cabe na GPU de 6 GB junto com o bge-m3 (D15).
           model: ${OLLAMA_MODEL:qwen3:4b-instruct-2507-q4_K_M}
           # Respostas jurídicas: baixa criatividade, máxima aderência ao contexto.
           temperature: 0.2
+    vectorstore:
+      pgvector:
+        # Cria as extensões (vector, hstore, uuid-ossp), a tabela e o índice na primeira execução.
+        initialize-schema: true
+        table-name: trechos_normativos
+        # Precisa bater com o modelo de embeddings (bge-m3 = 1024). Trocar de modelo exige recriar a tabela.
+        dimensions: 1024
+        distance-type: COSINE_DISTANCE
+        index-type: HNSW
 
 app:
+  corpus:
+    # Relativo ao diretório de onde a aplicação é iniciada (a raiz do projeto).
+    clt: ${CORPUS_CLT:corpus/clt/DEL5452.html}
+  eval:
+    arquivo: ${EVAL_ARQUIVO:docs/eval/eval-set.json}
   llm:
     model-label: ${OLLAMA_MODEL:qwen3:4b-instruct-2507-q4_K_M}
 

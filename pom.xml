@@ -22,6 +22,7 @@
     <properties>
         <java.version>25</java.version>
         <spring-ai.version>2.0.0</spring-ai.version>
+        <jsoup.version>1.21.1</jsoup.version>
     </properties>
 
     <dependencyManagement>
@@ -51,16 +52,23 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- LLM local (geração de texto). Embeddings vêm da Voyage no passo 3. -->
+        <!-- Ollama: chat (qwen3:4b-instruct) e embeddings (bge-m3) locais -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-model-ollama</artifactId>
         </dependency>
 
-        <!-- Postgres (o VectorStore pgvector entra no passo 3, junto com a Voyage) -->
+        <!-- Banco vetorial: PostgreSQL + pgvector (traz o JDBC junto) -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-vector-store-pgvector</artifactId>
+        </dependency>
+
+        <!-- Leitura do HTML oficial da CLT -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>

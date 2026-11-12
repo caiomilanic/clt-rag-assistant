@@ -37,7 +37,7 @@
 | Criterion | Target | Status |
 |---|---|---|
 | Every answer cites its source, or explicitly says nothing was found | 100% of eval answers | Not measured yet (step 6) |
-| The expected article is among the retrieved excerpts | ≥ 90% of eval questions (top-5) | Not measured yet (step 6) |
+| The expected article is among the retrieved excerpts | ≥ 90% of eval questions (top-5) | **90.5%** (19/21) on the first run; MRR 0.655 ([analysis](docs/eval/README.md#resultados)) |
 | The answer says only what the cited excerpts support | 100% of eval answers | Not measured yet (step 6) |
 | No external network calls in the `offline` profile | 0 calls | By design; to be verified in step 9 |
 | Response time on a 6 GB consumer GPU | ≤ 15 s per answer, including retrieval | Model alone: ~5 s on GPU, down from ~90 s on CPU (see [performance](#model-choice-and-performance)); full RAG not measured yet |
@@ -90,6 +90,8 @@ It got the number right and every citation wrong. With no system prompt at all, 
 The made-up answers also **change from run to run and from model to model**. Asked the same question without a system prompt, the 8B model has also answered "3 days for up to 12 months of service", and the smaller 4B model answered "13 business days under Law No. 6,015/1973" (Brazil's public registries law). Three runs without a system prompt, three different made-up rules, all stated with confidence. The model's own memory can't be trusted for legal facts; it has to read them from the source. Even with the system prompt, the 4B model cited **the right article (Art. 130) with the wrong rule** ("12 business days"). A correct citation attached to a false claim is the most dangerous failure, which is why the eval checks that each answer is supported by its excerpts, not just that it cites the right article ([example](docs/exemplos/com-prompt-4b-instruct.json)).
 
 **The solution:** RAG (*Retrieval-Augmented Generation*). Before answering, the system retrieves the relevant excerpts from a vector database and requires the model to answer **only from them**, citing the source.
+
+**First result (retrieval only, no LLM yet):** for **90.5%** of the eval questions, the correct CLT article is among the top 5 excerpts retrieved, from 834 articles ingested in 40 seconds on a laptop GPU. Asked *"Qual o prazo para a empresa pagar as férias?"* ("When must the company pay vacation?"), the search returns Art. 145 first, the exact article the model without RAG couldn't cite. The two misses share one cause, documented in the [eval analysis](docs/eval/README.md#resultados).
 
 ## Architecture
 
@@ -153,10 +155,27 @@ Together the two models take about 4 GB of VRAM, so they fit on a 6 GB GPU. With
 
 ### 3. Application
 ```bash
-mvn spring-boot:run
+mvn spring-boot:run      # run from the project root: the corpus and eval paths are relative to it
+```
+On first start, Spring AI creates the `trechos_normativos` table and its HNSW index in Postgres.
+
+### 4. Ingest the CLT
+```bash
+curl -s -X POST http://localhost:8080/api/ingestao/clt
+# {"fonte":"clt","trechos":834,"duracaoMs":...}
+```
+Parses the official HTML, embeds each article with `bge-m3` and stores it in pgvector. Safe to re-run: documents have stable ids and are replaced, not duplicated.
+
+### 5. Search and measure retrieval
+```bash
+# semantic search only, no LLM: which articles match the question?
+curl -s "http://localhost:8080/api/busca?k=3&q=prazo+para+pagar+as+f%C3%A9rias"
+
+# run the whole eval set against the search and get the hit rate
+curl -s -X POST "http://localhost:8080/api/avaliacao/recuperacao?k=5"
 ```
 
-### 4. Testing
+### 6. Smoke test of the LLM (no RAG)
 ```bash
 curl -s http://localhost:8080/actuator/health
 # expected: "db":{"status":"UP"...} and "status":"UP"
@@ -274,15 +293,18 @@ That's **~13x faster** than where the project started. Two lessons for on-premis
 |---|---|---|
 | `GET` | `/actuator/health` | Application and database health |
 | `POST` | `/api/smoke/chat` | Asks the LLM directly, **without RAG** (smoke test; replaced in step 4) |
+| `POST` | `/api/ingestao/{fonte}` | Ingests a source into the vector store (`clt` for now). Idempotent |
+| `GET` | `/api/busca?q=…&k=5` | Semantic search only: top-k excerpts with reference, link and similarity score |
+| `POST` | `/api/avaliacao/recuperacao?k=5` | Runs the eval set against the search: hit rate, MRR and per-question results |
 
 ## Roadmap
 
 The project ships in layers. Each layer works on its own and can be published.
 
 ### Layer 1: MVP with the CLT (offline)
-- [ ] **1. Corpus and eval set:** official CLT text (Planalto, the federal government's legislation portal), bundled in the repository, plus HR questions with the expected article. *v0.1 drafted: 826 articles extracted, 24 questions ([`docs/eval`](docs/eval/README.md)); under review.*
+- [x] **1. Corpus and eval set:** official CLT text (Planalto, the federal government's legislation portal), bundled in the repository, plus 24 HR questions with the expected article ([`docs/eval`](docs/eval/README.md))
 - [x] **2. Skeleton:** Spring Boot + Spring AI, Postgres/pgvector via Docker, local Ollama
-- [ ] **3. Adapter-based ingestion:** CLT adapter (one chunk per article, metadata shared across all sources) and local embeddings; `offline`/`cloud` profiles
+- [x] **3. Adapter-based ingestion:** CLT adapter (one chunk per article, metadata shared across all sources), local embeddings (`bge-m3`), search and retrieval eval endpoints. 834 articles ingested in 40 s; **retrieval hit rate 90.5% (top-5)**. The `cloud` profile moved to step 6, where it is compared
 - [ ] **4. RAG endpoint:** top-k retrieval + mandatory source citation
 - [ ] **5. Observability:** tokens, latency and cost per call
 - [ ] **6. Evaluation:** retrieval hit rate for the correct source; `offline` vs. `cloud` comparison
@@ -317,8 +339,12 @@ clt-rag-assistant/
 │   ├── troubleshooting.md
 │   ├── eval/                       # eval set: questions, expected articles, excerpts
 │   └── exemplos/                   # reference requests and responses
-├── tools/                          # Python helpers: CLT parser prototype, eval set builder
+├── tools/                          # Python helpers: parser prototype, eval set builder
 └── src/main/java/br/com/caiomilani/cltassistant/
+    ├── ingestao/                   # source-agnostic ingestion: TrechoNormativo, AdaptadorFonte, IngestaoService
+    │   └── clt/                    # CLT adapter + HTML parser (rules in tools/README.md, tested in CltHtmlParserTest)
+    ├── busca/                      # GET /api/busca: semantic search, no LLM
+    ├── avaliacao/                  # POST /api/avaliacao/recuperacao: eval set vs. search
     ├── api/SmokeController.java    # POST /api/smoke/chat
     ├── config/ChatClientConfig.java# ChatClient + system prompt
     └── shared/Disclaimer.java      # single source for the legal disclaimer

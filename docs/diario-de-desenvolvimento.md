@@ -125,3 +125,25 @@ A resposta trouxe um tipo novo de erro: **artigo certo, regra errada**. "12 dias
 
 ### Pendências
 - Aumentar o contexto (`num_ctx`) no passo 4 e conferir se os dois modelos continuam cabendo na VRAM.
+
+## 2026-11-12: Passo 3, ingestão (código)
+
+- **Parser portado para Java** (`CltHtmlParser`, jsoup). O Maven Central é bloqueado no ambiente do Claude, mas havia um jar do jsoup local (1.15.3, vindo do Gradle), então deu para compilar e rodar o parser contra a CLT real antes de entregar.
+- A comparação com o protótipo Python achou **bugs nos dois**:
+  - O protótipo perdia o Art. 12 (diferença de parser HTML) e os Arts. 554 e 555, escritos "Art 554." sem ponto no HTML.
+  - O Java perdia o Art. 556, porque o critério de "MP caducada" olhava as primeiras notas do artigo inteiro, e elas vinham de dispositivos vizinhos. Corrigido: o critério olha só a linha do caput.
+  - Âncoras erradas no próprio HTML (o Art. 553 tem `name="art936"`). O link usa `art553` quando essa âncora existe.
+  - Normalização de "Lei no 8.036" para "Lei nº 8.036", aplicada também no protótipo, para os trechos do eval baterem com o parser Java.
+- Resultado: **835 artigos (834 vigentes)**. Todos os 33 trechos justificativos do eval aparecem literalmente na saída do parser Java.
+- Testes JUnit (`CltHtmlParserTest`): um caso por problema do HTML, mais um teste contra o arquivo real. Os casos foram conferidos aqui com um harness, porque o JUnit também não estava disponível.
+- O código com Spring (adaptador, ingestão, busca, avaliação) foi compilado contra stubs das APIs do Spring AI. Isso garante a sintaxe e os tipos, mas **a primeira build real será na máquina do Caio**.
+- Endpoints novos: `POST /api/ingestao/clt`, `GET /api/busca`, `POST /api/avaliacao/recuperacao`.
+
+### Primeira execução na máquina do Caio
+- O primeiro teste deu 404 nos endpoints novos: a aplicação em execução era a build antiga. O `mvn clean` falhou com `Failed to delete target\classes`, porque um `java.exe` órfão de uma execução anterior segurava os arquivos. Resolvido com `tasklist | grep -i java` + `taskkill //F //PID <n>` (sem os sinais `< >`, que no bash viram redirecionamento).
+- **Compilou e subiu de primeira** depois disso. As APIs do Spring AI 2.0 que só tinham sido testadas contra stubs estavam certas.
+- **Ingestão:** 834 trechos em **40 s** (bge-m3 na GPU).
+- **Busca:** "prazo para pagar as férias" → **Art. 145 em 1º lugar**, seguido de 137 e 134.
+
+### Primeiro número: recuperação 90,5% (top-5)
+19 de 21 perguntas com o artigo esperado entre os 5 primeiros; MRR 0,655; artigo certo em 1º lugar em 10 de 21. Os dois erros (Q10, banco de horas, Art. 59 § 5º; Q15, tolerância do ponto, Art. 58 § 1º) têm a mesma causa: **o assunto está num parágrafo e o caput trata de outra coisa**, então um vetor por artigo inteiro dilui o tema. Os scores das perguntas fora do escopo (0,54–0,60) se misturam com os das válidas (0,53–0,71): um limiar de similaridade sozinho não resolve a recusa. Análise e hipóteses (chunk por dispositivo, busca híbrida) em [eval/README.md](eval/README.md#resultados). Resultado bruto em [eval/resultados/](eval/resultados/2026-11-12-recuperacao-k5.json).

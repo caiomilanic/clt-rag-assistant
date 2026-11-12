@@ -117,3 +117,16 @@ Registro curto das decisões do projeto: o que foi escolhido, por quê e o que f
 **Trade-off aceito:** sem RAG, o 4B alucina tanto quanto o 8B ("13 dias úteis, Lei nº 6.015", que na verdade é a Lei de Registros Públicos). No RAG, o modelo não precisa *saber* a lei, precisa *ler* os trechos recuperados. O eval set vai confirmar se ele lê bem o bastante; o 8B continua a uma variável de distância para comparação.
 **Lições para o dimensionamento on-premise:** (1) o modelo precisa caber inteiro na VRAM; (2) o modelo de chat e o de embeddings dividem a mesma VRAM; (3) GPU é requisito prático: na CPU, uma resposta leva mais de 1 minuto.
 **Consequência:** o `think: false` saiu do `application.yml`, porque não tinha efeito pelo Spring AI e a variante instruct não precisa dele.
+
+### D16. Pipeline de ingestão e busca (2026-11-12)
+**Escolha:**
+- **Modelo de dados comum a todas as fontes** (`TrechoNormativo`: tipo da fonte, documento, referência, contexto, texto, link, notas) e um **adaptador por tipo de fonte** (`AdaptadorFonte`). Na camada 1 só existe o `CltAdapter`; convenções e políticas entram como novos adaptadores, sem mexer no resto.
+- **Parser da CLT em Java** (`CltHtmlParser`, com jsoup), portado do protótipo Python e coberto por testes, um para cada problema real do HTML. Contra o arquivo real, ele extrai **835 artigos** (834 vigentes), mais que o protótipo (826): recupera artigos que o protótipo perdia, como o 12, os 554 e 555 (escritos "Art 554." sem ponto) e o 556 (descartado por engano, porque notas de dispositivos vizinhos tinham "Vigência encerrada"). O critério de MP caducada passou a olhar só as notas da linha do caput. **O parser Java é a referência**; o protótipo fica como ferramenta do eval.
+- **Texto do embedding com cabeçalho:** "CLT, Art. 130 | TÍTULO II > CAPÍTULO IV - DAS FÉRIAS ANUAIS" + texto do artigo. O capítulo dá ao vetor o tema, que o caput nem sempre repete.
+- **Ingestão idempotente:** o id de cada documento é um UUID derivado do id do trecho (`clt:art-130`). Rodar de novo substitui, não duplica.
+- **Ingestão disparada por endpoint** (`POST /api/ingestao/clt`), não na inicialização. A aplicação sobe rápido, e reingerir é uma ação explícita.
+- **pgvector:** tabela `trechos_normativos`, 1024 dimensões (bge-m3), distância cosseno, índice HNSW.
+- **Busca e avaliação sem LLM:** `GET /api/busca` e `POST /api/avaliacao/recuperacao`. A recuperação é medida isoladamente antes do RAG, para saber se um erro futuro vem da busca ou da geração.
+
+**Adiado:** o perfil `cloud` (Voyage AI) foi para o passo 6, onde ele existe para ser comparado. Implementá-lo agora seria código sem uso.
+**Limitação conhecida:** artigos que saírem do corpus numa atualização da lei continuam no banco até uma limpeza da fonte inteira. Fica para o pacote de atualização (camada 3).
