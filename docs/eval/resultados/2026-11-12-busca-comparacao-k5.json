@@ -1,0 +1,1965 @@
+{
+  "_contexto": {
+    "data": "2026-11-12",
+    "endpoint": "POST /api/avaliacao/recuperacao?k=5&granularidade=…&estrategia=…",
+    "embeddings": "bge-m3",
+    "documentos_no_banco": 2695,
+    "escolha": "dispositivo + vetorial (100% no top-5)"
+  },
+  "resumo": [
+    {
+      "configuracao": "artigo-vetorial",
+      "acertoRecuperacao": 0.905,
+      "acertos": 19,
+      "mrr": 0.655
+    },
+    {
+      "configuracao": "artigo-hibrida",
+      "acertoRecuperacao": 0.762,
+      "acertos": 16,
+      "mrr": 0.599
+    },
+    {
+      "configuracao": "dispositivo-vetorial",
+      "acertoRecuperacao": 1.0,
+      "acertos": 21,
+      "mrr": 0.716
+    },
+    {
+      "configuracao": "dispositivo-hibrida",
+      "acertoRecuperacao": 0.857,
+      "acertos": 18,
+      "mrr": 0.74
+    }
+  ],
+  "detalhes": {
+    "artigo-vetorial": {
+      "versaoEval": "0.2",
+      "k": 5,
+      "granularidade": "artigo",
+      "estrategia": "vetorial",
+      "perguntasAvaliadas": 21,
+      "acertos": 19,
+      "acertoRecuperacao": 0.905,
+      "mrr": 0.655,
+      "resultados": [
+        {
+          "id": "Q01",
+          "tipo": "direta",
+          "pergunta": "Quantos dias de férias o trabalhador tem direito por ano?",
+          "esperados": [
+            "130"
+          ],
+          "recuperados": [
+            "130",
+            "134",
+            "129",
+            "133",
+            "139"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.7006524205207825
+        },
+        {
+          "id": "Q02",
+          "tipo": "direta",
+          "pergunta": "Um funcionário completou 12 meses de casa com 8 faltas injustificadas no período. Quantos dias de férias ele tem?",
+          "esperados": [
+            "130"
+          ],
+          "recuperados": [
+            "130",
+            "146",
+            "147",
+            "134",
+            "235-D"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.659585565328598
+        },
+        {
+          "id": "Q03",
+          "tipo": "direta",
+          "pergunta": "Posso dividir as férias de um colaborador em três partes? Existe tamanho mínimo para cada parte?",
+          "esperados": [
+            "134"
+          ],
+          "recuperados": [
+            "139",
+            "134",
+            "140",
+            "150",
+            "143"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6040372252464294
+        },
+        {
+          "id": "Q04",
+          "tipo": "direta",
+          "pergunta": "O colaborador quer vender parte das férias. Quanto ele pode vender e até quando precisa pedir?",
+          "esperados": [
+            "143"
+          ],
+          "recuperados": [
+            "143",
+            "135",
+            "139",
+            "150",
+            "134"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.5448240041732788
+        },
+        {
+          "id": "Q05",
+          "tipo": "direta",
+          "pergunta": "Qual o prazo para a empresa pagar as férias?",
+          "esperados": [
+            "145"
+          ],
+          "recuperados": [
+            "145",
+            "134",
+            "137",
+            "130",
+            "146"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.7048799991607666
+        },
+        {
+          "id": "Q06",
+          "tipo": "multi_artigo",
+          "pergunta": "A empresa perdeu o prazo para conceder as férias de um funcionário. O que acontece?",
+          "esperados": [
+            "137",
+            "134"
+          ],
+          "recuperados": [
+            "146",
+            "137",
+            "147",
+            "134",
+            "133"
+          ],
+          "posicoes": [
+            2,
+            4
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6553334593772888
+        },
+        {
+          "id": "Q07",
+          "tipo": "direta",
+          "pergunta": "As férias de um funcionário podem começar numa quinta-feira, se sexta-feira for feriado?",
+          "esperados": [
+            "134"
+          ],
+          "recuperados": [
+            "134",
+            "130",
+            "133",
+            "139",
+            "150"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6445209383964539
+        },
+        {
+          "id": "Q08",
+          "tipo": "direta",
+          "pergunta": "Qual o adicional mínimo da hora extra?",
+          "esperados": [
+            "59"
+          ],
+          "recuperados": [
+            "241",
+            "59",
+            "296",
+            "73",
+            "305"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6820751130580902
+        },
+        {
+          "id": "Q09",
+          "tipo": "direta",
+          "pergunta": "Quantas horas extras por dia um funcionário pode fazer?",
+          "esperados": [
+            "59"
+          ],
+          "recuperados": [
+            "59",
+            "304",
+            "241",
+            "235-C",
+            "235-F"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6733278632164001
+        },
+        {
+          "id": "Q10",
+          "tipo": "multi_artigo",
+          "pergunta": "Posso fazer banco de horas por acordo individual com o funcionário, sem passar pelo sindicato?",
+          "esperados": [
+            "59"
+          ],
+          "recuperados": [
+            "224",
+            "617",
+            "442",
+            "452-A",
+            "59-A"
+          ],
+          "posicoes": [
+            0
+          ],
+          "acerto": false,
+          "scoreTop1": 0.5309456884860992
+        },
+        {
+          "id": "Q11",
+          "tipo": "direta",
+          "pergunta": "Qual o intervalo mínimo de almoço para quem trabalha 8 horas por dia?",
+          "esperados": [
+            "71"
+          ],
+          "recuperados": [
+            "71",
+            "308",
+            "58",
+            "382",
+            "304"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6486979424953461
+        },
+        {
+          "id": "Q12",
+          "tipo": "hierarquia",
+          "pergunta": "A convenção coletiva da categoria pode reduzir o intervalo de almoço para 30 minutos?",
+          "esperados": [
+            "611-A"
+          ],
+          "recuperados": [
+            "71",
+            "611-A",
+            "611-B",
+            "235-E",
+            "452-A"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.616718977689743
+        },
+        {
+          "id": "Q13",
+          "tipo": "direta",
+          "pergunta": "Se o funcionário não tirou o intervalo de almoço completo, quanto a empresa precisa pagar?",
+          "esperados": [
+            "71"
+          ],
+          "recuperados": [
+            "71",
+            "452-A",
+            "144",
+            "722",
+            "59"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.621838390827179
+        },
+        {
+          "id": "Q14",
+          "tipo": "direta",
+          "pergunta": "Qual o descanso mínimo entre o fim de um expediente e o início do próximo?",
+          "esperados": [
+            "66"
+          ],
+          "recuperados": [
+            "71",
+            "382",
+            "66",
+            "412",
+            "308"
+          ],
+          "posicoes": [
+            3
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6808638274669647
+        },
+        {
+          "id": "Q15",
+          "tipo": "direta",
+          "pergunta": "Atrasos ou saídas de poucos minutos no ponto contam como hora extra ou geram desconto?",
+          "esperados": [
+            "58"
+          ],
+          "recuperados": [
+            "241",
+            "59",
+            "250",
+            "242",
+            "71"
+          ],
+          "posicoes": [
+            0
+          ],
+          "acerto": false,
+          "scoreTop1": 0.6348229050636292
+        },
+        {
+          "id": "Q16",
+          "tipo": "direta",
+          "pergunta": "Qual o prazo para pagar as verbas rescisórias?",
+          "esperados": [
+            "477"
+          ],
+          "recuperados": [
+            "467",
+            "478",
+            "487",
+            "477",
+            "146"
+          ],
+          "posicoes": [
+            4
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6762880086898804
+        },
+        {
+          "id": "Q17",
+          "tipo": "direta",
+          "pergunta": "Como funciona a demissão por acordo entre empresa e funcionário? O que ele recebe?",
+          "esperados": [
+            "484-A"
+          ],
+          "recuperados": [
+            "477-B",
+            "477",
+            "484-A",
+            "497",
+            "502"
+          ],
+          "posicoes": [
+            3
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6046105027198792
+        },
+        {
+          "id": "Q18",
+          "tipo": "cobertura_parcial",
+          "pergunta": "Quantos dias de aviso prévio o funcionário tem direito?",
+          "esperados": [
+            "487"
+          ],
+          "recuperados": [
+            "487",
+            "490",
+            "491",
+            "488",
+            "29"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.689224511384964
+        },
+        {
+          "id": "Q19",
+          "tipo": "direta",
+          "pergunta": "Um funcionário vai se casar. Quantos dias ele pode faltar sem desconto?",
+          "esperados": [
+            "473"
+          ],
+          "recuperados": [
+            "473",
+            "130",
+            "131",
+            "487",
+            "392"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6487832069396973
+        },
+        {
+          "id": "Q20",
+          "tipo": "hierarquia",
+          "pergunta": "A convenção coletiva pode reduzir o número de dias de férias?",
+          "esperados": [
+            "611-B"
+          ],
+          "recuperados": [
+            "139",
+            "611-B",
+            "611-A",
+            "143",
+            "134"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6309936940670013
+        },
+        {
+          "id": "Q21",
+          "tipo": "hierarquia",
+          "pergunta": "Se o acordo coletivo da empresa e a convenção da categoria tratam do mesmo tema de forma diferente, qual vale?",
+          "esperados": [
+            "620"
+          ],
+          "recuperados": [
+            "611-A",
+            "611",
+            "620",
+            "613",
+            "612"
+          ],
+          "posicoes": [
+            3
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6598112881183624
+        },
+        {
+          "id": "F01",
+          "tipo": "fora_do_escopo",
+          "pergunta": "Qual a pena para o crime de furto?",
+          "esperados": [],
+          "recuperados": [
+            "733",
+            "75",
+            "351",
+            "434",
+            "153"
+          ],
+          "posicoes": [],
+          "acerto": false,
+          "scoreTop1": 0.5372880697250366
+        },
+        {
+          "id": "F02",
+          "tipo": "fora_do_escopo",
+          "pergunta": "Qual a alíquota de depósito do FGTS sobre o salário?",
+          "esperados": [],
+          "recuperados": [
+            "580",
+            "911",
+            "589",
+            "586",
+            "582"
+          ],
+          "posicoes": [],
+          "acerto": false,
+          "scoreTop1": 0.5506370961666107
+        },
+        {
+          "id": "F03",
+          "tipo": "fora_do_escopo",
+          "pergunta": "Como calculo a contribuição do INSS descontada do salário?",
+          "esperados": [],
+          "recuperados": [
+            "582",
+            "580",
+            "545",
+            "911",
+            "586"
+          ],
+          "posicoes": [],
+          "acerto": false,
+          "scoreTop1": 0.6026241481304169
+        }
+      ]
+    },
+    "artigo-hibrida": {
+      "versaoEval": "0.2",
+      "k": 5,
+      "granularidade": "artigo",
+      "estrategia": "hibrida",
+      "perguntasAvaliadas": 21,
+      "acertos": 16,
+      "acertoRecuperacao": 0.762,
+      "mrr": 0.599,
+      "resultados": [
+        {
+          "id": "Q01",
+          "tipo": "direta",
+          "pergunta": "Quantos dias de férias o trabalhador tem direito por ano?",
+          "esperados": [
+            "130"
+          ],
+          "recuperados": [
+            "130",
+            "133",
+            "142",
+            "922",
+            "134"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.7006524205207825
+        },
+        {
+          "id": "Q02",
+          "tipo": "direta",
+          "pergunta": "Um funcionário completou 12 meses de casa com 8 faltas injustificadas no período. Quantos dias de férias ele tem?",
+          "esperados": [
+            "130"
+          ],
+          "recuperados": [
+            "130",
+            "134",
+            "146",
+            "133",
+            "150"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.659585565328598
+        },
+        {
+          "id": "Q03",
+          "tipo": "direta",
+          "pergunta": "Posso dividir as férias de um colaborador em três partes? Existe tamanho mínimo para cada parte?",
+          "esperados": [
+            "134"
+          ],
+          "recuperados": [
+            "150",
+            "134",
+            "139",
+            "130",
+            "142"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.5638974606990814
+        },
+        {
+          "id": "Q04",
+          "tipo": "direta",
+          "pergunta": "O colaborador quer vender parte das férias. Quanto ele pode vender e até quando precisa pedir?",
+          "esperados": [
+            "143"
+          ],
+          "recuperados": [
+            "150",
+            "142",
+            "139",
+            "134",
+            "135"
+          ],
+          "posicoes": [
+            0
+          ],
+          "acerto": false,
+          "scoreTop1": 0.5358597934246063
+        },
+        {
+          "id": "Q05",
+          "tipo": "direta",
+          "pergunta": "Qual o prazo para a empresa pagar as férias?",
+          "esperados": [
+            "145"
+          ],
+          "recuperados": [
+            "142",
+            "137",
+            "139",
+            "130",
+            "150"
+          ],
+          "posicoes": [
+            0
+          ],
+          "acerto": false,
+          "scoreTop1": 0.6537633240222931
+        },
+        {
+          "id": "Q06",
+          "tipo": "multi_artigo",
+          "pergunta": "A empresa perdeu o prazo para conceder as férias de um funcionário. O que acontece?",
+          "esperados": [
+            "137",
+            "134"
+          ],
+          "recuperados": [
+            "137",
+            "150",
+            "133",
+            "134",
+            "139"
+          ],
+          "posicoes": [
+            1,
+            4
+          ],
+          "acerto": true,
+          "scoreTop1": 0.646094560623169
+        },
+        {
+          "id": "Q07",
+          "tipo": "direta",
+          "pergunta": "As férias de um funcionário podem começar numa quinta-feira, se sexta-feira for feriado?",
+          "esperados": [
+            "134"
+          ],
+          "recuperados": [
+            "134",
+            "150",
+            "139",
+            "142",
+            "136"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6445209383964539
+        },
+        {
+          "id": "Q08",
+          "tipo": "direta",
+          "pergunta": "Qual o adicional mínimo da hora extra?",
+          "esperados": [
+            "59"
+          ],
+          "recuperados": [
+            "59",
+            "241",
+            "71",
+            "73",
+            "235-C"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6606059372425079
+        },
+        {
+          "id": "Q09",
+          "tipo": "direta",
+          "pergunta": "Quantas horas extras por dia um funcionário pode fazer?",
+          "esperados": [
+            "59"
+          ],
+          "recuperados": [
+            "59",
+            "235-C",
+            "61",
+            "244",
+            "58-A"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6733278632164001
+        },
+        {
+          "id": "Q10",
+          "tipo": "multi_artigo",
+          "pergunta": "Posso fazer banco de horas por acordo individual com o funcionário, sem passar pelo sindicato?",
+          "esperados": [
+            "59"
+          ],
+          "recuperados": [
+            "611-A",
+            "59",
+            "226",
+            "59-B",
+            "239"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.5035180747509003
+        },
+        {
+          "id": "Q11",
+          "tipo": "direta",
+          "pergunta": "Qual o intervalo mínimo de almoço para quem trabalha 8 horas por dia?",
+          "esperados": [
+            "71"
+          ],
+          "recuperados": [
+            "71",
+            "235-C",
+            "922",
+            "308",
+            "58"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6486979424953461
+        },
+        {
+          "id": "Q12",
+          "tipo": "hierarquia",
+          "pergunta": "A convenção coletiva da categoria pode reduzir o intervalo de almoço para 30 minutos?",
+          "esperados": [
+            "611-A"
+          ],
+          "recuperados": [
+            "71",
+            "611-A",
+            "611-B",
+            "616",
+            "476-A"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.616718977689743
+        },
+        {
+          "id": "Q13",
+          "tipo": "direta",
+          "pergunta": "Se o funcionário não tirou o intervalo de almoço completo, quanto a empresa precisa pagar?",
+          "esperados": [
+            "71"
+          ],
+          "recuperados": [
+            "71",
+            "452-A",
+            "47",
+            "142",
+            "58-A"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.621838390827179
+        },
+        {
+          "id": "Q14",
+          "tipo": "direta",
+          "pergunta": "Qual o descanso mínimo entre o fim de um expediente e o início do próximo?",
+          "esperados": [
+            "66"
+          ],
+          "recuperados": [
+            "71",
+            "235-D",
+            "66",
+            "235-E",
+            "59-A"
+          ],
+          "posicoes": [
+            3
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6808638274669647
+        },
+        {
+          "id": "Q15",
+          "tipo": "direta",
+          "pergunta": "Atrasos ou saídas de poucos minutos no ponto contam como hora extra ou geram desconto?",
+          "esperados": [
+            "58"
+          ],
+          "recuperados": [
+            "59",
+            "71",
+            "235-C",
+            "241",
+            "244"
+          ],
+          "posicoes": [
+            0
+          ],
+          "acerto": false,
+          "scoreTop1": 0.6113263964653015
+        },
+        {
+          "id": "Q16",
+          "tipo": "direta",
+          "pergunta": "Qual o prazo para pagar as verbas rescisórias?",
+          "esperados": [
+            "477"
+          ],
+          "recuperados": [
+            "467",
+            "487",
+            "478",
+            "477",
+            "137"
+          ],
+          "posicoes": [
+            4
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6762880086898804
+        },
+        {
+          "id": "Q17",
+          "tipo": "direta",
+          "pergunta": "Como funciona a demissão por acordo entre empresa e funcionário? O que ele recebe?",
+          "esperados": [
+            "484-A"
+          ],
+          "recuperados": [
+            "476-A",
+            "452-A",
+            "477-B",
+            "922",
+            "477"
+          ],
+          "posicoes": [
+            0
+          ],
+          "acerto": false,
+          "scoreTop1": 0.5701535046100616
+        },
+        {
+          "id": "Q18",
+          "tipo": "cobertura_parcial",
+          "pergunta": "Quantos dias de aviso prévio o funcionário tem direito?",
+          "esperados": [
+            "487"
+          ],
+          "recuperados": [
+            "487",
+            "490",
+            "392",
+            "491",
+            "489"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.689224511384964
+        },
+        {
+          "id": "Q19",
+          "tipo": "direta",
+          "pergunta": "Um funcionário vai se casar. Quantos dias ele pode faltar sem desconto?",
+          "esperados": [
+            "473"
+          ],
+          "recuperados": [
+            "473",
+            "130",
+            "392",
+            "235-D",
+            "896-C"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6487832069396973
+        },
+        {
+          "id": "Q20",
+          "tipo": "hierarquia",
+          "pergunta": "A convenção coletiva pode reduzir o número de dias de férias?",
+          "esperados": [
+            "611-B"
+          ],
+          "recuperados": [
+            "611-A",
+            "611-B",
+            "139",
+            "134",
+            "143"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.595198392868042
+        },
+        {
+          "id": "Q21",
+          "tipo": "hierarquia",
+          "pergunta": "Se o acordo coletivo da empresa e a convenção da categoria tratam do mesmo tema de forma diferente, qual vale?",
+          "esperados": [
+            "620"
+          ],
+          "recuperados": [
+            "611-A",
+            "611",
+            "611-B",
+            "616",
+            "614"
+          ],
+          "posicoes": [
+            0
+          ],
+          "acerto": false,
+          "scoreTop1": 0.6598112881183624
+        },
+        {
+          "id": "F01",
+          "tipo": "fora_do_escopo",
+          "pergunta": "Qual a pena para o crime de furto?",
+          "esperados": [],
+          "recuperados": [
+            "733",
+            "722",
+            "75",
+            "557",
+            "351"
+          ],
+          "posicoes": [],
+          "acerto": false,
+          "scoreTop1": 0.5372880697250366
+        },
+        {
+          "id": "F02",
+          "tipo": "fora_do_escopo",
+          "pergunta": "Qual a alíquota de depósito do FGTS sobre o salário?",
+          "esperados": [],
+          "recuperados": [
+            "899",
+            "580",
+            "911",
+            "789",
+            "611-B"
+          ],
+          "posicoes": [],
+          "acerto": false,
+          "scoreTop1": 0.49170297384262085
+        },
+        {
+          "id": "F03",
+          "tipo": "fora_do_escopo",
+          "pergunta": "Como calculo a contribuição do INSS descontada do salário?",
+          "esperados": [],
+          "recuperados": [
+            "580",
+            "582",
+            "589",
+            "602",
+            "590"
+          ],
+          "posicoes": [],
+          "acerto": false,
+          "scoreTop1": 0.594588041305542
+        }
+      ]
+    },
+    "dispositivo-vetorial": {
+      "versaoEval": "0.2",
+      "k": 5,
+      "granularidade": "dispositivo",
+      "estrategia": "vetorial",
+      "perguntasAvaliadas": 21,
+      "acertos": 21,
+      "acertoRecuperacao": 1.0,
+      "mrr": 0.716,
+      "resultados": [
+        {
+          "id": "Q01",
+          "tipo": "direta",
+          "pergunta": "Quantos dias de férias o trabalhador tem direito por ano?",
+          "esperados": [
+            "130"
+          ],
+          "recuperados": [
+            "130",
+            "134",
+            "129",
+            "146",
+            "133"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6934875249862671
+        },
+        {
+          "id": "Q02",
+          "tipo": "direta",
+          "pergunta": "Um funcionário completou 12 meses de casa com 8 faltas injustificadas no período. Quantos dias de férias ele tem?",
+          "esperados": [
+            "130"
+          ],
+          "recuperados": [
+            "146",
+            "130",
+            "147",
+            "452-A",
+            "235-D"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6506243348121643
+        },
+        {
+          "id": "Q03",
+          "tipo": "direta",
+          "pergunta": "Posso dividir as férias de um colaborador em três partes? Existe tamanho mínimo para cada parte?",
+          "esperados": [
+            "134"
+          ],
+          "recuperados": [
+            "134",
+            "139",
+            "235-D",
+            "150",
+            "140"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6034899055957794
+        },
+        {
+          "id": "Q04",
+          "tipo": "direta",
+          "pergunta": "O colaborador quer vender parte das férias. Quanto ele pode vender e até quando precisa pedir?",
+          "esperados": [
+            "143"
+          ],
+          "recuperados": [
+            "135",
+            "144",
+            "150",
+            "145",
+            "143"
+          ],
+          "posicoes": [
+            5
+          ],
+          "acerto": true,
+          "scoreTop1": 0.5375579297542572
+        },
+        {
+          "id": "Q05",
+          "tipo": "direta",
+          "pergunta": "Qual o prazo para a empresa pagar as férias?",
+          "esperados": [
+            "145"
+          ],
+          "recuperados": [
+            "145",
+            "143",
+            "134",
+            "137",
+            "130"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6923105716705322
+        },
+        {
+          "id": "Q06",
+          "tipo": "multi_artigo",
+          "pergunta": "A empresa perdeu o prazo para conceder as férias de um funcionário. O que acontece?",
+          "esperados": [
+            "137",
+            "134"
+          ],
+          "recuperados": [
+            "147",
+            "146",
+            "137",
+            "133",
+            "134"
+          ],
+          "posicoes": [
+            3,
+            5
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6436607241630554
+        },
+        {
+          "id": "Q07",
+          "tipo": "direta",
+          "pergunta": "As férias de um funcionário podem começar numa quinta-feira, se sexta-feira for feriado?",
+          "esperados": [
+            "134"
+          ],
+          "recuperados": [
+            "134",
+            "133",
+            "130",
+            "146",
+            "150"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6239384710788727
+        },
+        {
+          "id": "Q08",
+          "tipo": "direta",
+          "pergunta": "Qual o adicional mínimo da hora extra?",
+          "esperados": [
+            "59"
+          ],
+          "recuperados": [
+            "241",
+            "59",
+            "58-A",
+            "61",
+            "235-C"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6764088571071625
+        },
+        {
+          "id": "Q09",
+          "tipo": "direta",
+          "pergunta": "Quantas horas extras por dia um funcionário pode fazer?",
+          "esperados": [
+            "59"
+          ],
+          "recuperados": [
+            "59",
+            "241",
+            "235-C",
+            "235-F",
+            "61"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6619330942630768
+        },
+        {
+          "id": "Q10",
+          "tipo": "multi_artigo",
+          "pergunta": "Posso fazer banco de horas por acordo individual com o funcionário, sem passar pelo sindicato?",
+          "esperados": [
+            "59"
+          ],
+          "recuperados": [
+            "59",
+            "226",
+            "59-B",
+            "75-B",
+            "573"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.5971532166004181
+        },
+        {
+          "id": "Q11",
+          "tipo": "direta",
+          "pergunta": "Qual o intervalo mínimo de almoço para quem trabalha 8 horas por dia?",
+          "esperados": [
+            "71"
+          ],
+          "recuperados": [
+            "308",
+            "224",
+            "71",
+            "235-C",
+            "230"
+          ],
+          "posicoes": [
+            3
+          ],
+          "acerto": true,
+          "scoreTop1": 0.5958629250526428
+        },
+        {
+          "id": "Q12",
+          "tipo": "hierarquia",
+          "pergunta": "A convenção coletiva da categoria pode reduzir o intervalo de almoço para 30 minutos?",
+          "esperados": [
+            "611-A"
+          ],
+          "recuperados": [
+            "71",
+            "611-A",
+            "230",
+            "235-C",
+            "59-A"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6044268608093262
+        },
+        {
+          "id": "Q13",
+          "tipo": "direta",
+          "pergunta": "Se o funcionário não tirou o intervalo de almoço completo, quanto a empresa precisa pagar?",
+          "esperados": [
+            "71"
+          ],
+          "recuperados": [
+            "71",
+            "230",
+            "144",
+            "477",
+            "729"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6026130318641663
+        },
+        {
+          "id": "Q14",
+          "tipo": "direta",
+          "pergunta": "Qual o descanso mínimo entre o fim de um expediente e o início do próximo?",
+          "esperados": [
+            "66"
+          ],
+          "recuperados": [
+            "382",
+            "66",
+            "235",
+            "239",
+            "412"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6634921431541443
+        },
+        {
+          "id": "Q15",
+          "tipo": "direta",
+          "pergunta": "Atrasos ou saídas de poucos minutos no ponto contam como hora extra ou geram desconto?",
+          "esperados": [
+            "58"
+          ],
+          "recuperados": [
+            "58",
+            "241",
+            "59-B",
+            "235-C",
+            "71"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6531226634979248
+        },
+        {
+          "id": "Q16",
+          "tipo": "direta",
+          "pergunta": "Qual o prazo para pagar as verbas rescisórias?",
+          "esperados": [
+            "477"
+          ],
+          "recuperados": [
+            "467",
+            "478",
+            "477",
+            "487",
+            "147"
+          ],
+          "posicoes": [
+            3
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6762880086898804
+        },
+        {
+          "id": "Q17",
+          "tipo": "direta",
+          "pergunta": "Como funciona a demissão por acordo entre empresa e funcionário? O que ele recebe?",
+          "esperados": [
+            "484-A"
+          ],
+          "recuperados": [
+            "477-B",
+            "479",
+            "484-A",
+            "497",
+            "502"
+          ],
+          "posicoes": [
+            3
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6046105027198792
+        },
+        {
+          "id": "Q18",
+          "tipo": "cobertura_parcial",
+          "pergunta": "Quantos dias de aviso prévio o funcionário tem direito?",
+          "esperados": [
+            "487"
+          ],
+          "recuperados": [
+            "487",
+            "490",
+            "491",
+            "133",
+            "488"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.659394770860672
+        },
+        {
+          "id": "Q19",
+          "tipo": "direta",
+          "pergunta": "Um funcionário vai se casar. Quantos dias ele pode faltar sem desconto?",
+          "esperados": [
+            "473"
+          ],
+          "recuperados": [
+            "473",
+            "320",
+            "488",
+            "131",
+            "146"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6474571526050568
+        },
+        {
+          "id": "Q20",
+          "tipo": "hierarquia",
+          "pergunta": "A convenção coletiva pode reduzir o número de dias de férias?",
+          "esperados": [
+            "611-B"
+          ],
+          "recuperados": [
+            "611-B",
+            "139",
+            "611-A",
+            "134",
+            "143"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6131909489631653
+        },
+        {
+          "id": "Q21",
+          "tipo": "hierarquia",
+          "pergunta": "Se o acordo coletivo da empresa e a convenção da categoria tratam do mesmo tema de forma diferente, qual vale?",
+          "esperados": [
+            "620"
+          ],
+          "recuperados": [
+            "611-A",
+            "620",
+            "611",
+            "613",
+            "8"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.672209620475769
+        },
+        {
+          "id": "F01",
+          "tipo": "fora_do_escopo",
+          "pergunta": "Qual a pena para o crime de furto?",
+          "esperados": [],
+          "recuperados": [
+            "137",
+            "733",
+            "75",
+            "351",
+            "434"
+          ],
+          "posicoes": [],
+          "acerto": false,
+          "scoreTop1": 0.5391301512718201
+        },
+        {
+          "id": "F02",
+          "tipo": "fora_do_escopo",
+          "pergunta": "Qual a alíquota de depósito do FGTS sobre o salário?",
+          "esperados": [],
+          "recuperados": [
+            "582",
+            "580",
+            "899",
+            "484-A",
+            "589"
+          ],
+          "posicoes": [],
+          "acerto": false,
+          "scoreTop1": 0.5551140904426575
+        },
+        {
+          "id": "F03",
+          "tipo": "fora_do_escopo",
+          "pergunta": "Como calculo a contribuição do INSS descontada do salário?",
+          "esperados": [],
+          "recuperados": [
+            "580",
+            "545",
+            "589",
+            "582",
+            "586"
+          ],
+          "posicoes": [],
+          "acerto": false,
+          "scoreTop1": 0.5813523828983307
+        }
+      ]
+    },
+    "dispositivo-hibrida": {
+      "versaoEval": "0.2",
+      "k": 5,
+      "granularidade": "dispositivo",
+      "estrategia": "hibrida",
+      "perguntasAvaliadas": 21,
+      "acertos": 18,
+      "acertoRecuperacao": 0.857,
+      "mrr": 0.74,
+      "resultados": [
+        {
+          "id": "Q01",
+          "tipo": "direta",
+          "pergunta": "Quantos dias de férias o trabalhador tem direito por ano?",
+          "esperados": [
+            "130"
+          ],
+          "recuperados": [
+            "130",
+            "133",
+            "922",
+            "134",
+            "611-B"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6934875249862671
+        },
+        {
+          "id": "Q02",
+          "tipo": "direta",
+          "pergunta": "Um funcionário completou 12 meses de casa com 8 faltas injustificadas no período. Quantos dias de férias ele tem?",
+          "esperados": [
+            "130"
+          ],
+          "recuperados": [
+            "130",
+            "147",
+            "133",
+            "134",
+            "146"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6477804183959961
+        },
+        {
+          "id": "Q03",
+          "tipo": "direta",
+          "pergunta": "Posso dividir as férias de um colaborador em três partes? Existe tamanho mínimo para cada parte?",
+          "esperados": [
+            "134"
+          ],
+          "recuperados": [
+            "134",
+            "139",
+            "135",
+            "142",
+            "611-B"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6034899055957794
+        },
+        {
+          "id": "Q04",
+          "tipo": "direta",
+          "pergunta": "O colaborador quer vender parte das férias. Quanto ele pode vender e até quando precisa pedir?",
+          "esperados": [
+            "143"
+          ],
+          "recuperados": [
+            "135",
+            "134",
+            "137",
+            "150",
+            "142"
+          ],
+          "posicoes": [
+            0
+          ],
+          "acerto": false,
+          "scoreTop1": 0.5375579297542572
+        },
+        {
+          "id": "Q05",
+          "tipo": "direta",
+          "pergunta": "Qual o prazo para a empresa pagar as férias?",
+          "esperados": [
+            "145"
+          ],
+          "recuperados": [
+            "137",
+            "142",
+            "134",
+            "139",
+            "135"
+          ],
+          "posicoes": [
+            0
+          ],
+          "acerto": false,
+          "scoreTop1": 0.6520496010780334
+        },
+        {
+          "id": "Q06",
+          "tipo": "multi_artigo",
+          "pergunta": "A empresa perdeu o prazo para conceder as férias de um funcionário. O que acontece?",
+          "esperados": [
+            "137",
+            "134"
+          ],
+          "recuperados": [
+            "137",
+            "133",
+            "134",
+            "144",
+            "142"
+          ],
+          "posicoes": [
+            1,
+            3
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6326528787612915
+        },
+        {
+          "id": "Q07",
+          "tipo": "direta",
+          "pergunta": "As férias de um funcionário podem começar numa quinta-feira, se sexta-feira for feriado?",
+          "esperados": [
+            "134"
+          ],
+          "recuperados": [
+            "134",
+            "139",
+            "133",
+            "130",
+            "138"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6239384710788727
+        },
+        {
+          "id": "Q08",
+          "tipo": "direta",
+          "pergunta": "Qual o adicional mínimo da hora extra?",
+          "esperados": [
+            "59"
+          ],
+          "recuperados": [
+            "241",
+            "58-A",
+            "235-C",
+            "413",
+            "61"
+          ],
+          "posicoes": [
+            0
+          ],
+          "acerto": false,
+          "scoreTop1": 0.6764088571071625
+        },
+        {
+          "id": "Q09",
+          "tipo": "direta",
+          "pergunta": "Quantas horas extras por dia um funcionário pode fazer?",
+          "esperados": [
+            "59"
+          ],
+          "recuperados": [
+            "59",
+            "413",
+            "61",
+            "235-C",
+            "58-A"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6619330942630768
+        },
+        {
+          "id": "Q10",
+          "tipo": "multi_artigo",
+          "pergunta": "Posso fazer banco de horas por acordo individual com o funcionário, sem passar pelo sindicato?",
+          "esperados": [
+            "59"
+          ],
+          "recuperados": [
+            "59",
+            "59-A",
+            "226",
+            "59-B",
+            "613"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.5971532166004181
+        },
+        {
+          "id": "Q11",
+          "tipo": "direta",
+          "pergunta": "Qual o intervalo mínimo de almoço para quem trabalha 8 horas por dia?",
+          "esperados": [
+            "71"
+          ],
+          "recuperados": [
+            "71",
+            "245",
+            "59-A",
+            "308",
+            "922"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.5800090134143829
+        },
+        {
+          "id": "Q12",
+          "tipo": "hierarquia",
+          "pergunta": "A convenção coletiva da categoria pode reduzir o intervalo de almoço para 30 minutos?",
+          "esperados": [
+            "611-A"
+          ],
+          "recuperados": [
+            "71",
+            "611-A",
+            "611-B",
+            "235-E",
+            "230"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6044268608093262
+        },
+        {
+          "id": "Q13",
+          "tipo": "direta",
+          "pergunta": "Se o funcionário não tirou o intervalo de almoço completo, quanto a empresa precisa pagar?",
+          "esperados": [
+            "71"
+          ],
+          "recuperados": [
+            "71",
+            "922",
+            "230",
+            "162",
+            "144"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6026130318641663
+        },
+        {
+          "id": "Q14",
+          "tipo": "direta",
+          "pergunta": "Qual o descanso mínimo entre o fim de um expediente e o início do próximo?",
+          "esperados": [
+            "66"
+          ],
+          "recuperados": [
+            "66",
+            "235-C",
+            "71",
+            "385",
+            "235-E"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6603440642356873
+        },
+        {
+          "id": "Q15",
+          "tipo": "direta",
+          "pergunta": "Atrasos ou saídas de poucos minutos no ponto contam como hora extra ou geram desconto?",
+          "esperados": [
+            "58"
+          ],
+          "recuperados": [
+            "58",
+            "58-A",
+            "71",
+            "235-C",
+            "238"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6531226634979248
+        },
+        {
+          "id": "Q16",
+          "tipo": "direta",
+          "pergunta": "Qual o prazo para pagar as verbas rescisórias?",
+          "esperados": [
+            "477"
+          ],
+          "recuperados": [
+            "467",
+            "477",
+            "490",
+            "478",
+            "789"
+          ],
+          "posicoes": [
+            2
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6762880086898804
+        },
+        {
+          "id": "Q17",
+          "tipo": "direta",
+          "pergunta": "Como funciona a demissão por acordo entre empresa e funcionário? O que ele recebe?",
+          "esperados": [
+            "484-A"
+          ],
+          "recuperados": [
+            "477-B",
+            "922",
+            "479",
+            "748",
+            "484-A"
+          ],
+          "posicoes": [
+            5
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6046105027198792
+        },
+        {
+          "id": "Q18",
+          "tipo": "cobertura_parcial",
+          "pergunta": "Quantos dias de aviso prévio o funcionário tem direito?",
+          "esperados": [
+            "487"
+          ],
+          "recuperados": [
+            "487",
+            "490",
+            "133",
+            "491",
+            "489"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.659394770860672
+        },
+        {
+          "id": "Q19",
+          "tipo": "direta",
+          "pergunta": "Um funcionário vai se casar. Quantos dias ele pode faltar sem desconto?",
+          "esperados": [
+            "473"
+          ],
+          "recuperados": [
+            "473",
+            "130",
+            "488",
+            "131",
+            "392"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6474571526050568
+        },
+        {
+          "id": "Q20",
+          "tipo": "hierarquia",
+          "pergunta": "A convenção coletiva pode reduzir o número de dias de férias?",
+          "esperados": [
+            "611-B"
+          ],
+          "recuperados": [
+            "611-B",
+            "139",
+            "134",
+            "611-A",
+            "130"
+          ],
+          "posicoes": [
+            1
+          ],
+          "acerto": true,
+          "scoreTop1": 0.6131909489631653
+        },
+        {
+          "id": "Q21",
+          "tipo": "hierarquia",
+          "pergunta": "Se o acordo coletivo da empresa e a convenção da categoria tratam do mesmo tema de forma diferente, qual vale?",
+          "esperados": [
+            "620"
+          ],
+          "recuperados": [
+            "611-A",
+            "611",
+            "620",
+            "611-B",
+            "8"
+          ],
+          "posicoes": [
+            3
+          ],
+          "acerto": true,
+          "scoreTop1": 0.672209620475769
+        },
+        {
+          "id": "F01",
+          "tipo": "fora_do_escopo",
+          "pergunta": "Qual a pena para o crime de furto?",
+          "esperados": [],
+          "recuperados": [
+            "137",
+            "530",
+            "733",
+            "557",
+            "75"
+          ],
+          "posicoes": [],
+          "acerto": false,
+          "scoreTop1": 0.5391301512718201
+        },
+        {
+          "id": "F02",
+          "tipo": "fora_do_escopo",
+          "pergunta": "Qual a alíquota de depósito do FGTS sobre o salário?",
+          "esperados": [],
+          "recuperados": [
+            "789",
+            "582",
+            "611-B",
+            "580",
+            "244"
+          ],
+          "posicoes": [],
+          "acerto": false,
+          "scoreTop1": 0.4963110685348511
+        },
+        {
+          "id": "F03",
+          "tipo": "fora_do_escopo",
+          "pergunta": "Como calculo a contribuição do INSS descontada do salário?",
+          "esperados": [],
+          "recuperados": [
+            "589",
+            "582",
+            "580",
+            "602",
+            "590"
+          ],
+          "posicoes": [],
+          "acerto": false,
+          "scoreTop1": 0.5708547532558441
+        }
+      ]
+    }
+  }
+}

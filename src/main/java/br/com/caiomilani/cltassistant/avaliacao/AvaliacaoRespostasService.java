@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import br.com.caiomilani.cltassistant.busca.EstrategiaBusca;
+import br.com.caiomilani.cltassistant.ingestao.Granularidade;
 import br.com.caiomilani.cltassistant.rag.RagService;
 
 /**
@@ -43,17 +45,18 @@ public class AvaliacaoRespostasService {
      * @param recusasCorretas        perguntas fora do escopo em que o sistema recusou sem citar
      * @param recusasIndevidas       perguntas válidas em que o sistema disse "não encontrei"
      */
-    public record Relatorio(String versaoEval, int k, int perguntas, double citacao,
+    public record Relatorio(String versaoEval, int k, String granularidade, String estrategia, int perguntas,
+                            double citacao,
                             int respostasComCitacaoForaDosTrechos, String recusasCorretas, int recusasIndevidas,
                             long latenciaMediaMs, long latenciaMaximaMs, List<ResultadoPergunta> resultados) {
     }
 
-    public Relatorio avaliar(int k) throws IOException {
+    public Relatorio avaliar(int k, Granularidade granularidade, EstrategiaBusca estrategia) throws IOException {
         EvalSet eval = evalSet.carregar();
         List<ResultadoPergunta> resultados = new ArrayList<>();
 
         for (EvalSet.Pergunta p : eval.perguntas()) {
-            RagService.Resposta r = rag.perguntar(p.pergunta(), k);
+            RagService.Resposta r = rag.perguntar(p.pergunta(), k, granularidade, estrategia);
             List<String> citados = r.citacao().citados();
             boolean acerto = p.foraDoEscopo()
                     ? !r.encontrou() && citados.isEmpty()
@@ -77,7 +80,7 @@ public class AvaliacaoRespostasService {
         long latenciaMaxima = resultados.stream().map(ResultadoPergunta::latenciaMs)
                 .max(Comparator.naturalOrder()).orElse(0L);
 
-        return new Relatorio(eval.versao(), k, total,
+        return new Relatorio(eval.versao(), k, granularidade.valor(), estrategia.name().toLowerCase(), total,
                 total == 0 ? 0 : Math.round(1000.0 * acertos / total) / 1000.0,
                 comCitacaoFora, recusasCorretas + "/" + foraDoEscopo, recusasIndevidas,
                 latenciaMedia, latenciaMaxima, resultados);

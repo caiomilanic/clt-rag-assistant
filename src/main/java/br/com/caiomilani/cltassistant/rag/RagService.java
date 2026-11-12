@@ -1,18 +1,17 @@
 package br.com.caiomilani.cltassistant.rag;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import br.com.caiomilani.cltassistant.busca.EstrategiaBusca;
+import br.com.caiomilani.cltassistant.busca.Recuperador;
+import br.com.caiomilani.cltassistant.ingestao.Granularidade;
 import br.com.caiomilani.cltassistant.shared.Disclaimer;
 
 /**
@@ -22,19 +21,24 @@ import br.com.caiomilani.cltassistant.shared.Disclaimer;
 @Service
 public class RagService {
 
-    private final VectorStore vectorStore;
+    private final Recuperador recuperador;
     private final ChatClient chatClient;
     private final String modelo;
 
-    public RagService(VectorStore vectorStore, ChatModel chatModel,
+    public RagService(Recuperador recuperador, ChatModel chatModel,
                       @Value("${app.llm.model-label}") String modelo) {
-        this.vectorStore = vectorStore;
+        this.recuperador = recuperador;
         // Cliente próprio, sem o prompt de sistema padrão do endpoint de fumaça.
         this.chatClient = ChatClient.create(chatModel);
         this.modelo = modelo;
     }
 
-    public record Fonte(String referencia, String documento, String contexto, String link, Double score) {
+    /**
+     * @param dispositivo dispositivo que trouxe o artigo na busca (ex.: "§ 5º"), ou "artigo"
+     * @param score       similaridade vetorial; null quando o artigo veio só da busca textual
+     */
+    public record Fonte(String referencia, String documento, String contexto, String link,
+                        String dispositivo, Double score) {
     }
 
     /**
@@ -54,14 +58,17 @@ public class RagService {
     }
 
     public Resposta perguntar(String pergunta, int k) {
+        return perguntar(pergunta, k, recuperador.granularidadePadrao(), recuperador.estrategiaPadrao());
+    }
+
+    public Resposta perguntar(String pergunta, int k, Granularidade granularidade, EstrategiaBusca estrategia) {
         long inicio = System.nanoTime();
-        List<Document> trechos = vectorStore.similaritySearch(
-                SearchRequest.builder().query(pergunta).topK(k).build());
+        List<Recuperador.ArtigoRecuperado> trechos = recuperador.buscar(pergunta, k, granularidade, estrategia);
         long fimBusca = System.nanoTime();
 
         ChatResponse chat = chatClient.prompt()
                 .system(PromptRag.SISTEMA)
-                .user(PromptRag.usuario(pergunta, trechos))
+                .user(PromptRag.usuario(pergunta, trechos.stream().map(Recuperador.ArtigoRecuperado::texto).toList()))
                 .call()
                 .chatResponse();
         long fim = System.nanoTime();
@@ -90,9 +97,7 @@ public class RagService {
                 new Citacao(citados, foraDosTrechos), metricas, Disclaimer.TEXT);
     }
 
-    private static Fonte fonte(Document d) {
-        Map<String, Object> m = d.getMetadata();
-        return new Fonte(String.valueOf(m.get("referencia")), String.valueOf(m.get("documento")),
-                String.valueOf(m.get("contexto")), String.valueOf(m.get("link")), d.getScore());
+    private static Fonte fonte(Recuperador.ArtigoRecuperado a) {
+        return new Fonte(a.referencia(), a.documento(), a.contexto(), a.link(), a.dispositivo(), a.scoreVetorial());
     }
 }

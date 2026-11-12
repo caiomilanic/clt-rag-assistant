@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.springframework.ai.document.Document;
-
 /**
  * Prompt do RAG. Cada regra existe por causa de uma falha observada no modelo sem RAG
  * (ver docs/exemplos e D17 em docs/decisoes.md).
@@ -43,9 +41,9 @@ public final class PromptRag {
     }
 
     /** Monta a mensagem do usuário com os trechos numerados e a pergunta. */
-    public static String usuario(String pergunta, List<Document> trechos) {
+    public static String usuario(String pergunta, List<String> trechos) {
         String blocos = IntStream.range(0, trechos.size())
-                .mapToObj(i -> "[" + (i + 1) + "] " + trechos.get(i).getText())
+                .mapToObj(i -> "[" + (i + 1) + "] " + trechos.get(i))
                 .collect(Collectors.joining("\n\n"));
         return "<trechos>\n" + blocos + "\n</trechos>\n\nPergunta: " + pergunta;
     }

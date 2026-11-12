@@ -36,11 +36,11 @@
 
 | Criterion | Target | Status |
 |---|---|---|
-| Every answer cites its source, or explicitly says nothing was found | 100% of eval answers | **91.7%** (22/24); both misses trace back to retrieval misses |
-| The expected article is among the retrieved excerpts | ≥ 90% of eval questions (top-5) | **90.5%** (19/21) on the first run; MRR 0.655 ([analysis](docs/eval/README.md#resultados)) |
-| The answer says only what the cited excerpts support | 100% of eval answers | **81%** (17/21, manual review); failures analyzed in the [eval notes](docs/eval/README.md#análise-das-respostas-2026-11-12) |
+| Every answer cites its source, or explicitly says nothing was found | 100% of eval answers | **100%** (24/24) with provision-level search (was 91.7%) |
+| The expected article is among the retrieved excerpts | ≥ 90% of eval questions (top-5) | **100%** (21/21) with provision-level search, up from 90.5%; hybrid search was measured and rejected ([comparison](docs/eval/README.md#comparação-de-configurações-de-busca-2026-11-12)) |
+| The answer says only what the cited excerpts support | 100% of eval answers | **85.7%** (18/21, manual review) + 2 partially correct; up from 81% ([eval notes](docs/eval/README.md#respostas-com-a-busca-por-dispositivo-2026-11-12)) |
 | No external network calls in the `offline` profile | 0 calls | By design; to be verified in step 9 |
-| Response time on a 6 GB consumer GPU | ≤ 15 s per answer, including retrieval | **1.6 s average, 3.4 s max** across the eval set (down from ~90 s on CPU without RAG; see [performance](#model-choice-and-performance)) |
+| Response time on a 6 GB consumer GPU | ≤ 15 s per answer, including retrieval | **1.9 s average, 5.2 s max** across the eval set (down from ~90 s on CPU without RAG; see [performance](#model-choice-and-performance)) |
 
 ### Non-goals
 
@@ -95,13 +95,13 @@ The made-up answers also **change from run to run and from model to model**. Ask
 
 | | |
 |---|---|
-| Correct article among the top 5 retrieved | **90.5%** |
-| Answers citing the expected article (or correctly refusing) | **91.7%** |
-| Answers fully supported by their excerpts (manual review) | **81%** |
+| Correct article among the top 5 retrieved | **100%** (was 90.5% before indexing by provision) |
+| Answers citing the expected article (or correctly refusing) | **100%** |
+| Answers fully supported by their excerpts (manual review) | **85.7%** (+2 partially: right rule, missing a condition) |
 | Out-of-scope questions refused | **3/3** |
-| Average response time | **1.6 s** |
+| Average response time | **1.9 s** |
 
-The remaining failures are documented, not hidden: a 4B model sometimes misapplies a rule it quoted correctly (8 absences → it answered 30 days instead of 24), and when retrieval misses, a related-but-wrong excerpt can lead to a confident wrong answer. Both are the targets of step 6 ([analysis](docs/eval/README.md#análise-das-respostas-2026-11-12)).
+Indexing by provision (each paragraph as its own vector, while the LLM still gets the whole article) took retrieval from 90.5% to 100% and fixed the most dangerous failure: a confident "No" built on an unrelated article. Hybrid keyword + vector search was measured too, and **rejected** because it made retrieval worse. The remaining issues are documented, not hidden: the 4B model sometimes leaves out a condition ("up to 6 months") or cites the wrong item number within the right article, and once misread an article it had retrieved ([analysis](docs/eval/README.md#respostas-com-a-busca-por-dispositivo-2026-11-12)).
 
 **First result (retrieval only):** for **90.5%** of the eval questions, the correct CLT article is among the top 5 excerpts retrieved, from 834 articles ingested in 40 seconds on a laptop GPU. Asked *"Qual o prazo para a empresa pagar as férias?"* ("When must the company pay vacation?"), the search returns Art. 145 first, the exact article the model without RAG couldn't cite. The two misses share one cause, documented in the [eval analysis](docs/eval/README.md#resultados).
 
@@ -136,6 +136,7 @@ In the **`offline`** profile (the default), everything above runs inside the net
 | Embeddings | Ollama `bge-m3` (offline) · Voyage AI (cloud) | Offline by default; the cloud is only a baseline for comparison |
 | LLM | Ollama (`qwen3:4b-instruct`) | Runs locally with no per-request cost; fits a 6 GB GPU next to the embedding model |
 | Ingestion | One adapter per source type | The CLT has its own structure (article/paragraph/item); agreements and policies arrive as PDF/DOCX |
+| Retrieval | Vector and/or Postgres full-text, fused with RRF; article- or provision-level | Both options are switchable per request, so each is measured on the eval set before becoming the default |
 | Frontend | React + TypeScript | Chat with clickable citations to the text of each source |
 
 Decisions and the alternatives considered are in [`docs/decisoes.md`](docs/decisoes.md) (Portuguese).
@@ -321,8 +322,8 @@ That's **~13x faster** than where the project started. Two lessons for on-premis
 | `POST` | `/api/perguntas` | **The assistant.** Body `{"pergunta": "…", "k": 5}`. Answer with citations, sources, citation check, metrics and disclaimer |
 | `POST` | `/api/avaliacao/respostas?k=5` | Runs the eval set through the full RAG: citation rate, citations outside the retrieved excerpts, refusals, latency |
 | `POST` | `/api/ingestao/{fonte}` | Ingests a source into the vector store (`clt` for now). Idempotent |
-| `GET` | `/api/busca?q=…&k=5` | Semantic search only: top-k excerpts with reference, link and similarity score |
-| `POST` | `/api/avaliacao/recuperacao?k=5` | Runs the eval set against the search: hit rate, MRR and per-question results |
+| `GET` | `/api/busca?q=…&k=5` | Search only, no LLM: top-k articles with reference, link, matching provision and scores. Optional `granularidade=artigo\|dispositivo` and `estrategia=vetorial\|hibrida` |
+| `POST` | `/api/avaliacao/recuperacao?k=5` | Runs the eval set against the search: hit rate, MRR and per-question results. Same optional `granularidade` / `estrategia` parameters, to compare retrieval setups without restarting |
 
 ## Roadmap
 

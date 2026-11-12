@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
+
+import br.com.caiomilani.cltassistant.busca.EstrategiaBusca;
+import br.com.caiomilani.cltassistant.busca.Recuperador;
+import br.com.caiomilani.cltassistant.ingestao.Granularidade;
 
 /**
  * Mede a recuperação contra o eval set (docs/eval/eval-set.json): para cada pergunta, os
@@ -17,11 +18,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class AvaliacaoRecuperacaoService {
 
-    private final VectorStore vectorStore;
+    private final Recuperador recuperador;
     private final EvalSetRepositorio evalSet;
 
-    public AvaliacaoRecuperacaoService(VectorStore vectorStore, EvalSetRepositorio evalSet) {
-        this.vectorStore = vectorStore;
+    public AvaliacaoRecuperacaoService(Recuperador recuperador, EvalSetRepositorio evalSet) {
+        this.recuperador = recuperador;
         this.evalSet = evalSet;
     }
 
@@ -39,11 +40,12 @@ public class AvaliacaoRecuperacaoService {
      * @param acertoRecuperacao fração das perguntas (exceto fora do escopo) com todos os artigos esperados no top-k
      * @param mrr               média de 1/posição do primeiro artigo esperado (1.0 = sempre em primeiro)
      */
-    public record Relatorio(String versaoEval, int k, int perguntasAvaliadas, int acertos,
+    public record Relatorio(String versaoEval, int k, String granularidade, String estrategia,
+                            int perguntasAvaliadas, int acertos,
                             double acertoRecuperacao, double mrr, List<ResultadoPergunta> resultados) {
     }
 
-    public Relatorio avaliar(int k) throws IOException {
+    public Relatorio avaliar(int k, Granularidade granularidade, EstrategiaBusca estrategia) throws IOException {
         EvalSet eval = evalSet.carregar();
 
         List<ResultadoPergunta> resultados = new ArrayList<>();
@@ -52,15 +54,14 @@ public class AvaliacaoRecuperacaoService {
         double somaReciprocos = 0;
 
         for (EvalSet.Pergunta p : eval.perguntas()) {
-            List<Document> docs = vectorStore.similaritySearch(
-                    SearchRequest.builder().query(p.pergunta()).topK(k).build());
+            List<Recuperador.ArtigoRecuperado> docs = recuperador.buscar(p.pergunta(), k, granularidade, estrategia);
             List<String> recuperados = docs.stream()
-                    .map(d -> String.valueOf(d.getMetadata().get("referencia")).replace("Art. ", ""))
+                    .map(d -> d.referencia().replace("Art. ", ""))
                     .toList();
             List<Integer> posicoes = p.artigosEsperados().stream()
                     .map(a -> recuperados.indexOf(a) + 1)
                     .toList();
-            Double scoreTop1 = docs.isEmpty() ? null : docs.get(0).getScore();
+            Double scoreTop1 = docs.isEmpty() ? null : docs.get(0).scoreVetorial();
 
             boolean foraDoEscopo = p.foraDoEscopo();
             boolean acerto = !foraDoEscopo && !posicoes.isEmpty() && posicoes.stream().allMatch(i -> i > 0);
@@ -78,7 +79,8 @@ public class AvaliacaoRecuperacaoService {
 
         double taxa = avaliadas == 0 ? 0 : (double) acertos / avaliadas;
         double mrr = avaliadas == 0 ? 0 : somaReciprocos / avaliadas;
-        return new Relatorio(eval.versao(), k, avaliadas, acertos, arredondar(taxa), arredondar(mrr), resultados);
+        return new Relatorio(eval.versao(), k, granularidade.valor(), estrategia.name().toLowerCase(),
+                avaliadas, acertos, arredondar(taxa), arredondar(mrr), resultados);
     }
 
     private static double arredondar(double v) {

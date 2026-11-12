@@ -170,3 +170,30 @@ Pergunta de férias pelo RAG: **"30 dias corridos, quando não houver faltado ao
 Citação 91,7% · fidelidade 81% (revisão manual) · recusas corretas 3/3 · latência média 1,6 s (máx. 3,4 s). As duas falhas de citação coincidem com as duas falhas de recuperação. Três tipos de falha de fidelidade: erro de raciocínio com o trecho certo (Q02: 8 faltas → respondeu 30 dias em vez de 24; Q03: contradição), trecho parecido sem recusa (Q10, a mais perigosa) e recusa por falha de recuperação (Q15). Detalhes em [eval/README.md](eval/README.md#análise-das-respostas-2026-11-12) e revisão por pergunta em [eval/resultados/](eval/resultados/2026-11-12-respostas-k5.json).
 
 O detector de citações foi ajustado com base nessa rodada ("artigo 617" por extenso; "art. 18 da Lei 8.036" não conta; recusa no fim de uma resposta com citações não conta como recusa), com testes novos no `CitacoesTest`.
+
+## 2026-11-12: Passo 6a, melhorias na busca (código)
+
+- **`DivisorDeDispositivos`:** divide o artigo em caput (com incisos) e parágrafos. Na CLT: 1.863 dispositivos.
+- **Ingestão em dois níveis**, marcados pelo metadado `granularidade` (`artigo` | `dispositivo`). Cada documento de dispositivo guarda o artigo inteiro em `texto_artigo`.
+- **`Recuperador`:** busca vetorial com filtro de granularidade, busca textual em SQL (`to_tsquery('portuguese', …)` com OU) e fusão por RRF, sempre devolvendo artigos (o melhor dispositivo de cada um).
+- O RAG, a busca e as duas avaliações passaram a usar o `Recuperador`; as avaliações aceitam `granularidade` e `estrategia` na URL.
+- Testes: `DivisorDeDispositivosTest` (inclui os casos reais do Art. 59 e do Art. 130) e `RecuperadorTest` (agrupamento por artigo, RRF promovendo o artigo que aparece nas duas listas, artigo vindo só da busca textual, sanitização dos termos para o `to_tsquery`). Conferidos aqui com um harness; o SQL só roda de verdade na máquina do Caio.
+
+### Medição das 4 combinações
+- **Ingestão:** 2.695 documentos (834 artigos + 1.861 dispositivos) em 67 s.
+- **Teste manual** com "banco de horas por acordo individual" (dispositivo + híbrida): o Art. 59 apareceu com `"dispositivo":"§ 5º"`, mas em 2º lugar, atrás do 59-B. Foi o primeiro sinal de que a parte textual trazia ruído.
+- **Eval:** artigo + vetorial 90,5% · artigo + híbrida 76,2% · **dispositivo + vetorial 100%** · dispositivo + híbrida 85,7%. Q10 e Q15 foram para 1º lugar com a busca por dispositivo.
+- **Novo padrão:** dispositivo + vetorial (`application.yml`). A busca híbrida virou um resultado negativo documentado, que é tão útil para o portfólio quanto um positivo: mostra que a decisão veio de medição, não de moda.
+- Ressalva registrada: risco de sobreajuste ao eval. Falta validar com perguntas novas.
+
+### Respostas com a busca por dispositivo
+`POST /api/avaliacao/respostas?granularidade=dispositivo&estrategia=vetorial`: **citação 100%**, recusas 3/3, 0 recusas indevidas, latência 1,9 s em média. Revisão manual: **18 fiéis, 2 parciais, 1 infiel** (antes: 17 fiéis, 3 infiéis, 1 recusa indevida).
+- Banco de horas (Q10) e tolerância do ponto (Q15) passaram a responder certo no essencial, mas **omitindo a condição** (6 meses; 5 e 10 minutos).
+- **Regressão na Q11** (intervalo de almoço): o Art. 71 veio em 3º e o modelo disse que a regra "não é especificada". Erro de leitura do 4B.
+- **Padrão novo:** inciso errado na citação ("Art. 130, I" em vez de II; "Art. 611-B, I" em vez de XI). O artigo sempre certo, o inciso não, e o detector só checa o artigo.
+
+### Próximos ajustes candidatos
+1. Prompt: exigir prazos, limites e condições do dispositivo na resposta.
+2. Verificar o dispositivo citado (§ ou inciso) contra o texto do trecho, além do artigo.
+3. Conjunto de validação com perguntas novas, para medir sem sobreajuste.
+4. Comparar o `qwen3:8b` nas perguntas de leitura e raciocínio (Q02, Q03, Q11).

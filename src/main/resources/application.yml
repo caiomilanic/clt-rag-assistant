@@ -42,6 +42,11 @@ app:
     clt: ${CORPUS_CLT:corpus/clt/DEL5452.html}
   eval:
     arquivo: ${EVAL_ARQUIVO:docs/eval/eval-set.json}
+  busca:
+    # artigo | dispositivo e vetorial | hibrida (D18). Sobrescrevíveis por pergunta na API de busca e nas avaliações.
+    # Padrão escolhido pela medição de 2026-11-12: dispositivo + vetorial = 100% no top-5 (D18).
+    granularidade: ${BUSCA_GRANULARIDADE:dispositivo}
+    estrategia: ${BUSCA_ESTRATEGIA:vetorial}
   llm:
     model-label: ${OLLAMA_MODEL:qwen3:4b-instruct-2507-q4_K_M}
 
