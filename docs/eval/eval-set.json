@@ -1,0 +1,431 @@
+{
+  "versao": "0.1",
+  "descricao": "Eval set do assistente de normas trabalhistas. Perguntas na linguagem do analista de RH/DP, com o artigo esperado e o trecho da CLT que justifica a resposta.",
+  "corpus": {
+    "fonte": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm",
+    "arquivo": "corpus/clt/DEL5452.html",
+    "sha256": "df64b204e60d5a09307415882de6fbd581c4414075305d92b31c63d65e38883c",
+    "obtido_em": "2026-11-12",
+    "observacao": "A verdade de referência é o texto desta versão do arquivo. Se a CLT mudar, atualize o arquivo, o hash e revise as respostas."
+  },
+  "tipos": {
+    "direta": "A resposta está num único dispositivo.",
+    "multi_artigo": "A resposta completa combina mais de um dispositivo.",
+    "hierarquia": "A resposta depende da relação entre lei, convenção e acordo coletivo.",
+    "cobertura_parcial": "O corpus responde só uma parte; o sistema deve dizer o que falta em vez de inventar.",
+    "fora_do_escopo": "O corpus não responde; o sistema deve dizer isso e não citar artigos."
+  },
+  "metricas": {
+    "acerto_recuperacao": "Fração das perguntas (exceto fora_do_escopo) em que todos os artigos_esperados aparecem entre os k trechos recuperados (k = 5). Meta: >= 90%.",
+    "citacao": "Fração das respostas que citam ao menos um artigo esperado, ou, em fora_do_escopo, que declaram não ter encontrado a resposta sem citar artigos. Meta: 100%."
+  },
+  "perguntas": [
+    {
+      "id": "Q01",
+      "tema": "ferias",
+      "tipo": "direta",
+      "pergunta": "Quantos dias de férias o trabalhador tem direito por ano?",
+      "artigos_esperados": [
+        "130"
+      ],
+      "resposta_referencia": "30 dias corridos após cada período aquisitivo de 12 meses, se o empregado não tiver mais de 5 faltas injustificadas; o número cai conforme as faltas (Art. 130).",
+      "trechos_justificativos": [
+        {
+          "artigo": "130",
+          "texto": "Art. 130 - Após cada período de 12 (doze) meses de vigência do contrato de trabalho, o empregado terá direito a férias, na seguinte proporção:"
+        },
+        {
+          "artigo": "130",
+          "texto": "I - 30 (trinta) dias corridos, quando não houver faltado ao serviço mais de 5 (cinco) vezes;"
+        }
+      ],
+      "observacoes": "Pergunta da linha de base sem RAG: o modelo citou Art. 133 (errado). Ver docs/exemplos/antes-do-rag.json."
+    },
+    {
+      "id": "Q02",
+      "tema": "ferias",
+      "tipo": "direta",
+      "pergunta": "Um funcionário completou 12 meses de casa com 8 faltas injustificadas no período. Quantos dias de férias ele tem?",
+      "artigos_esperados": [
+        "130"
+      ],
+      "resposta_referencia": "24 dias corridos, porque teve de 6 a 14 faltas (Art. 130, II).",
+      "trechos_justificativos": [
+        {
+          "artigo": "130",
+          "texto": "II - 24 (vinte e quatro) dias corridos, quando houver tido de 6 (seis) a 14 (quatorze) faltas;"
+        }
+      ]
+    },
+    {
+      "id": "Q03",
+      "tema": "ferias",
+      "tipo": "direta",
+      "pergunta": "Posso dividir as férias de um colaborador em três partes? Existe tamanho mínimo para cada parte?",
+      "artigos_esperados": [
+        "134"
+      ],
+      "resposta_referencia": "Sim, com a concordância do empregado: até três períodos, um deles com pelo menos 14 dias corridos e os demais com pelo menos 5 dias corridos cada (Art. 134, § 1º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "134",
+          "texto": "§ 1º Desde que haja concordância do empregado, as férias poderão ser usufruídas em até três períodos, sendo que um deles não poderá ser inferior a quatorze dias corridos e os demais não poderão ser inferiores a cinco dias corridos, cada um."
+        }
+      ]
+    },
+    {
+      "id": "Q04",
+      "tema": "ferias",
+      "tipo": "direta",
+      "pergunta": "O colaborador quer vender parte das férias. Quanto ele pode vender e até quando precisa pedir?",
+      "artigos_esperados": [
+        "143"
+      ],
+      "resposta_referencia": "Até 1/3 do período de férias pode ser convertido em abono pecuniário; o pedido deve ser feito até 15 dias antes do fim do período aquisitivo (Art. 143, caput e § 1º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "143",
+          "texto": "Art. 143 - É facultado ao empregado converter 1/3 (um terço) do período de férias a que tiver direito em abono pecuniário, no valor da remuneração que lhe seria devida nos dias correspondentes."
+        },
+        {
+          "artigo": "143",
+          "texto": "§ 1º - O abono de férias deverá ser requerido até 15 (quinze) dias antes do término do período aquisitivo."
+        }
+      ]
+    },
+    {
+      "id": "Q05",
+      "tema": "ferias",
+      "tipo": "direta",
+      "pergunta": "Qual o prazo para a empresa pagar as férias?",
+      "artigos_esperados": [
+        "145"
+      ],
+      "resposta_referencia": "Até 2 dias antes do início do período de férias, incluindo o abono, se houver (Art. 145).",
+      "trechos_justificativos": [
+        {
+          "artigo": "145",
+          "texto": "Art. 145 - O pagamento da remuneração das férias e, se for o caso, o do abono referido no art. 143 serão efetuados até 2 (dois) dias antes do início do respectivo período."
+        }
+      ]
+    },
+    {
+      "id": "Q06",
+      "tema": "ferias",
+      "tipo": "multi_artigo",
+      "pergunta": "A empresa perdeu o prazo para conceder as férias de um funcionário. O que acontece?",
+      "artigos_esperados": [
+        "137",
+        "134"
+      ],
+      "resposta_referencia": "As férias devem ser concedidas nos 12 meses seguintes à aquisição do direito (Art. 134); se concedidas depois desse prazo, a remuneração é paga em dobro (Art. 137).",
+      "trechos_justificativos": [
+        {
+          "artigo": "137",
+          "texto": "Art. 137 - Sempre que as férias forem concedidas após o prazo de que trata o art. 134, o empregador pagará em dobro a respectiva remuneração."
+        },
+        {
+          "artigo": "134",
+          "texto": "Art. 134 - As férias serão concedidas por ato do empregador, em um só período, nos 12 (doze) meses subseqüentes à data em que o empregado tiver adquirido o direito."
+        }
+      ]
+    },
+    {
+      "id": "Q07",
+      "tema": "ferias",
+      "tipo": "direta",
+      "pergunta": "As férias de um funcionário podem começar numa quinta-feira, se sexta-feira for feriado?",
+      "artigos_esperados": [
+        "134"
+      ],
+      "resposta_referencia": "Não. É proibido iniciar as férias nos dois dias que antecedem feriado ou dia de repouso semanal remunerado (Art. 134, § 3º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "134",
+          "texto": "§ 3º É vedado o início das férias no período de dois dias que antecede feriado ou dia de repouso semanal remunerado."
+        }
+      ]
+    },
+    {
+      "id": "Q08",
+      "tema": "jornada",
+      "tipo": "direta",
+      "pergunta": "Qual o adicional mínimo da hora extra?",
+      "artigos_esperados": [
+        "59"
+      ],
+      "resposta_referencia": "Pelo menos 50% sobre a hora normal (Art. 59, § 1º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "59",
+          "texto": "§ 1º A remuneração da hora extra será, pelo menos, 50% (cinquenta por cento) superior à da hora normal."
+        }
+      ],
+      "observacoes": "O Art. 611-B, X também protege esse mínimo contra redução por convenção; citar é um bônus."
+    },
+    {
+      "id": "Q09",
+      "tema": "jornada",
+      "tipo": "direta",
+      "pergunta": "Quantas horas extras por dia um funcionário pode fazer?",
+      "artigos_esperados": [
+        "59"
+      ],
+      "resposta_referencia": "No máximo duas horas extras por dia (Art. 59, caput).",
+      "trechos_justificativos": [
+        {
+          "artigo": "59",
+          "texto": "Art. 59. A duração diária do trabalho poderá ser acrescida de horas extras, em número não excedente de duas, por acordo individual, convenção coletiva ou acordo coletivo de trabalho."
+        }
+      ]
+    },
+    {
+      "id": "Q10",
+      "tema": "jornada",
+      "tipo": "multi_artigo",
+      "pergunta": "Posso fazer banco de horas por acordo individual com o funcionário, sem passar pelo sindicato?",
+      "artigos_esperados": [
+        "59"
+      ],
+      "resposta_referencia": "Sim, por acordo individual escrito, desde que a compensação ocorra em até 6 meses (Art. 59, § 5º). Para compensar em até 1 ano, é preciso acordo ou convenção coletiva (Art. 59, § 2º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "59",
+          "texto": "§ 5º O banco de horas de que trata o § 2º deste artigo poderá ser pactuado por acordo individual escrito, desde que a compensação ocorra no período máximo de seis meses."
+        },
+        {
+          "artigo": "59",
+          "texto": "§ 2º Poderá ser dispensado o acréscimo de salário se, por força de acordo ou convenção coletiva de trabalho, o excesso de horas em um dia for compensado pela correspondente diminuição em outro dia, de maneira que não exceda, no período máximo de um ano, à soma das jornadas semanais de trabalho previstas, nem seja ultrapassado o limite máximo de dez horas diárias."
+        }
+      ],
+      "camada2": "Tema em que convenções coletivas costumam ter regras próprias."
+    },
+    {
+      "id": "Q11",
+      "tema": "jornada",
+      "tipo": "direta",
+      "pergunta": "Qual o intervalo mínimo de almoço para quem trabalha 8 horas por dia?",
+      "artigos_esperados": [
+        "71"
+      ],
+      "resposta_referencia": "No mínimo 1 hora e, salvo acordo escrito ou contrato coletivo, no máximo 2 horas (Art. 71, caput).",
+      "trechos_justificativos": [
+        {
+          "artigo": "71",
+          "texto": "Art. 71 - Em qualquer trabalho contínuo, cuja duração exceda de 6 (seis) horas, é obrigatória a concessão de um intervalo para repouso ou alimentação, o qual será, no mínimo, de 1 (uma) hora e, salvo acordo escrito ou contrato coletivo em contrário, não poderá exceder de 2 (duas) horas."
+        }
+      ],
+      "camada2": "Ver Q12: a convenção coletiva pode reduzir esse intervalo."
+    },
+    {
+      "id": "Q12",
+      "tema": "hierarquia",
+      "tipo": "hierarquia",
+      "pergunta": "A convenção coletiva da categoria pode reduzir o intervalo de almoço para 30 minutos?",
+      "artigos_esperados": [
+        "611-A"
+      ],
+      "resposta_referencia": "Sim. A convenção ou o acordo coletivo prevalecem sobre a lei quanto ao intervalo intrajornada, respeitado o mínimo de 30 minutos para jornadas acima de 6 horas (Art. 611-A, III).",
+      "trechos_justificativos": [
+        {
+          "artigo": "611-A",
+          "texto": "Art. 611-A. A convenção coletiva e o acordo coletivo de trabalho têm prevalência sobre a lei quando, entre outros, dispuserem sobre:"
+        },
+        {
+          "artigo": "611-A",
+          "texto": "III - intervalo intrajornada, respeitado o limite mínimo de trinta minutos para jornadas superiores a seis horas;"
+        }
+      ],
+      "observacoes": "Bônus: mencionar que a regra geral é de 1 hora (Art. 71).",
+      "camada2": "Caso central da camada 2: mostrar CLT (Art. 71) e cláusula da CCT lado a lado."
+    },
+    {
+      "id": "Q13",
+      "tema": "jornada",
+      "tipo": "direta",
+      "pergunta": "Se o funcionário não tirou o intervalo de almoço completo, quanto a empresa precisa pagar?",
+      "artigos_esperados": [
+        "71"
+      ],
+      "resposta_referencia": "Apenas o tempo suprimido, com acréscimo de 50% sobre a hora normal, com natureza indenizatória (Art. 71, § 4º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "71",
+          "texto": "§ 4º A não concessão ou a concessão parcial do intervalo intrajornada mínimo, para repouso e alimentação, a empregados urbanos e rurais, implica o pagamento, de natureza indenizatória, apenas do período suprimido, com acréscimo de 50% (cinquenta por cento) sobre o valor da remuneração da hora normal de trabalho."
+        }
+      ]
+    },
+    {
+      "id": "Q14",
+      "tema": "jornada",
+      "tipo": "direta",
+      "pergunta": "Qual o descanso mínimo entre o fim de um expediente e o início do próximo?",
+      "artigos_esperados": [
+        "66"
+      ],
+      "resposta_referencia": "11 horas consecutivas (Art. 66).",
+      "trechos_justificativos": [
+        {
+          "artigo": "66",
+          "texto": "Art. 66 - Entre 2 (duas) jornadas de trabalho haverá um período mínimo de 11 (onze) horas consecutivas para descanso."
+        }
+      ]
+    },
+    {
+      "id": "Q15",
+      "tema": "jornada",
+      "tipo": "direta",
+      "pergunta": "Atrasos ou saídas de poucos minutos no ponto contam como hora extra ou geram desconto?",
+      "artigos_esperados": [
+        "58"
+      ],
+      "resposta_referencia": "Não, se as variações de horário no registro de ponto não passarem de 5 minutos, observado o limite de 10 minutos diários (Art. 58, § 1º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "58",
+          "texto": "§ 1º Não serão descontadas nem computadas como jornada extraordinária as variações de horário no registro de ponto não excedentes de cinco minutos, observado o limite máximo de dez minutos diários."
+        }
+      ],
+      "observacoes": "Não exigir 'por marcação': essa leitura vem da jurisprudência (TST), não do texto da CLT."
+    },
+    {
+      "id": "Q16",
+      "tema": "rescisao",
+      "tipo": "direta",
+      "pergunta": "Qual o prazo para pagar as verbas rescisórias?",
+      "artigos_esperados": [
+        "477"
+      ],
+      "resposta_referencia": "Até 10 dias contados do término do contrato, incluindo a entrega dos documentos da rescisão (Art. 477, § 6º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "477",
+          "texto": "§ 6º A entrega ao empregado de documentos que comprovem a comunicação da extinção contratual aos órgãos competentes bem como o pagamento dos valores constantes do instrumento de rescisão ou recibo de quitação deverão ser efetuados até dez dias contados a partir do término do contrato."
+        }
+      ]
+    },
+    {
+      "id": "Q17",
+      "tema": "rescisao",
+      "tipo": "direta",
+      "pergunta": "Como funciona a demissão por acordo entre empresa e funcionário? O que ele recebe?",
+      "artigos_esperados": [
+        "484-A"
+      ],
+      "resposta_referencia": "Metade do aviso prévio, se indenizado, e metade da indenização sobre o saldo do FGTS; as demais verbas integralmente; saque de até 80% do FGTS; sem direito ao seguro-desemprego (Art. 484-A).",
+      "trechos_justificativos": [
+        {
+          "artigo": "484-A",
+          "texto": "Art. 484-A. O contrato de trabalho poderá ser extinto por acordo entre empregado e empregador, caso em que serão devidas as seguintes verbas trabalhistas:"
+        },
+        {
+          "artigo": "484-A",
+          "texto": "§ 1º A extinção do contrato prevista no caput deste artigo permite a movimentação da conta vinculada do trabalhador no Fundo de Garantia do Tempo de Serviço na forma do inciso I-A do art. 20 da Lei no 8.036, de 11 de maio de 1990, limitada até 80% (oitenta por cento) do valor dos depósitos."
+        },
+        {
+          "artigo": "484-A",
+          "texto": "§ 2º A extinção do contrato por acordo prevista no caput deste artigo não autoriza o ingresso no Programa de Seguro-Desemprego."
+        }
+      ]
+    },
+    {
+      "id": "Q18",
+      "tema": "rescisao",
+      "tipo": "cobertura_parcial",
+      "pergunta": "Quantos dias de aviso prévio o funcionário tem direito?",
+      "artigos_esperados": [
+        "487"
+      ],
+      "resposta_referencia": "A CLT fixa 30 dias para quem recebe por quinzena ou mês ou tem mais de 12 meses de empresa (Art. 487, II). A proporcionalidade por tempo de serviço está em lei própria, fora do corpus: a resposta deve dizer isso em vez de inventar a regra.",
+      "trechos_justificativos": [
+        {
+          "artigo": "487",
+          "texto": "II - trinta dias aos que perceberem por quinzena ou mês, ou que tenham mais de 12 (doze) meses de serviço na empresa."
+        }
+      ],
+      "observacoes": "Teste de honestidade: o aviso prévio proporcional (Lei 12.506/2011) não está na CLT. O Art. 611-B, XVI só menciona que ele existe 'nos termos da lei'."
+    },
+    {
+      "id": "Q19",
+      "tema": "ausencias",
+      "tipo": "direta",
+      "pergunta": "Um funcionário vai se casar. Quantos dias ele pode faltar sem desconto?",
+      "artigos_esperados": [
+        "473"
+      ],
+      "resposta_referencia": "Até 3 dias consecutivos (Art. 473, II).",
+      "trechos_justificativos": [
+        {
+          "artigo": "473",
+          "texto": "II - até 3 (três) dias consecutivos, em virtude de casamento;"
+        }
+      ]
+    },
+    {
+      "id": "Q20",
+      "tema": "hierarquia",
+      "tipo": "hierarquia",
+      "pergunta": "A convenção coletiva pode reduzir o número de dias de férias?",
+      "artigos_esperados": [
+        "611-B"
+      ],
+      "resposta_referencia": "Não. Reduzir o número de dias de férias é objeto ilícito de convenção ou acordo coletivo (Art. 611-B, XI).",
+      "trechos_justificativos": [
+        {
+          "artigo": "611-B",
+          "texto": "Art. 611-B. Constituem objeto ilícito de convenção coletiva ou de acordo coletivo de trabalho, exclusivamente, a supressão ou a redução dos seguintes direitos:"
+        },
+        {
+          "artigo": "611-B",
+          "texto": "XI - número de dias de férias devidas ao empregado;"
+        }
+      ]
+    },
+    {
+      "id": "Q21",
+      "tema": "hierarquia",
+      "tipo": "hierarquia",
+      "pergunta": "Se o acordo coletivo da empresa e a convenção da categoria tratam do mesmo tema de forma diferente, qual vale?",
+      "artigos_esperados": [
+        "620"
+      ],
+      "resposta_referencia": "O acordo coletivo sempre prevalece sobre a convenção coletiva (Art. 620).",
+      "trechos_justificativos": [
+        {
+          "artigo": "620",
+          "texto": "Art. 620. As condições estabelecidas em acordo coletivo de trabalho sempre prevalecerão sobre as estipuladas em convenção coletiva de trabalho."
+        }
+      ],
+      "camada2": "Base para a regra de hierarquia na resposta com múltiplas fontes."
+    },
+    {
+      "id": "F01",
+      "tema": "fora_do_escopo",
+      "tipo": "fora_do_escopo",
+      "pergunta": "Qual a pena para o crime de furto?",
+      "artigos_esperados": [],
+      "resposta_referencia": "Deve recusar: direito penal está fora do escopo do assistente.",
+      "trechos_justificativos": [],
+      "observacoes": "Não pode citar nenhum artigo da CLT."
+    },
+    {
+      "id": "F02",
+      "tema": "fora_do_escopo",
+      "tipo": "fora_do_escopo",
+      "pergunta": "Qual a alíquota de depósito do FGTS sobre o salário?",
+      "artigos_esperados": [],
+      "resposta_referencia": "Deve dizer que a resposta não está no corpus: a alíquota do FGTS é definida em lei própria, não na CLT.",
+      "trechos_justificativos": [],
+      "observacoes": "Pergunta trabalhista e tentadora para alucinar: o modelo 'sabe' a resposta, mas ela não está nas fontes."
+    },
+    {
+      "id": "F03",
+      "tema": "fora_do_escopo",
+      "tipo": "fora_do_escopo",
+      "pergunta": "Como calculo a contribuição do INSS descontada do salário?",
+      "artigos_esperados": [],
+      "resposta_referencia": "Deve dizer que a resposta não está no corpus: contribuição previdenciária é regida pela legislação da Previdência, não pela CLT.",
+      "trechos_justificativos": []
+    }
+  ]
+}

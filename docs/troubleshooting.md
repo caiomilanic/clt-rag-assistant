@@ -50,12 +50,47 @@ Reiniciar depois. A virtualização precisa estar habilitada na BIOS (Gerenciado
 **Solução:** `ollama pull qwen3:8b` (ou o modelo definido em `OLLAMA_MODEL`). Confira com `ollama list`.
 
 ### Respostas muito lentas (mais de 60 s)
+**Primeiro, descubra onde o modelo está rodando:**
+```bash
+ollama run qwen3:8b "oi" > /dev/null && ollama ps   # coluna PROCESSOR
+```
+O `ollama ps` só lista modelos carregados na memória. Se vier vazio, carregue o modelo antes, como no comando acima.
+
 **Causas prováveis:**
+- **`100% CPU`:** a GPU não está sendo usada. Na CPU, espere ~5–10 tokens/s, ou seja, de 1 a 2 minutos por resposta. Veja a próxima seção.
 - A primeira chamada carrega o modelo na memória e é sempre mais lenta.
 - O modo de raciocínio do Qwen3 gera centenas de tokens antes da resposta. Sinal: `completionTokens` alto para uma resposta curta.
-- Sem GPU, o modelo roda na CPU.
 
-**Solução:** desligar o raciocínio (ver diário, pendências) ou usar um modelo menor (`qwen3:4b`).
+**Para medir a velocidade real**, chame o Ollama direto e divida `eval_count` por `eval_duration` (em nanossegundos):
+```bash
+curl -s http://localhost:11434/api/chat -d '{"model":"qwen3:8b","messages":[{"role":"user","content":"oi"}],"think":false,"stream":false}'
+```
+
+### `100% CPU` mesmo com placa NVIDIA
+**Causa:** o Ollama não detectou a GPU. Confirme no log:
+```bash
+grep -i "inference compute" "$LOCALAPPDATA/Ollama/server.log" | tail -2
+# library=cpu → GPU não detectada; library=cuda → detectada
+```
+**Soluções, em ordem:**
+1. Atualizar o driver NVIDIA (GeForce Experience → Drivers, ou nvidia.com/drivers) e reiniciar o PC. Drivers antigos não atendem às bibliotecas CUDA das versões atuais do Ollama.
+2. Em notebooks: *Configurações → Sistema → Tela → Elementos gráficos*, adicionar `ollama.exe` e `ollama app.exe` (em `%LOCALAPPDATA%\Programs\Ollama\`) como **Alto desempenho**, e manter o notebook na tomada.
+3. Fechar o Ollama pelo ícone da bandeja (*Quit*) e abrir de novo depois de cada ajuste.
+
+### Pouca RAM disponível para o modelo
+**Sintoma:** o log do Ollama mostra `available` bem menor que o tamanho do modelo, e o sistema fica lento, porque parte do modelo vai para o disco (swap).
+**Soluções:**
+- Fechar aplicativos pesados em segundo plano (launchers de jogos, muitas abas de navegador).
+- Limitar a memória do WSL, que o Docker Desktop usa. Crie `C:\Users\<usuario>\.wslconfig` com:
+  ```ini
+  [wsl2]
+  memory=3GB
+  ```
+  Depois rode `wsl --shutdown` e abra o Docker Desktop de novo. O Postgres do projeto precisa de muito pouco.
+
+### `think: false` no `application.yml` não muda nada
+**Causa:** a propriedade não é repassada ao Ollama nesta versão do Spring AI, e o Spring ignora propriedades desconhecidas sem erro. Chamando a API do Ollama direto com `"think": false`, funciona.
+**Solução em teste:** `/no_think` no final do prompt de sistema (ver diário).
 
 ## Requisições
 

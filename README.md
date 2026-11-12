@@ -271,7 +271,7 @@ All measurements so far ran **100% on CPU** (~6 tokens/s), because Ollama did no
 The project ships in layers. Each layer works on its own and can be published.
 
 ### Layer 1: MVP with the CLT (offline)
-- [ ] **1. Corpus and eval set:** official CLT text (Planalto, the federal government's legislation portal), bundled in the repository, plus 15–20 HR questions with the expected article
+- [ ] **1. Corpus and eval set:** official CLT text (Planalto, the federal government's legislation portal), bundled in the repository, plus HR questions with the expected article. *v0.1 drafted: 826 articles extracted, 24 questions ([`docs/eval`](docs/eval/README.md)); under review.*
 - [x] **2. Skeleton:** Spring Boot + Spring AI, Postgres/pgvector via Docker, local Ollama
 - [ ] **3. Adapter-based ingestion:** CLT adapter (one chunk per article, metadata shared across all sources) and local embeddings; `offline`/`cloud` profiles
 - [ ] **4. RAG endpoint:** top-k retrieval + mandatory source citation
@@ -301,11 +301,14 @@ The step-by-step development history, with problems and fixes, is in the [dev lo
 clt-rag-assistant/
 ├── docker-compose.yml              # Postgres + pgvector (port 5433); optional Ollama
 ├── docker/postgres/init/           # creates the vector extension
+├── corpus/clt/DEL5452.html         # official CLT text, versioned (hash pinned in the eval set)
 ├── docs/                           # design notes (Portuguese)
 │   ├── decisoes.md                 # architecture decisions and alternatives
 │   ├── diario-de-desenvolvimento.md# dev log
 │   ├── troubleshooting.md
+│   ├── eval/                       # eval set: questions, expected articles, excerpts
 │   └── exemplos/                   # reference requests and responses
+├── tools/                          # Python helpers: CLT parser prototype, eval set builder
 └── src/main/java/br/com/caiomilani/cltassistant/
     ├── api/SmokeController.java    # POST /api/smoke/chat
     ├── config/ChatClientConfig.java# ChatClient + system prompt

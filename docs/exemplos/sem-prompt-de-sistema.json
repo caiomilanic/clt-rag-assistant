@@ -1,0 +1,30 @@
+{
+  "_contexto": {
+    "data": "2026-11-05",
+    "chamada": "POST http://localhost:11434/api/chat direto no Ollama, sem prompt de sistema, com \"think\": false",
+    "pergunta": "Quantos dias de férias o trabalhador tem direito por ano?",
+    "analise": [
+      "Errou a regra: afirmou '15 dias + 1 por ano de serviço, até 30'. Pela CLT são 30 dias corridos (Art. 130), reduzidos só em caso de faltas injustificadas.",
+      "Inventou a fonte: atribuiu a regra à 'Lei nº 11.091/2005', que trata do plano de carreira dos técnico-administrativos das universidades federais e não tem relação com férias na CLT.",
+      "Chamou o adicional de 1/3 de 'salário de férias'; o terço é adicional garantido pela Constituição (art. 7º, XVII).",
+      "Usou a bandeira da Índia para 'outros países'."
+    ],
+    "metricas": {
+      "eval_count": 499,
+      "eval_duration_s": 77.4,
+      "tokens_por_segundo": 6.4,
+      "processador": "100% CPU"
+    }
+  },
+  "message": {
+    "role": "assistant",
+    "content": "O número de dias de férias que um trabalhador tem direito por ano varia conforme o país e o tipo de contrato de trabalho. Vou te explicar com base na legislação brasileira, que é a mais comum em contextos como esse:\n\n### 🇧🇷 **Brasil - Lei do Tempo de Serviço (Lei nº 11.091/2005)**\n\nEm geral, o trabalhador brasileiro tem direito a **15 dias de férias anuais**, com **1 dia de gozo adicional** por cada ano de serviço, conforme previsto na **Lei nº 11.091/2005**.\n\n#### 📌 Detalhes:\n- **Trabalhador com menos de 5 anos de serviço**: 15 dias de férias.\n- **Trabalhador com 5 anos ou mais de serviço**: 15 dias + 1 dia de gozo adicional por cada ano de serviço (até o limite de 30 dias de férias).\n\n#### ✅ Exemplo:\n- **5 anos de serviço**: 15 + 5 = **20 dias de férias**.\n- **10 anos de serviço**: 15 + 10 = **25 dias de férias**.\n- **15 anos de serviço**: 15 + 15 = **30 dias de férias** (limite máximo).\n\n---\n\n### 🇮🇳 **Outros países (exemplo)**\n\nSe você estiver se referindo a outro país, por favor, indique qual, e posso te dar a informação específica.\n\n---\n\n### 📌 Observação:\n- As férias são concedidas **anualmente**, e o trabalhador tem direito a um **intervalo de descanso** de **2 a 3 semanas** (geralmente 15 a 30 dias, dependendo do país e do tempo de serviço).\n- O trabalhador também tem direito a **salário de férias**, que é **1/3 do salário bruto** (no Brasil).\n\nSe quiser, posso te ajudar a calcular o número de dias de férias com base no seu tempo de serviço ou em outro país! 😊"
+  },
+  "done_reason": "stop",
+  "total_duration": 88566719600,
+  "load_duration": 10409603100,
+  "prompt_eval_count": 33,
+  "prompt_eval_duration": 722061000,
+  "eval_count": 499,
+  "eval_duration": 77399814000
+}

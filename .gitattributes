@@ -1,0 +1,5 @@
+# O HTML da CLT é cp1252 com quebras de linha mistas: o Git não deve converter nada,
+# senão o hash registrado no eval set deixa de bater.
+corpus/** -text
+# Fora das estatísticas de linguagem do GitHub.
+corpus/** linguist-vendored

@@ -41,9 +41,62 @@ Pergunta: "Quantos dias de férias o trabalhador tem direito por ano?"
 
 JSON completo em [exemplos/antes-do-rag.json](exemplos/antes-do-rag.json). Essa pergunta entra no eval set.
 
+### Arrumação
+- Projeto movido para fora do OneDrive (`C:\Users\caiom\IdeaProjects\clt-rag-assistant`), sem a pasta duplicada.
+- SDK do IntelliJ trocado do JDK 26 para o 25.
+- Repositório Git iniciado e publicado no GitHub.
+
+### Investigação da latência
+1. **`think: false` no `application.yml`:** quase nenhum efeito (100,6 s; 560 tokens de saída, contra 111,6 s e 606 antes). O Spring Boot ignora propriedades desconhecidas sem erro, então a propriedade provavelmente não é repassada ao Ollama nesta versão do Spring AI.
+2. **Teste direto na API do Ollama com `"think": false`:** o raciocínio desligou (a resposta não tem campo `thinking`). Foram 499 tokens em 77,4 s de geração, ou **~6,4 tokens/s**.
+3. **`ollama ps`:** `100% CPU`, contexto de 4096 tokens.
+4. **Hardware:** RTX 3060 Laptop (6 GB de VRAM) + Intel UHD, 16 GB de RAM.
+5. **Log do Ollama:** `inference compute ... library=cpu`, ou seja, **a GPU não foi detectada**. Driver NVIDIA 537.42 (2023), CUDA 12.2. O mesmo log mostrou **só 1,3 GB de RAM disponível** com Docker, IntelliJ, navegadores, Steam e Epic abertos.
+
+**Conclusão:** a lentidão vem da CPU (e da falta de RAM), não do thinking. O thinking é um ajuste secundário.
+
+### Segundo exemplo de alucinação
+No teste direto (item 2), **sem prompt de sistema**, o modelo afirmou que o trabalhador tem "15 dias + 1 por ano de serviço, até 30", com base na "Lei nº 11.091/2005". A lei citada trata da carreira dos técnico-administrativos das universidades federais, e a regra é inventada (são 30 dias, Art. 130 da CLT). O modelo ainda pôs uma bandeira da Índia em "outros países". Registrado em [exemplos/sem-prompt-de-sistema.json](exemplos/sem-prompt-de-sistema.json).
+
+Isso fecha a escada usada no README: **sem prompt, inventa a regra e a lei → com prompt, acerta a regra e inventa os artigos → com RAG, deve citar a fonte certa.**
+
 ### Pendências abertas
-- **Latência alta:** os 606 tokens de saída para uma resposta curta indicam que o modo de raciocínio do Qwen3 está ativo. Testar `spring.ai.ollama.chat.options.think: false`; se a propriedade não existir nesta versão, usar `/no_think` no prompt de sistema. Medir a latência antes e depois.
-- Confirmar RAM e GPU da máquina para validar o modelo (`qwen3:8b` vs `qwen3:4b`).
-- O IntelliJ está rodando com o JDK 26; trocar o SDK do projeto para o 25.
-- Tirar o projeto do OneDrive antes do primeiro commit (sincronização da pasta `target/`).
-- Inicializar o repositório Git.
+- **GPU:** atualizar o driver NVIDIA, reiniciar e confirmar `library=cuda` no log e `GPU` no `ollama ps`. Remedir a latência.
+- **RAM:** fechar Steam e Epic durante o desenvolvimento; limitar o WSL com `.wslconfig` (`memory=3GB`).
+- **Thinking pelo Spring AI:** testar `/no_think` no prompt de sistema e medir `completionTokens`.
+- **Modelo:** comparar `qwen3:8b` (5,9 GB; mal cabe nos 6 GB de VRAM) com `qwen3:4b` (cabe inteiro na GPU).
+- **Contexto:** o Ollama está usando 4096 tokens. No passo 4, o prompt leva vários trechos e pode estourar; aumentar o contexto (`num_ctx`).
+
+## 2026-11-12: Reposicionamento do projeto
+
+Discussão sobre rodar 100% offline levou a três decisões (detalhes em [decisoes.md](decisoes.md)):
+
+- **D9, offline por padrão:** com a Voyage, toda pergunta dependeria de internet, porque o embedding da pergunta é calculado a cada consulta. Embeddings passam para o Ollama no perfil `offline`; a Voyage fica no perfil `cloud`, como comparação.
+- **D10, novo posicionamento:** de "assistente da CLT para o trabalhador" para **assistente de normas trabalhistas para RH e DP, on-premise**. Ele reúne CLT, convenção coletiva e políticas internas, indica a hierarquia entre as normas e cita a fonte. A CLT passa a ser a base legal do sistema e a base de testes. O sistema organiza e cita; quem decide é o analista.
+- **D11, entrega em camadas:** MVP só com a CLT → segunda fonte (uma convenção coletiva real) → visão completa.
+
+O README foi reescrito com o novo posicionamento, o diagrama on-premise e o roadmap em camadas.
+
+## 2026-11-12: Passo 1, corpus e eval set (v0.1)
+
+### Corpus
+- O `curl` para o Planalto falhou de duas formas: primeiro em silêncio (o `-s` escondia o erro) e depois com `Recv failure: Connection was reset`. O servidor derruba clientes automatizados. **Solução:** salvar pelo navegador (Ctrl+S, "somente HTML").
+- O navegador salvou como `DEL5452.html` (maiúsculas, `.html`), e não `del5452.htm`, por isso o `ls` não achou o arquivo.
+- Arquivo: 3,5 MB, encoding windows-1252, gerado pelo FrontPage. SHA-256 `df64b204…883c`, registrado no eval set.
+- Com os embeddings no Ollama (D9), o limite de requisições da Voyage deixou de existir. Por isso o corpus é **a CLT inteira**, e não mais o recorte por temas planejado antes.
+
+### Protótipo do parser
+Escrito em Python para descobrir as regras antes do adaptador Java. Problemas encontrados no HTML, e como cada um foi tratado:
+1. Texto revogado convive com o vigente, riscado com `<strike>`. É descartado.
+2. Versões de medidas provisórias que caducaram (ex.: MP 808/2017) aparecem **sem** riscado, só com a nota "Vigência encerrada". Também são descartadas.
+3. O arquivo começa com os arts. 1º e 2º do decreto-lei que aprova a CLT, o que gerava duplicatas dos arts. 1º e 2º.
+4. Bug do regex: "Art. 58 - A duração…" era lido como "Art. 58-A". Corrigido: o sufixo só vale colado ao hífen.
+5. Sobrescritos quebrados ("§ 1 o") e sobras de dispositivos revogados ("I -;", "a);").
+6. 11 artigos ainda aparecem duplicados sem riscado; ficou a versão mais longa, com a lista registrada para revisão.
+
+Resultado: **826 artigos vigentes**, mediana de ~380 caracteres, máximo de ~5.000. Confirma um chunk por artigo (D13).
+
+### Eval set v0.1
+24 perguntas: 15 diretas, 2 multi-artigo, 3 de hierarquia (611-A, 611-B, 620), 1 de cobertura parcial (aviso prévio proporcional, que está em outra lei) e 3 fora do escopo (penal, FGTS, INSS). Trechos justificativos extraídos do corpus por script. A pergunta da linha de base (Q01, férias) está incluída. Pendente: revisão das perguntas e respostas pelo Caio.
+
+Um cuidado registrado no item Q15 (tolerância do ponto): a leitura de "5 minutos **por marcação**" vem da jurisprudência do TST, não do texto da CLT. A resposta de referência segue só o texto da lei.

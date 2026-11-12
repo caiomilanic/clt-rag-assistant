@@ -32,7 +32,7 @@ Registro curto das decisões do projeto: o que foi escolhido, por quê e o que f
 **Por quê:** um banco só para dados relacionais e vetores; suporte nativo no Spring AI (`PgVectorStore`); fácil de hospedar no Azure.
 **Detalhe:** porta **5433** no host, porque a 5432 costuma estar ocupada por um PostgreSQL instalado localmente (aconteceu na máquina de desenvolvimento).
 
-### D6. Embeddings: Voyage AI (`voyage-4`)
+### D6. Embeddings: Voyage AI (`voyage-4`). *Revista pela D9: a Voyage passa a ser só o perfil `cloud`.*
 **Escolha:** Voyage AI, modelo `voyage-4` ou `voyage-4-lite`.
 **Alternativas:** embeddings do próprio Ollama (ex.: `nomic-embed-text`), OpenAI.
 **Por quê:** a Anthropic não tem API própria de embeddings e recomenda a Voyage. A família voyage-4 tem 200M tokens gratuitos, que cobrem o corpus da CLT reprocessado muitas vezes.
@@ -48,3 +48,51 @@ Registro curto das decisões do projeto: o que foi escolhido, por quê e o que f
 **Escolha:** `POST /api/smoke/chat`, que chama o LLM direto e já devolve modelo, latência, tokens e aviso.
 **Por quê:** valida a integração com o Ollama isoladamente, e a resposta sem RAG serve de linha de base ("antes") para comparar com o RAG. O formato da resposta já antecipa a observabilidade do passo 5.
 **Consequência:** será substituído pelo endpoint de RAG no passo 4.
+
+### D9. Offline por padrão, com perfis `offline` e `cloud` (2026-11-12)
+**Escolha:** o sistema roda inteiro dentro da rede, com embeddings e LLM no Ollama. Um perfil `cloud` opcional usa a Voyage AI para embeddings e, no futuro, o Claude como LLM.
+**Alternativa:** a arquitetura original, com a Voyage obrigatória.
+**Por quê:** com a Voyage, toda pergunta faria uma chamada externa (o embedding da pergunta é calculado a cada consulta), e o sistema não funcionaria sem internet. Rodar 100% local é requisito para o posicionamento on-premise (D10).
+**Consequências:**
+- O modelo de embeddings local (candidatos: `bge-m3`, multilíngue e bom em português; `nomic-embed-text`) divide a GPU com o LLM. É preciso medir o consumo de VRAM.
+- O corpus da CLT fica empacotado no repositório; a ingestão não baixa nada em tempo de execução.
+- O eval set roda nos dois perfis e mede o custo de qualidade de ficar offline.
+
+### D10. Reposicionamento: assistente de normas trabalhistas para RH (2026-11-12)
+**Escolha:** *"Assistente de normas trabalhistas para RH, com RAG, que roda on-premise: reúne o que dizem a CLT, a convenção coletiva e as políticas internas sobre cada dúvida, indica a hierarquia entre essas normas e cita a fonte de cada trecho. Nenhum dado sai da rede da empresa."*
+**Alternativas:**
+- *Assistente da CLT para o trabalhador* (posicionamento original): bom para divulgação, mas sem diferencial técnico forte.
+- *RAG genérico offline para qualquer documento:* mercado já ocupado por ferramentas prontas (AnythingLLM, Open WebUI, PrivateGPT).
+**Por quê:** no direito do trabalho, as normas têm hierarquia (CLT, convenção coletiva, acordo coletivo, política interna; Arts. 611-A, 611-B e 620 da CLT), e um RAG genérico não sabe disso. É esse conhecimento de domínio que diferencia o projeto. O argumento de privacidade também só se sustenta com documentos da empresa: a CLT é pública.
+**Limites do escopo:**
+- **Usuário:** analista de RH/DP, que confere a fonte antes de agir. Autoatendimento para funcionários fica para depois.
+- **O sistema organiza e cita; não decide.** Dizer qual norma prevalece num caso concreto é interpretação jurídica. O texto diz "indica a hierarquia", e não "aplica".
+- **Sem dados de funcionários** (salário, ponto, histórico) e **sem ações** (cálculos, lançamentos). Isso simplifica a LGPD.
+
+### D11. Entrega em camadas (2026-11-12)
+**Escolha:** três camadas, cada uma funcional e publicável sozinha.
+1. **MVP:** RAG offline só com a CLT, com eval e números.
+2. **Molde:** segunda fonte (uma convenção coletiva pública real) e respostas mostrando as duas fontes.
+3. **Visão:** políticas internas, acordos, atualização offline do corpus e controle de acesso.
+
+**Por quê:** a visão completa é grande para um projeto solo, e convenções em PDF são bem menos estruturadas que a CLT. A camada 1 já demonstra RAG, avaliação e operação offline; as seguintes acrescentam o diferencial de domínio.
+**Consequência:** a ingestão é projetada desde o início com adaptadores por tipo de fonte e metadados comuns (tipo da fonte, documento, seção, vigência, link), mesmo que a camada 1 só implemente o adaptador da CLT.
+
+### D12. Corpus versionado no repositório (2026-11-12)
+**Escolha:** o HTML oficial da CLT (`corpus/clt/DEL5452.html`, baixado do Planalto pelo navegador) fica versionado no Git, com o SHA-256 registrado no eval set. O arquivo é marcado em `.gitattributes` como binário (`-text`), para o Git não converter o encoding (cp1252) nem as quebras de linha.
+**Alternativa:** baixar a CLT em tempo de execução.
+**Por quê:** (1) o sistema precisa rodar sem internet (D9); (2) o eval só faz sentido contra uma versão fixa da lei; (3) o servidor do Planalto derruba conexões do `curl` (`Connection was reset`), então o download automático nem é confiável.
+**Consequência:** atualizar a lei vira uma ação explícita: trocar o arquivo, atualizar o hash e revisar o eval. Na camada 3, isso vira o "pacote de atualização do corpus".
+
+### D13. Regras de extração e chunking validados com um protótipo (2026-11-12)
+**Escolha:** antes do adaptador Java, um protótipo em Python ([`tools/corpus/parse_clt.py`](../tools/corpus/parse_clt.py)) validou as regras de extração do HTML: descartar texto riscado e versões de MP com "Vigência encerrada", tirar as notas de alteração do texto, normalizar "§ 1 o", ignorar os artigos do decreto-lei de aprovação. As regras estão em [`tools/README.md`](../tools/README.md).
+**Resultado:** 826 artigos vigentes, mediana de ~380 caracteres e máximo de ~5.000. **Isso confirma a D7: um chunk por artigo**, sem precisar subdividir os longos, que cabem no contexto dos modelos de embedding candidatos.
+**Por quê um protótipo:** o HTML do Planalto é irregular (FrontPage, texto revogado misturado com o vigente, duplicatas). Descobrir as regras em script descartável é mais rápido que em Java, e as regras viram especificação e casos de teste do adaptador.
+
+### D14. Desenho do eval set (2026-11-12)
+**Escolha:** 24 perguntas na linguagem do analista de RH, de cinco tipos: `direta`, `multi_artigo`, `hierarquia`, `cobertura_parcial` e `fora_do_escopo`. Cada uma tem os artigos esperados, uma resposta de referência e os trechos justificativos **copiados do corpus por script**. Detalhes em [`eval/README.md`](eval/README.md).
+**Por quê os tipos além de `direta`:**
+- `hierarquia`: é o diferencial do produto (D10) e precisa de medição desde o MVP.
+- `cobertura_parcial` e `fora_do_escopo`: medem honestidade. O teste da linha de base mostrou que o problema do modelo não é não saber, é inventar com segurança. Por isso há perguntas trabalhistas cuja resposta o modelo "sabe" mas que não estão no corpus (alíquota do FGTS, aviso prévio proporcional).
+
+**Métricas:** acerto de recuperação (artigo esperado entre os 5 trechos recuperados, meta ≥ 90%) e citação (100%).
