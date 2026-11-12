@@ -197,3 +197,27 @@ O detector de citações foi ajustado com base nessa rodada ("artigo 617" por ex
 2. Verificar o dispositivo citado (§ ou inciso) contra o texto do trecho, além do artigo.
 3. Conjunto de validação com perguntas novas, para medir sem sobreajuste.
 4. Comparar o `qwen3:8b` nas perguntas de leitura e raciocínio (Q02, Q03, Q11).
+
+## 2026-11-12: Passo 6b, condições no prompt e verificador de dispositivos
+
+- **Prompt:** duas regras novas na `PromptRag`. Parágrafo ou inciso só depois de conferir o texto (na dúvida, só o artigo). Prazos, limites, percentuais e condições fazem parte da resposta.
+- **`VerificadorDeCitacoes`:** confere cada "(Art. N, § X)" ou "(Art. N, inciso)" contra o artigo recuperado. Marca dispositivo que não existe e número da frase que não está no dispositivo citado (aceitando número por extenso, como "trinta", e descontando números da pergunta).
+- **Teste com dados reais antes do Ollama:** o verificador rodou sobre as 24 respostas gravadas da rodada anterior. Primeira versão: 3 acertos (Q02, Q05, Q09) e 2 falsos positivos na Q11, porque a citação vinha no início da frase e o "8 horas" era da pergunta. Corrigido, ficou em 3 acertos e 0 falsos positivos. A Q20 (inciso I no lugar de XI, sem números na frase) continua passando: limitação documentada na D19.
+- **Integração:** `citacao.problemasDeDispositivo` na resposta da API; `respostasComProblemaDeDispositivo` no relatório da avaliação.
+- **Testes:** `VerificadorDeCitacoesTest` com os casos reais (11 testes). Sem acesso ao Maven Central no ambiente do Claude, rodaram com um runner mínimo; o `mvn test` na máquina do Caio é a confirmação.
+- **Próximo:** medir o efeito das duas mudanças no eval, e depois montar o conjunto de validação com perguntas novas.
+
+### Medição da rodada 6b
+- **Resultado:** 17 fiéis, 3 parciais, 1 infiel (antes 18, 2, 1); 4 citações de dispositivo erradas, como antes, mas em perguntas diferentes. Q10 passou a dizer os 6 meses; Q15 continua sem os 5 e 10 minutos; Q11 continua concluindo errado (cita o mínimo de 1 hora acima de 6 horas e diz que não há regra para 8 horas).
+- **Leitura honesta:** as duas regras novas no prompt não mudaram o placar. O modelo de 4B não consegue conferir o próprio inciso. Isso é um resultado: aponta para corrigir no sistema (rebaixar a citação marcada para o artigo) ou trocar o modelo.
+- **Bug encontrado pelo próprio eval:** o verificador marcou "Art. 59-B, § 6º" na Q10, citação que não existe na resposta. Causa: grupos de captura dentro de quantificadores possessivos no Java guardam o valor de tentativas que falharam. O mesmo padrão estava no `Citacoes`, que já estava em produção desde o passo 4 ("art. 20-A da Lei" + "Art. 477" virava "477-A"). Corrigido nos dois, com testes de regressão.
+- **Ponto cego corrigido:** números por extenso na resposta ("duas horas") agora são conferidos. A Q09 passou a ser detectada.
+- Com as correções, aplicado às duas rodadas gravadas: anterior, 3 detecções (Q02, Q05, Q09); 6b, 2 (Q09, Q12); nenhum falso positivo. Não detectados: Q17 e Q20, com dispositivo errado em frases sem números.
+
+## 2026-11-12: Passo 6c, rebaixar a citação marcada
+
+- **`VerificadorDeCitacoes.corrigir`:** devolve a resposta com cada citação marcada trocada pelo artigo, e os problemas encontrados. Leva junto um inciso que vem logo depois do parágrafo ("§ 3º, III").
+- **`RagService`:** entrega a resposta corrigida; o texto do modelo fica em `citacao.respostaOriginal`. A avaliação grava as duas versões.
+- **Teste com dados reais:** nas duas rodadas gravadas, 5 citações rebaixadas, todas erradas (Q02, Q05, Q09; Q09, Q12), nenhuma certa alterada.
+- **Testes:** mais 4 em `VerificadorDeCitacoesTest` (17 no total).
+- Decisão na D20.

@@ -42,4 +42,11 @@ class CitacoesTest {
                 + "saque de até 80%, conforme o § 1º do art. 484-A. Ver também art. 7º, XVII, da Constituição.";
         assertThat(Citacoes.extrair(resposta)).containsExactly("484-A");
     }
+
+    /** A letra de um artigo descartado ("20-A da Lei") não pode grudar no artigo seguinte. */
+    @Test
+    void letraDeArtigoDescartadoNaoVazaParaOSeguinte() {
+        assertThat(Citacoes.extrair("na forma do art. 20-A da Lei nº 8.036 e do Art. 477"))
+                .containsExactly("477");
+    }
 }

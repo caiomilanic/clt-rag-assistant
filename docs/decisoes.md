@@ -162,3 +162,34 @@ Registro curto das decisões do projeto: o que foi escolhido, por quê e o que f
 **Alternativas não escolhidas agora:** reranker (um modelo que reordena os candidatos; custaria mais VRAM e latência) e reescrita da pergunta pelo LLM (custaria uma chamada a mais por pergunta). Ficam como próximas hipóteses, se as duas opções não bastarem.
 
 **Resultado da D18 (2026-11-12):** medidas as 4 combinações no eval (top-5): artigo + vetorial 90,5%; artigo + híbrida 76,2%; **dispositivo + vetorial 100%**; dispositivo + híbrida 85,7% (com o melhor MRR, 0,740). **Novo padrão: dispositivo + vetorial.** A busca híbrida ficou como opção, com o resultado negativo documentado: a consulta textual com OU sobre todas as palavras e o peso igual no RRF trazem ruído. Ressalva: o eval é pequeno e foi usado para desenhar a mudança, então a confirmação precisa de perguntas novas (validação separada).
+
+### D19. Condições no prompt e verificação de parágrafos e incisos (2026-11-12)
+**Problemas medidos** na rodada com busca por dispositivo: (1) respostas certas no essencial, mas **sem a condição** (Q10 sem o limite de 6 meses do banco de horas; Q15 sem os 5 e 10 minutos); (2) **inciso errado** na citação, com o artigo certo: "Art. 130, I" quando a regra está no II (Q02), "Art. 145, I" e "Art. 59, I", que não têm inciso (Q05, Q09), "Art. 611-B, I" no lugar do XI (Q20). O detector de citações só conferia o artigo, então nada disso aparecia nas métricas.
+
+**1. Prompt (regras 2 e 4 da `PromptRag`):** o parágrafo ou o inciso só entra na citação depois de o modelo conferir que o texto está naquele dispositivo; na dúvida, cita só o artigo. E prazos, limites, percentuais e condições ("desde que", "até", "no máximo", "mediante", "por escrito") passam a fazer parte da resposta, porque para o analista de RH a condição é a regra.
+
+**2. `VerificadorDeCitacoes` (sem LLM, determinístico):** para cada citação com § ou inciso ("(Art. 130, I)", "§ 6º do Art. 477", "Art. 487, I e II", "Art. 59-B, parágrafo único") de um artigo que estava entre os trechos:
+- **`dispositivo_inexistente`**: o artigo recuperado não tem aquele § ou inciso;
+- **`numero_ausente`**: a frase que a citação sustenta traz um número que não está no dispositivo citado. Os números por extenso da lei contam ("30 minutos" ↔ "trinta minutos"), e números que já estão na pergunta ("8 horas por dia") são contexto, não afirmação.
+
+A resposta da API traz `citacao.problemasDeDispositivo` e a avaliação conta `respostasComProblemaDeDispositivo` (meta: 0).
+
+**Validação antes de medir:** rodado sobre as 24 respostas reais da última avaliação, o verificador marcou exatamente Q02 (24, 6 e 14 não estão no inciso I), Q05 e Q09 (incisos inexistentes), sem falso positivo. Dois ajustes vieram desse teste: citação que abre a frase ("(Art. 71, § 1º) menciona…") usa o resto da frase, e números da pergunta são descontados.
+
+**Alternativa não escolhida agora:** modelo juiz (LLM) comparando cada afirmação com o trecho. Pega mais casos, mas custa uma chamada a mais, tem variação própria e precisa ele mesmo ser avaliado. O verificador determinístico é barato, explicável e roda em toda resposta; o juiz fica para depois, se o verificador não bastar.
+**Limitação conhecida:** inciso que existe, mas é o errado, só é pego quando a frase tem números. O "Art. 611-B, I" da Q20, numa frase sem números, passa. Citações só com artigo não são conferidas no nível de dispositivo.
+**Risco registrado:** prompt e verificador foram desenhados olhando as mesmas 24 perguntas. A confirmação vem do conjunto de validação com perguntas novas (próximo passo).
+
+**Resultado da D19 (2026-11-12):** placar de fidelidade praticamente igual (17 fiéis, 3 parciais, 1 infiel; antes 18, 2, 1) e o mesmo número de citações de dispositivo erradas (4). A regra 4 ajudou na Q10 (passou a dizer os 6 meses), mas não na Q15. A regra 2 o modelo de 4B não seguiu: os erros de inciso mudaram de lugar. O verificador foi o ganho: pegou 2 dos 4 erros novos e tornou o problema mensurável. As regras ficam (não pioraram e são corretas para modelos maiores), mas a conclusão é que **a correção do dispositivo tem de vir do sistema**, não do prompt.
+
+**Correções no verificador depois da rodada:**
+- **Falso positivo na Q10:** "(Art. 59-B). … (Art. 59, § 6º)" virava "Art. 59-B, § 6º". Causa: no Java, um grupo de captura dentro de um quantificador possessivo (`?+`) pode manter o valor de uma tentativa que falhou e contaminar a próxima. Os possessivos foram trocados por lookaheads (`(?!\d)`, `(?![-º°])`). O mesmo bug existia no `Citacoes` (detector de artigos): "art. 20-A da Lei nº 8.036 e o Art. 477" virava "477-A". Corrigido nos dois, com testes.
+- **Números por extenso na resposta:** "até duas horas extras (Art. 59, § 1º)" passava, porque só algarismos eram lidos na resposta. Agora "duas" conta como 2 ("um/uma" fica de fora, por ser quase sempre artigo indefinido).
+
+### D20. Citação de dispositivo marcada é rebaixada para o artigo (2026-11-12)
+**Problema:** a D19 mostrou que o `qwen3:4b-instruct` não confere o próprio inciso, mesmo instruído: em duas rodadas, 4 citações de § ou inciso erradas em 21 respostas, enquanto o **artigo** veio certo em 100% delas.
+**Escolha:** quando o `VerificadorDeCitacoes` marca uma citação, o sistema a reescreve só com o artigo antes de entregar a resposta: "(Art. 130, I)" vira "(Art. 130)"; "§ 6º do Art. 477" vira "Art. 477"; "Art. 611-A, § 3º, III" vira "Art. 611-A". O texto do modelo fica em `citacao.respostaOriginal` (null quando nada mudou), e o problema continua em `problemasDeDispositivo`, para que a métrica não esconda o erro.
+**Alternativas:** (1) nova chamada ao LLM pedindo a correção: mais cara, mais lenta e sem garantia de acerto com o mesmo modelo; (2) só avisar o analista: deixa uma citação errada na frente dele; (3) remover a citação: perde a fonte. Rebaixar é determinístico, sem custo, e deixa uma fonte que o analista abre e lê inteira.
+**Por quê:** para o analista de RH, uma citação menos precisa e certa vale mais que uma precisa e errada. O artigo completo já aparece nas fontes da resposta.
+**Validação:** aplicado às duas rodadas gravadas, rebaixou 5 citações (Q02, Q05 e Q09 na anterior; Q09 e Q12 na 6b), todas erradas, sem tocar nas certas.
+**Limitação:** só corrige o que o verificador detecta. Inciso que existe, mas é o errado, numa frase sem números (Q17, Q20) continua passando.

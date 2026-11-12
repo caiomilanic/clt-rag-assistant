@@ -19,6 +19,7 @@ Temas: férias, jornada, rescisão, ausências e hierarquia entre normas. Os ite
 - **Acerto de recuperação:** fração das perguntas (exceto `fora_do_escopo`) em que todos os `artigos_esperados` aparecem entre os 5 trechos recuperados. Meta: ≥ 90%.
 - **Citação:** fração das respostas que citam ao menos um artigo esperado ou, em `fora_do_escopo`, que declaram não ter encontrado a resposta sem citar artigos. Meta: 100%.
 - **Fidelidade:** fração das respostas cujo conteúdo é sustentado pelos trechos citados. Meta: 100%. Entrou na v0.2 depois de um caso real: o `qwen3:4b-instruct`, sem RAG, citou o **artigo certo (Art. 130) com a regra errada** ("12 dias úteis"). Conferir só a citação teria dado esse caso como acerto ([exemplo](../exemplos/com-prompt-4b-instruct.json)). Por enquanto é avaliada à mão numa amostra; a automação (modelo juiz comparando resposta e trechos) fica para o passo 6.
+- **Problemas de dispositivo:** respostas em que um § ou inciso citado não existe no artigo recuperado, ou em que a frase traz um número que não está no dispositivo citado (`respostasComProblemaDeDispositivo`, D19). Meta: 0. É uma parte automática e parcial da fidelidade: pega "Art. 145, I" (não existe) e "24 dias (Art. 130, I)" (o 24 está no inciso II), mas não um inciso errado numa frase sem números.
 
 ## Regras
 
@@ -141,3 +142,39 @@ Critérios da revisão manual: **fiel** = conteúdo correto, com as condições 
 - **Regressão nova (Q11):** o Art. 71 veio em 3º lugar e o modelo afirmou que o intervalo para 8 horas "não é especificado", quando o caput diz 1 hora. Na rodada anterior, com o Art. 71 em 1º, a resposta estava certa. É um erro de leitura do modelo de 4B, sensível à posição do trecho.
 - **Padrão novo: inciso errado na citação.** O modelo tende a escrever "inciso I": "Art. 130, I" quando é o II (Q02); "Art. 611-B, I" quando é o XI (Q20); "Art. 145, I" e "Art. 59, I", que nem têm inciso. O artigo está sempre certo; o inciso não. O detector de citações verifica só o artigo, então isso passa sem ser notado. Possível evolução: verificar o dispositivo citado contra o texto do trecho.
 - **Latência:** 1,9 s em média; o máximo de 5,2 s foi a primeira chamada (carga do modelo).
+
+### Verificador de dispositivos sobre as respostas gravadas (2026-11-12)
+
+Antes de rodar o modelo de novo, o `VerificadorDeCitacoes` (D19) foi aplicado às 24 respostas da rodada anterior, com o texto dos artigos recuperados:
+
+| Pergunta | Citação | Problema detectado | Correto? |
+|---|---|---|---|
+| Q02 | "24 dias corridos … de 6 a 14 faltas (Art. 130, I)" | `numero_ausente`: 24, 6 e 14 estão no inciso II | Sim |
+| Q05 | "(Art. 145, I)" | `dispositivo_inexistente` | Sim |
+| Q09 | "(Art. 59, I)" | `dispositivo_inexistente` | Sim |
+| Q20 | "(Art. 611-B, I)" no lugar do XI | não detectado (frase sem números) | Limitação |
+
+Nenhum falso positivo nas outras 20 respostas. Os acertos do inciso certo com número por extenso (Q12: "30 minutos" ↔ "trinta minutos"; Q13: 50% no § 4º) passaram, como deviam.
+
+### Rodada 6b: condições no prompt + verificador (2026-11-12)
+
+[Resultado com revisão manual](resultados/2026-11-12-respostas-6b-k5.json).
+
+| | Rodada anterior | **6b** |
+|---|---|---|
+| Citação (artigo) | 100% | 100% |
+| Fiéis / parciais / infiéis | 18 / 2 / 1 | **17 / 3 / 1** |
+| Citações de § ou inciso erradas | 4 (Q02, Q05, Q09, Q20) | 4 (Q09, Q12, Q17, Q20) |
+| Detectadas pelo verificador | 3 de 4 | 2 de 4 (Q09, Q12) |
+| Recusas corretas / indevidas | 3/3 · 0 | 3/3 · 0 |
+| Latência média | 1,9 s | 2,5 s (12,2 s na 1ª chamada, com carga do modelo) |
+
+- **As mudanças no prompt não melhoraram o resultado no agregado.** Uma rodada só, com variação natural do modelo, não separa efeito de ruído; o placar ficou praticamente igual.
+- **Regra 4 (condições):** ajudou na Q10, que passou a dizer o limite de 6 meses, mas não na Q15 (continua sem os 5 e 10 minutos). A Q07 ficou curta demais ("Não."), perdendo a explicação.
+- **Regra 2 (conferir antes de citar § ou inciso):** o 4B não seguiu. Corrigiu Q02 e Q05, mas errou em Q12 e Q17, e trocou o erro da Q20 (de I para X; o certo é XI). Os erros só mudaram de lugar.
+- **O ganho real foi o verificador:** os erros de dispositivo agora aparecem na métrica, em vez de passarem como acerto. A rodada também revelou um bug nele (falso positivo na Q10) e um ponto cego (números por extenso na resposta, Q09), ambos corrigidos; veja a D19.
+- **Conclusão:** pedir ao modelo de 4B que confira o próprio inciso não funciona. A próxima alavanca está no sistema, não no prompt: quando o verificador marca um dispositivo, o sistema pode **rebaixar a citação para o artigo** (o artigo está sempre certo) ou pedir uma nova geração. A outra é testar um modelo maior (`qwen3:8b`).
+
+### Rebaixamento da citação marcada (D20)
+
+A partir daqui, a resposta entregue já sai com as citações marcadas pelo verificador trocadas pelo artigo; `respostaOriginal` guarda o texto do modelo. Na revisão manual, avalie a resposta entregue e use `problemasDeDispositivo` e `respostaOriginal` para saber o que o sistema corrigiu. Aplicado às rodadas gravadas: 5 citações rebaixadas, todas erradas, nenhuma certa alterada.

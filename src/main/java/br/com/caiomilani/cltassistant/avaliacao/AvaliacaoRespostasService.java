@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import br.com.caiomilani.cltassistant.busca.EstrategiaBusca;
 import br.com.caiomilani.cltassistant.ingestao.Granularidade;
 import br.com.caiomilani.cltassistant.rag.RagService;
+import br.com.caiomilani.cltassistant.rag.VerificadorDeCitacoes;
 
 /**
  * Roda o eval set pelo RAG completo e mede o que dá para medir automaticamente:
@@ -35,19 +36,24 @@ public class AvaliacaoRespostasService {
 
     public record ResultadoPergunta(String id, String tipo, String pergunta, List<String> esperados,
                                     List<String> recuperados, List<String> citados, List<String> citadosForaDosTrechos,
+                                    List<VerificadorDeCitacoes.Problema> problemasDeDispositivo,
                                     boolean encontrou, boolean acertoCitacao, long latenciaMs, Integer tokensSaida,
-                                    String resposta) {
+                                    String resposta, String respostaOriginal) {
     }
 
     /**
      * @param citacao                fração de perguntas com acerto de citação (meta: 1.0)
      * @param respostasComCitacaoForaDosTrechos quantas respostas citaram artigo não recuperado (meta: 0)
+     * @param respostasComProblemaDeDispositivo quantas respostas citaram § ou inciso inexistente, ou com
+     *                               número que não está no dispositivo citado (meta: 0; D19). Na resposta
+     *                               entregue essas citações já saem rebaixadas para o artigo (D20)
      * @param recusasCorretas        perguntas fora do escopo em que o sistema recusou sem citar
      * @param recusasIndevidas       perguntas válidas em que o sistema disse "não encontrei"
      */
     public record Relatorio(String versaoEval, int k, String granularidade, String estrategia, int perguntas,
                             double citacao,
-                            int respostasComCitacaoForaDosTrechos, String recusasCorretas, int recusasIndevidas,
+                            int respostasComCitacaoForaDosTrechos, int respostasComProblemaDeDispositivo,
+                            String recusasCorretas, int recusasIndevidas,
                             long latenciaMediaMs, long latenciaMaximaMs, List<ResultadoPergunta> resultados) {
     }
 
@@ -63,13 +69,16 @@ public class AvaliacaoRespostasService {
                     : p.artigosEsperados().stream().anyMatch(citados::contains);
             resultados.add(new ResultadoPergunta(p.id(), p.tipo(), p.pergunta(), p.artigosEsperados(),
                     r.fontes().stream().map(f -> f.referencia().replace("Art. ", "")).toList(),
-                    citados, r.citacao().foraDosTrechos(), r.encontrou(), acerto,
-                    r.metricas().latenciaTotalMs(), r.metricas().tokensSaida(), r.resposta()));
+                    citados, r.citacao().foraDosTrechos(), r.citacao().problemasDeDispositivo(), r.encontrou(), acerto,
+                    r.metricas().latenciaTotalMs(), r.metricas().tokensSaida(), r.resposta(),
+                    r.citacao().respostaOriginal()));
         }
 
         int total = resultados.size();
         long acertos = resultados.stream().filter(ResultadoPergunta::acertoCitacao).count();
         int comCitacaoFora = (int) resultados.stream().filter(x -> !x.citadosForaDosTrechos().isEmpty()).count();
+        int comProblemaDeDispositivo = (int) resultados.stream()
+                .filter(x -> !x.problemasDeDispositivo().isEmpty()).count();
         long foraDoEscopo = resultados.stream().filter(x -> EvalSet.FORA_DO_ESCOPO.equals(x.tipo())).count();
         long recusasCorretas = resultados.stream()
                 .filter(x -> EvalSet.FORA_DO_ESCOPO.equals(x.tipo()) && x.acertoCitacao()).count();
@@ -82,7 +91,7 @@ public class AvaliacaoRespostasService {
 
         return new Relatorio(eval.versao(), k, granularidade.valor(), estrategia.name().toLowerCase(), total,
                 total == 0 ? 0 : Math.round(1000.0 * acertos / total) / 1000.0,
-                comCitacaoFora, recusasCorretas + "/" + foraDoEscopo, recusasIndevidas,
+                comCitacaoFora, comProblemaDeDispositivo, recusasCorretas + "/" + foraDoEscopo, recusasIndevidas,
                 latenciaMedia, latenciaMaxima, resultados);
     }
 }

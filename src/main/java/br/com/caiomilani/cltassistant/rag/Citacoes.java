@@ -14,7 +14,10 @@ public final class Citacoes {
      * ("art. 18 da Lei nº 8.036") não contam como citação de artigo da CLT.
      */
     private static final Pattern ARTIGO = Pattern.compile(
-            "(?i:art(?:igo)?)\\.?\\s*(\\d{1,4}+)(?:\\s*[º°])?+(?:-([A-Z]))?+"
+            // sem quantificadores possessivos: no Java, o grupo da letra dentro de um "?+" pode manter
+            // o valor de uma tentativa que falhou ("art. 20-A da Lei") e contaminar a seguinte ("Art. 477"
+            // virava "477-A"); os lookaheads (?!\\d) e (?![-º°]) impedem o recuo que o possessivo impedia
+            "(?i:art(?:igo)?)\\.?\\s*(\\d{1,4})(?!\\d)(?:\\s*[º°])?(?:-([A-Z])(?![\\p{L}]))?(?![-º°])"
                     // não pode ser seguido de "da Lei…", "do Decreto…", "da Constituição…",
                     // nem com um parágrafo ou inciso no meio ("art. 7º, XVII, da Constituição")
                     + "(?!\\s*,?\\s*(?:(?:§\\s*\\d+º?|[IVXLC]+)\\s*,?\\s*)?(?i:d[aoe]s?\\s+(?:Lei|Decreto|Medida|Constitui)))");

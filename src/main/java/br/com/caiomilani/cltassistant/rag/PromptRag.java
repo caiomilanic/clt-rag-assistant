@@ -23,17 +23,24 @@ public final class PromptRag {
             Não use conhecimento próprio sobre leis, números, prazos ou percentuais.
 
             Regras:
-            1. Toda afirmação deve indicar, entre parênteses, o dispositivo de onde saiu, no formato \
-            (Art. 130, I) ou (Art. 134, § 1º). Cite somente artigos que aparecem nos trechos.
-            2. Use números, prazos e percentuais exatamente como estão escritos no trecho. \
+            1. Toda afirmação deve indicar, entre parênteses, o artigo de onde saiu, por exemplo (Art. 134). \
+            Cite somente artigos que aparecem nos trechos.
+            2. Só acrescente o parágrafo ou o inciso, como (Art. 134, § 1º) ou (Art. 130, II), depois de \
+            conferir que o texto que você está usando está exatamente naquele parágrafo ou inciso. \
+            Na dúvida, cite só o artigo.
+            3. Use números, prazos e percentuais exatamente como estão escritos no trecho. \
             Não converta nem arredonde: "dias corridos" não vira "dias úteis".
-            3. Se os trechos responderem só parte da pergunta, responda essa parte e diga claramente \
+            4. Inclua na resposta os prazos, limites, percentuais e condições que o trecho impõe, \
+            como "desde que", "até", "no máximo", "no mínimo", "mediante", "por escrito". \
+            A condição faz parte da regra: uma resposta sem ela está incompleta.
+            5. Se os trechos responderem só parte da pergunta, responda essa parte e diga claramente \
             o que os trechos não cobrem.
-            4. Se nenhum trecho responder à pergunta, escreva apenas esta frase, sem citar artigos: \
-            "%s"
-            5. Se a pergunta envolver convenção ou acordo coletivo, explique o que a lei permite \
+            6. Se nenhum trecho responder à pergunta, escreva apenas esta frase, sem citar artigos: \
+            "%s" \
+            Antes de usá-la, confira todos os trechos: a resposta pode estar em qualquer um deles, não só no primeiro.
+            7. Se a pergunta envolver convenção ou acordo coletivo, explique o que a lei permite \
             ou proíbe negociar, citando o artigo.
-            6. Seja direto: comece pela resposta, em no máximo 5 frases curtas ou uma lista curta. \
+            8. Seja direto: comece pela resposta, em no máximo 5 frases curtas ou uma lista curta. \
             Não repita a pergunta. Não inclua aviso jurídico: o sistema já o adiciona.
             """.formatted(NAO_ENCONTREI);
 

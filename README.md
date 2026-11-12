@@ -137,6 +137,7 @@ In the **`offline`** profile (the default), everything above runs inside the net
 | LLM | Ollama (`qwen3:4b-instruct`) | Runs locally with no per-request cost; fits a 6 GB GPU next to the embedding model |
 | Ingestion | One adapter per source type | The CLT has its own structure (article/paragraph/item); agreements and policies arrive as PDF/DOCX |
 | Retrieval | Vector and/or Postgres full-text, fused with RRF; article- or provision-level | Both options are switchable per request, so each is measured on the eval set before becoming the default |
+| Answer checking | Deterministic citation verifier | Every cited article, paragraph and item is checked against the retrieved text, so a wrong citation shows up in the metrics instead of in front of the analyst |
 | Frontend | React + TypeScript | Chat with clickable citations to the text of each source |
 
 Decisions and the alternatives considered are in [`docs/decisoes.md`](docs/decisoes.md) (Portuguese).
@@ -194,7 +195,11 @@ curl -s -X POST http://localhost:8080/api/perguntas \
   -H "Content-Type: application/json" \
   --data-binary @docs/exemplos/pergunta-rag-ferias.json
 ```
-The response carries the answer with inline citations, the retrieved sources (reference, link, similarity), a citation check (articles cited that were *not* among the retrieved excerpts are flagged), latency, tokens and the disclaimer.
+The response carries the answer with inline citations, the retrieved sources (reference, link, similarity), a citation check, latency, tokens and the disclaimer. The citation check is deterministic (no second LLM call) and runs on every answer:
+- `foraDosTrechos`: articles cited that were *not* among the retrieved excerpts (the model answered from memory);
+- `problemasDeDispositivo`: a cited paragraph or item that does not exist in the retrieved article (`"Art. 145, I"`), or a sentence whose numbers are not in the cited provision (`"24 days (Art. 130, I)"`, where 24 is in item II). Spelled-out numbers in the law ("trinta") count, and numbers taken from the question are ignored.
+
+When a paragraph or item citation is flagged, the answer is **delivered with that citation reduced to the article** (`"(Art. 130, I)"` becomes `"(Art. 130)"`): the article is always verified against the retrieved text, and a less precise but correct source is safer for the analyst than a precise wrong one. The model's original text is kept in `respostaOriginal` for auditing.
 
 To run the whole eval set through the RAG pipeline (one LLM call per question, takes a few minutes):
 ```bash

@@ -1,6 +1,8 @@
 package br.com.caiomilani.cltassistant.rag;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.metadata.Usage;
@@ -45,8 +47,13 @@ public class RagService {
      * @param citados         artigos citados na resposta
      * @param foraDosTrechos  artigos citados que NÃO estavam entre os trechos recuperados:
      *                        sinal de alucinação, que o modelo tirou da própria memória
+     * @param problemasDeDispositivo parágrafos ou incisos citados que não existem no artigo recuperado,
+     *                        ou cuja frase traz números que não estão naquele dispositivo (D19). Essas
+     *                        citações são rebaixadas para o artigo na resposta entregue (D20)
+     * @param respostaOriginal texto do modelo antes do rebaixamento; null quando nada foi alterado
      */
-    public record Citacao(List<String> citados, List<String> foraDosTrechos) {
+    public record Citacao(List<String> citados, List<String> foraDosTrechos,
+                          List<VerificadorDeCitacoes.Problema> problemasDeDispositivo, String respostaOriginal) {
     }
 
     public record Metricas(String modelo, long latenciaBuscaMs, long latenciaLlmMs, long latenciaTotalMs,
@@ -78,6 +85,9 @@ public class RagService {
         List<String> recuperados = fontes.stream().map(f -> f.referencia().replace("Art. ", "")).toList();
         List<String> citados = Citacoes.extrair(texto);
         List<String> foraDosTrechos = citados.stream().filter(a -> !recuperados.contains(a)).toList();
+        Map<String, String> textoPorArtigo = new LinkedHashMap<>();
+        trechos.forEach(t -> textoPorArtigo.putIfAbsent(t.referencia().replace("Art. ", ""), t.texto()));
+        VerificadorDeCitacoes.Correcao correcao = VerificadorDeCitacoes.corrigir(texto, pergunta, textoPorArtigo);
 
         Usage uso = chat.getMetadata().getUsage();
         Metricas metricas = new Metricas(modelo,
@@ -93,8 +103,10 @@ public class RagService {
                 || texto.startsWith("\"" + PromptRag.MARCA_NAO_ENCONTREI)
                 || (texto.contains(PromptRag.MARCA_NAO_ENCONTREI) && citados.isEmpty());
         boolean encontrou = !recusou;
-        return new Resposta(pergunta, texto, encontrou, fontes,
-                new Citacao(citados, foraDosTrechos), metricas, Disclaimer.TEXT);
+        // A resposta entregue sai com as citações de dispositivo marcadas rebaixadas para o artigo.
+        return new Resposta(pergunta, correcao.resposta(), encontrou, fontes,
+                new Citacao(citados, foraDosTrechos, correcao.problemas(), correcao.alterou() ? texto : null),
+                metricas, Disclaimer.TEXT);
     }
 
     private static Fonte fonte(Recuperador.ArtigoRecuperado a) {
