@@ -39,7 +39,7 @@
 | Every answer cites its source, or explicitly says nothing was found | 100% of eval answers | Not measured yet (step 6) |
 | The expected article is among the retrieved excerpts | ≥ 90% of eval questions (top-5) | Not measured yet (step 6) |
 | No external network calls in the `offline` profile | 0 calls | By design; to be verified in step 9 |
-| Response time on a 6 GB consumer GPU | To be set after the GPU baseline | CPU-only today: ~100 s (see [performance](#performance-cpu-vs-gpu)) |
+| Response time on a 6 GB consumer GPU | ≤ 15 s per answer, including retrieval | Model alone: ~5 s on GPU, down from ~90 s on CPU (see [performance](#model-choice-and-performance)); full RAG not measured yet |
 
 ### Non-goals
 
@@ -86,6 +86,8 @@ It got the number right and every citation wrong. With no system prompt at all, 
 | With a system prompt | Gets the rule right, makes up the articles ([`antes-do-rag.json`](docs/exemplos/antes-do-rag.json)) |
 | With RAG | *Goal:* answers from the retrieved articles and cites the correct source (measured by the eval set) |
 
+The made-up answers also **change from run to run and from model to model**. Asked the same question without a system prompt, the 8B model has also answered "3 days for up to 12 months of service", and the smaller 4B model answered "13 business days under Law No. 6,015/1973" (Brazil's public registries law). Three runs without a system prompt, three different made-up rules, all stated with confidence. The model's own memory can't be trusted for legal facts; it has to read them from the source.
+
 **The solution:** RAG (*Retrieval-Augmented Generation*). Before answering, the system retrieves the relevant excerpts from a vector database and requires the model to answer **only from them**, citing the source.
 
 ## Architecture
@@ -116,8 +118,8 @@ In the **`offline`** profile (the default), everything above runs inside the net
 |---|---|---|
 | API | Java 25 · Spring Boot 4 · Spring AI 2 | `ChatClient`, `EmbeddingModel` and `VectorStore` abstract the provider, so going from local to cloud is configuration |
 | Vector store | PostgreSQL 17 + pgvector | One database for data and vectors, easy to host on-premise |
-| Embeddings | Ollama (offline) · Voyage AI (cloud) | Offline by default; the cloud is only a baseline for comparison |
-| LLM | Ollama (`qwen3`) | Runs locally with no per-request cost; good at Portuguese |
+| Embeddings | Ollama `bge-m3` (offline) · Voyage AI (cloud) | Offline by default; the cloud is only a baseline for comparison |
+| LLM | Ollama (`qwen3:4b-instruct`) | Runs locally with no per-request cost; fits a 6 GB GPU next to the embedding model |
 | Ingestion | One adapter per source type | The CLT has its own structure (article/paragraph/item); agreements and policies arrive as PDF/DOCX |
 | Frontend | React + TypeScript | Chat with clickable citations to the text of each source |
 
@@ -138,19 +140,15 @@ docker exec cltrag-postgres psql -U cltrag -d cltrag -c "\dx"   # should list "v
 ```
 > The container is exposed on host port **5433** so it doesn't clash with a PostgreSQL already installed on the machine.
 
-### 2. Local model
+### 2. Local models
 ```bash
-ollama pull qwen3:8b
-ollama run qwen3:8b "Responda em uma frase: o que é a CLT?"
+ollama pull qwen3:4b-instruct-2507-q4_K_M   # chat, ~2.5 GB
+ollama pull bge-m3                          # embeddings, ~1.2 GB (used from step 3)
+ollama run qwen3:4b-instruct-2507-q4_K_M "Responda em uma frase: o que é a CLT?"
+ollama ps                                   # PROCESSOR should read "100% GPU"
 ```
 
-| Available memory | Suggested model | Download |
-|---|---|---|
-| 8 GB | `qwen3:4b` | ~3 GB |
-| 16 GB | `qwen3:8b` (default) | ~5 GB |
-| 32 GB+ or a 12–16 GB GPU | `qwen3:14b` | ~9 GB |
-
-To switch, set `OLLAMA_MODEL` in the environment.
+Together the two models take about 4 GB of VRAM, so they fit on a 6 GB GPU. With more VRAM (12 GB+), a larger instruct model is an option; set `OLLAMA_MODEL` to switch. Avoid "thinking" variants (see [why](#reasoning-models-and-the-instruct-variant)).
 
 ### 3. Application
 ```bash
@@ -171,7 +169,7 @@ Response shape:
 ```json
 {
   "answer": "...",
-  "model": "qwen3:8b",
+  "model": "qwen3:4b-instruct-2507-q4_K_M",
   "latencyMs": 8421,
   "promptTokens": 100,
   "completionTokens": 148,
@@ -188,7 +186,7 @@ Something went wrong? See the [troubleshooting guide](docs/troubleshooting.md) (
 | `POSTGRES_HOST` / `POSTGRES_PORT` | `localhost` / `5433` | Database connection |
 | `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` | `cltrag` | Local credentials |
 | `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server |
-| `OLLAMA_MODEL` | `qwen3:8b` | Generation model |
+| `OLLAMA_MODEL` | `qwen3:4b-instruct-2507-q4_K_M` | Generation model |
 | `VOYAGE_API_KEY` | — | Embeddings for the `cloud` profile (optional, from step 3) |
 
 Template in [`.env.example`](.env.example).
@@ -206,18 +204,16 @@ spring:
       base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
       chat:
         options:
-          model: ${OLLAMA_MODEL:qwen3:8b}
+          model: ${OLLAMA_MODEL:qwen3:4b-instruct-2507-q4_K_M}
           temperature: 0.2
-          think: false
 ```
 
 | Property | Value | What it does |
 |---|---|---|
 | `spring.ai.model.embedding` | `none` | Disables, for now, the embedding model the Ollama starter would create by default. The embedding provider (Ollama in the `offline` profile, Voyage in `cloud`) is configured with ingestion, in step 3. |
 | `ollama.base-url` | `http://localhost:11434` | Address of Ollama's HTTP API (11434 is the default port). Changes on deployment, when Ollama runs on another host or container. |
-| `chat.options.model` | `qwen3:8b` | Which model answers. It must be pulled first (`ollama pull`), otherwise the API returns `404 model not found`. |
+| `chat.options.model` | `qwen3:4b-instruct-2507-q4_K_M` | Which model answers: Qwen3 4B, *instruct* variant (no reasoning mode), 4-bit quantized. It must be pulled first (`ollama pull`), otherwise the API returns `404 model not found`. Details below. |
 | `chat.options.temperature` | `0.2` | How much randomness goes into word choice. Details below. |
-| `chat.options.think` | `false` | Turns off Qwen3's reasoning mode. Details below. |
 
 #### `temperature`: creativity vs. predictability
 
@@ -247,17 +243,29 @@ An intuitive example, completing *"O trabalhador tem direito a 30 dias de…"* (
 
 > Typical use: 0–0.3 for extraction, factual answers and RAG; 0.5–0.8 for general chat; above 1 for brainstorming and creative writing.
 
-#### `think`: reasoning mode
+#### Reasoning models and the instruct variant
 
-Qwen3 is a "hybrid" model: before answering, it can generate internal reasoning (*chain of thought*), which is processed but doesn't show up in the final `answer`.
+Some models generate internal reasoning (*chain of thought*) before answering. That helps with math or multi-step problems, but in RAG the hard part (finding the information) is already done by the vector search; the model only needs to **read the retrieved excerpts and write the answer**. Reasoning just adds latency.
 
-In the first test, with reasoning on, a short answer used **606 output tokens and 111 s**, most of it invisible reasoning. In RAG, the hard part (finding the information) is already done by the vector search. The model only needs to **read the retrieved excerpts and write the answer**, so reasoning adds latency without a matching gain.
+Turning it off turned out to be the tricky part:
+- `qwen3:8b` is a hybrid model. Ollama's API accepts `"think": false`, but setting `think: false` through Spring AI **had no effect** (still ~600 output tokens).
+- The default `qwen3:4b` tag is a **reasoning-only** model: it ignored `"think": false` and wrote a long English monologue before the answer (**1,230 tokens** for an answer of under 100).
+- The **instruct** variant (`qwen3:4b-instruct-2507`) has no reasoning mode at all. Same size, direct answers. That's the one used here.
 
-> **Current status:** calling Ollama's API directly with `"think": false` turns reasoning off (the response has no `thinking` field). Through Spring AI, the `think: false` property **had no effect** (560 tokens, 100 s). Next test: the `/no_think` command in the system prompt, which Qwen3 itself recognizes. Details in the [dev log](docs/diario-de-desenvolvimento.md).
+#### Model choice and performance
 
-#### Performance: CPU vs. GPU
+Measured on the development machine (RTX 3060 Laptop, 6 GB VRAM; 16 GB RAM), same question, through Ollama's API:
 
-All measurements so far ran **100% on CPU** (~6 tokens/s), because Ollama did not detect the development machine's GPU (RTX 3060 Laptop, 6 GB) with an outdated driver. For an on-premise install, **a GPU is a practical requirement**: on CPU, one answer takes 1 to 2 minutes. GPU numbers will be added here once measured.
+| Model | Runs on | Speed | Total time | Notes |
+|---|---|---|---|---|
+| `qwen3:8b` (old NVIDIA driver) | 100% CPU | 6.4 tokens/s | ~89 s | GPU not detected |
+| `qwen3:8b` (driver updated) | 30% CPU / 70% GPU | 13.7 tokens/s | ~43 s | Doesn't fit in 6 GB; no room left for embeddings |
+| `qwen3:4b` (reasoning) | 100% GPU | 78 tokens/s | ~16 s | 1,230 tokens, mostly reasoning |
+| **`qwen3:4b-instruct-2507`** | **100% GPU** | **85 tokens/s** | **~5 s** | **Chosen.** Fits on the GPU alongside `bge-m3` |
+
+That's **~13x faster** than where the project started. Two lessons for on-premise sizing: **the model has to fit entirely in VRAM** (a partial split runs at a fraction of GPU speed), and **the chat model and the embedding model share that VRAM**.
+
+**The trade-off:** a 4B model knows less than an 8B one, and without RAG it hallucinates just as freely (see [The problem RAG solves](#the-problem-rag-solves)). That's acceptable by design: with RAG the model doesn't need to *know* the law, it needs to *read* it. The eval set will confirm whether the 4B model reads well enough, and the 8B model stays one variable away for comparison.
 
 ## Endpoints
 

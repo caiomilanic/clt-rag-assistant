@@ -88,6 +88,14 @@ grep -i "inference compute" "$LOCALAPPDATA/Ollama/server.log" | tail -2
   ```
   Depois rode `wsl --shutdown` e abra o Docker Desktop de novo. O Postgres do projeto precisa de muito pouco.
 
+### Resposta com um monólogo em inglês terminando em `</think>`
+**Causa:** o modelo é uma versão "só de raciocínio". A tag padrão `qwen3:4b` é assim: ignora `"think": false` e escreve o raciocínio dentro da resposta.
+**Solução:** usar a variante *instruct*, que não tem modo de raciocínio: `ollama pull qwen3:4b-instruct-2507-q4_K_M`. Alternativa: `gemma3:4b`.
+
+### Modelo dividido entre CPU e GPU (ex.: `30%/70% CPU/GPU`)
+**Causa:** o modelo não cabe inteiro na VRAM. A parte na CPU limita a velocidade (no `qwen3:8b` com 6 GB: 13,7 tok/s, contra 85 tok/s do 4B inteiro na GPU).
+**Solução:** usar um modelo menor que caiba inteiro, lembrando que o modelo de embeddings (`bge-m3`, ~0,7 GB) também ocupa VRAM. Confira com `ollama ps`.
+
 ### `think: false` no `application.yml` não muda nada
 **Causa:** a propriedade não é repassada ao Ollama nesta versão do Spring AI, e o Spring ignora propriedades desconhecidas sem erro. Chamando a API do Ollama direto com `"think": false`, funciona.
 **Solução em teste:** `/no_think` no final do prompt de sistema (ver diário).

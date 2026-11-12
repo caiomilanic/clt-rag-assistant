@@ -9,20 +9,21 @@ spring:
 
   ai:
     model:
-      # Embeddings não vêm do Ollama: no passo 3 entra um EmbeddingModel da Voyage AI.
+      # Desligado até o passo 3, quando o provedor de embeddings passa a ser configurado por perfil
+      # (offline: bge-m3 no Ollama; cloud: Voyage AI).
       embedding: none
     ollama:
       base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
       chat:
         options:
-          model: ${OLLAMA_MODEL:qwen3:8b}
+          # Variante instruct: sem modo de raciocínio, cabe na GPU de 6 GB junto com o bge-m3 (D15).
+          model: ${OLLAMA_MODEL:qwen3:4b-instruct-2507-q4_K_M}
           # Respostas jurídicas: baixa criatividade, máxima aderência ao contexto.
           temperature: 0.2
-          think: false
 
 app:
   llm:
-    model-label: ${OLLAMA_MODEL:qwen3:8b}
+    model-label: ${OLLAMA_MODEL:qwen3:4b-instruct-2507-q4_K_M}
 
 management:
   endpoints:

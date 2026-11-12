@@ -1,0 +1,28 @@
+{
+  "_contexto": {
+    "data": "2026-11-12",
+    "chamada": "POST http://localhost:11434/api/chat direto no Ollama, sem prompt de sistema, temperatura padrão do Ollama",
+    "modelo": "qwen3:4b-instruct-2507-q4_K_M",
+    "pergunta": "Quantos dias de férias o trabalhador tem direito por ano?",
+    "analise": [
+      "Inventou a regra: '13 dias úteis de férias por ano'. Pela CLT são 30 dias corridos (Art. 130).",
+      "Inventou a fonte: 'Lei nº 6.015/1974 (Lei do Trabalho)'. A Lei nº 6.015/1973 é a Lei de Registros Públicos, sem relação com férias.",
+      "Inventou a progressão '1 ano = 13 dias, 2 anos = 26 dias'."
+    ],
+    "metricas": {
+      "eval_count": 448,
+      "eval_duration_s": 5.29,
+      "tokens_por_segundo": 84.6,
+      "processador": "100% GPU (RTX 3060 Laptop, 6 GB)"
+    }
+  },
+  "message": {
+    "role": "assistant",
+    "content": "No Brasil, o trabalhador tem direito a **13 dias úteis de férias por ano**, conforme estabelecido na **Lei nº 6.015/1974** (Lei do Trabalho).\n\nEsses 13 dias são:\n\n- **13 dias de férias remuneradas** (dias úteis);\n- O valor é calculado com base no salário de referência, geralmente o salário mensal, dividido por 30 dias, multiplicado por 13 (para 13 dias úteis).\n\nAlém disso, o trabalhador tem o direito de:\n\n- **1 dia de férias por ano** (se for trabalhador comum, sem contrato de trabalho com férias pagas acima de 13 dias);\n- **Férias proporcionais** (se o trabalhador tiver mais de 1 ano de serviço, o direito é proporcional ao tempo de trabalho).\n\n### Importante:\n- As férias devem ser proporcionais ao tempo de trabalho (ex: 1 ano = 13 dias, 2 anos = 26 dias, etc.).\n- O trabalhador tem direito a **13 dias de férias por ano**, **sem que isso seja cumprido automaticamente** — ele precisa ter trabalhado pelo menos 1 ano para ter direito a essas férias.\n- O trabalhador pode ter **férias proporcionais**, **com ou sem remuneração**, dependendo do contrato e da legislação aplicável.\n\n### Observação:\n- Em alguns setores ou com empresas que adotam regimes especiais (como empresas de prestação de serviços ou com contratos de trabalho por tempo determinado), pode haver **diferenças**, mas o direito básico é de **13 dias úteis de férias por ano**.\n\n✅ Resposta final: **O trabalhador tem direito a 13 dias úteis de férias por ano.**"
+  },
+  "done_reason": "stop",
+  "total_duration": 5327644600,
+  "prompt_eval_count": 25,
+  "eval_count": 448,
+  "eval_duration": 5293845000
+}

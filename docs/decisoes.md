@@ -16,7 +16,7 @@ Registro curto das decisões do projeto: o que foi escolhido, por quê e o que f
 **Por quê:** é a única rota de custo **garantidamente zero** e sem limite de uso. A API da Anthropic é barata para este volume, mas não é gratuita, e créditos de nuvem nem sempre cobrem modelos de terceiros.
 **Consequência:** o código depende só das abstrações do Spring AI (`ChatClient`). A troca para Claude é o passo 12 do roadmap: trocar o starter e as propriedades, rodar o eval set de novo e comparar.
 
-### D3. Modelo local: `qwen3:8b`
+### D3. Modelo local: `qwen3:8b`. *Substituída pela D15: `qwen3:4b-instruct-2507`.*
 **Escolha:** Qwen3 8B como padrão, configurável por `OLLAMA_MODEL`.
 **Alternativas:** Gemma 3 (4B/12B), Llama 3.x, Mistral.
 **Por quê:** bom suporte a português e cabe em máquina de 16 GB (~5 GB).
@@ -96,3 +96,23 @@ Registro curto das decisões do projeto: o que foi escolhido, por quê e o que f
 - `cobertura_parcial` e `fora_do_escopo`: medem honestidade. O teste da linha de base mostrou que o problema do modelo não é não saber, é inventar com segurança. Por isso há perguntas trabalhistas cuja resposta o modelo "sabe" mas que não estão no corpus (alíquota do FGTS, aviso prévio proporcional).
 
 **Métricas:** acerto de recuperação (artigo esperado entre os 5 trechos recuperados, meta ≥ 90%) e citação (100%).
+
+### D15. Modelo de chat: `qwen3:4b-instruct-2507` (2026-11-12)
+**Escolha:** `qwen3:4b-instruct-2507-q4_K_M` (Qwen3 4B, variante *instruct*, quantização de 4 bits) como padrão. Os embeddings ficam com o `bge-m3`. Os dois rodam 100% na GPU (RTX 3060 Laptop, 6 GB): 3,2 GB + 0,7 GB.
+**Medições** (mesma pergunta, API do Ollama):
+
+| Modelo | Onde roda | Velocidade | Tempo total |
+|---|---|---|---|
+| `qwen3:8b` (driver NVIDIA antigo) | 100% CPU | 6,4 tok/s | ~89 s |
+| `qwen3:8b` (driver atualizado) | 30% CPU / 70% GPU | 13,7 tok/s | ~43 s |
+| `qwen3:4b` (raciocínio) | 100% GPU | 78 tok/s | ~16 s (1.230 tokens, quase tudo raciocínio) |
+| **`qwen3:4b-instruct-2507`** | **100% GPU** | **85 tok/s** | **~5 s** |
+
+**Alternativas descartadas:**
+- `qwen3:8b`: não cabe inteiro nos 6 GB, e a divisão CPU/GPU roda a uma fração da velocidade. Além disso, não sobraria VRAM para o modelo de embeddings.
+- `qwen3:4b` (tag padrão): é uma versão só de raciocínio. Ignorou `"think": false` e gastou 1.230 tokens num monólogo em inglês antes de uma resposta de menos de 100.
+- `gemma3:4b`: alternativa sem raciocínio, mantida como plano B.
+
+**Trade-off aceito:** sem RAG, o 4B alucina tanto quanto o 8B ("13 dias úteis, Lei nº 6.015", que na verdade é a Lei de Registros Públicos). No RAG, o modelo não precisa *saber* a lei, precisa *ler* os trechos recuperados. O eval set vai confirmar se ele lê bem o bastante; o 8B continua a uma variável de distância para comparação.
+**Lições para o dimensionamento on-premise:** (1) o modelo precisa caber inteiro na VRAM; (2) o modelo de chat e o de embeddings dividem a mesma VRAM; (3) GPU é requisito prático: na CPU, uma resposta leva mais de 1 minuto.
+**Consequência:** o `think: false` saiu do `application.yml`, porque não tinha efeito pelo Spring AI e a variante instruct não precisa dele.

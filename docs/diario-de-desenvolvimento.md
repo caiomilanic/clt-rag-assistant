@@ -100,3 +100,24 @@ Resultado: **826 artigos vigentes**, mediana de ~380 caracteres, máximo de ~5.0
 24 perguntas: 15 diretas, 2 multi-artigo, 3 de hierarquia (611-A, 611-B, 620), 1 de cobertura parcial (aviso prévio proporcional, que está em outra lei) e 3 fora do escopo (penal, FGTS, INSS). Trechos justificativos extraídos do corpus por script. A pergunta da linha de base (Q01, férias) está incluída. Pendente: revisão das perguntas e respostas pelo Caio.
 
 Um cuidado registrado no item Q15 (tolerância do ponto): a leitura de "5 minutos **por marcação**" vem da jurisprudência do TST, não do texto da CLT. A resposta de referência segue só o texto da lei.
+
+## 2026-11-12: GPU e escolha do modelo
+
+- **Driver NVIDIA atualizado** (537.42 → 621.14, CUDA 13.5). O log do Ollama passou a mostrar `library=CUDA` com a RTX 3060 e 5,0 GB de VRAM livre.
+- **`qwen3:8b`:** `30%/70% CPU/GPU`, 13,7 tok/s (o dobro da CPU, mas longe do potencial da GPU, porque não cabe inteiro).
+- **`qwen3:4b`:** `100% GPU`, 78 tok/s. Mas a tag padrão é um modelo **só de raciocínio**: ignorou `"think": false`, e a resposta veio com um monólogo em inglês ("Wait, no… Let me check…") até `</think>`. Foram 1.230 tokens para menos de 100 de resposta.
+- **`qwen3:4b-instruct-2507-q4_K_M`:** `100% GPU`, **85 tok/s, ~5 s no total**, sem raciocínio. **Escolhido (D15).**
+- **`bge-m3`** baixado. Os dois modelos juntos ficam `100% GPU` (3,2 GB + 0,7 GB).
+- `application.yml` e `.env.example` atualizados para o modelo novo; `think: false` removido.
+
+### Mais alucinações para a coleção
+Todas sem prompt de sistema, mesma pergunta de férias:
+- `qwen3:8b`, chamada direta com a temperatura padrão do Ollama: "3 dias para contratos de 1 a 12 meses, 5 dias de 13 a 24…, 15 dias acima de 36 meses". Diferente da invenção anterior do mesmo modelo ("15 dias + 1 por ano, Lei 11.091/2005").
+- `qwen3:4b` (raciocínio): acertou 30 dias e o Art. 130 depois de muita hesitação no raciocínio. O "6 meses = 15 dias" que ele acrescentou corresponde às férias proporcionais na rescisão (Arts. 146 e 147), mas foi apresentado como regra geral.
+- `qwen3:4b-instruct`: "**13 dias úteis** de férias, conforme a **Lei nº 6.015/1974**". A regra não existe, e a Lei 6.015 é a Lei de Registros Públicos. Registrado em [exemplos/sem-prompt-4b-instruct.json](exemplos/sem-prompt-4b-instruct.json).
+
+Conclusão para o README: a resposta inventada muda de execução para execução e de modelo para modelo, e o modelo menor alucina tão livremente quanto o maior. A memória do modelo não serve como fonte, e é exatamente isso que o RAG resolve.
+
+### Pendências
+- O teste de latência pela aplicação (`/api/smoke/chat`) com o modelo novo ainda não foi feito; até aqui as medições foram direto na API do Ollama.
+- Aumentar o contexto (`num_ctx`) no passo 4 e conferir se os dois modelos continuam cabendo na VRAM.
