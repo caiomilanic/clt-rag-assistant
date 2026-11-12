@@ -1,103 +1,173 @@
-# Assistente CLT (RAG)
+# Labor Law Assistant (on-premise RAG)
 
-Assistente **informativo** sobre a Consolidação das Leis do Trabalho (CLT). Você pergunta em linguagem natural e recebe a resposta **com o artigo da lei de onde ela saiu**.
+> **A labor-law assistant for HR teams, built with RAG and running fully on-premise:** for each question, it gathers what Brazilian labor law (CLT), the collective bargaining agreement and the company's internal policies say, shows how these rules rank against each other, and cites the source of every excerpt. **No data ever leaves the company network.**
 
-> ⚠️ **Não é aconselhamento jurídico.** Toda resposta da API traz esse aviso. Para o seu caso concreto, consulte um advogado trabalhista, o sindicato da sua categoria ou a Defensoria Pública.
+> ⚠️ **Not legal advice.** The assistant organizes and cites the rules; the decision always belongs to a professional. Every API response carries this disclaimer.
 
-![Java](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0-6DB33F) ![Spring AI](https://img.shields.io/badge/Spring%20AI-2.0-6DB33F) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17%20%2B%20pgvector-336791) ![Ollama](https://img.shields.io/badge/LLM-Ollama%20local-black)
+![Java](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0-6DB33F) ![Spring AI](https://img.shields.io/badge/Spring%20AI-2.0-6DB33F) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17%20%2B%20pgvector-336791) ![Ollama](https://img.shields.io/badge/LLM-Ollama%20local-black) ![Offline](https://img.shields.io/badge/runs-100%25%20offline-blue)
 
-**Status:** 🚧 passo 2 de 12 concluído. O esqueleto roda de ponta a ponta (API ↔ Ollama ↔ Postgres); o RAG ainda não foi implementado. Veja o [roadmap](#roadmap).
+**Status:** 🚧 Layer 1 (MVP with the CLT), step 2 done. The skeleton runs end to end (API ↔ Ollama ↔ Postgres); RAG is not implemented yet. See the [roadmap](#roadmap).
+
+> The product targets Brazilian companies, so the app itself (prompts, answers, disclaimer) is in Portuguese. Design notes in [`docs/`](docs/) are also in Portuguese.
 
 ---
 
-## O problema
+## Problem and goals
 
-Qualquer trabalhador brasileiro tem dúvidas sobre férias, rescisão, horas extras… e a resposta está na CLT, um texto longo e difícil de navegar. Um chatbot comum responde com segurança, mas **inventa artigos**. Este é o modelo do projeto respondendo *sem* RAG:
+### The problem
 
-> **Pergunta:** Quantos dias de férias o trabalhador tem direito por ano?
+1. **The rules are scattered.** In Brazil, an HR analyst's answer to "what is this employee entitled to?" depends on several documents at once: the federal labor code (CLT), the collective bargaining agreement for the employee's category, sometimes a company-level agreement, and internal policies. They overlap, override each other under specific legal rules, and live in long PDFs. Cross-referencing them by hand is slow, and mistakes become labor claims and fines.
+2. **General-purpose AI makes things up.** Asked a simple vacation question, the LLM used in this project cited the wrong articles and, without guidance, invented an entire law ([see below](#the-problem-rag-solves)). For legal questions, a confident wrong answer is worse than no answer.
+3. **Cloud AI is often off the table.** HR questions involve sensitive employee situations, and internal policies and agreements are company documents. Sending them to an external API raises data-protection (LGPD) and confidentiality concerns, and many companies simply won't allow it.
+
+### Goals
+
+**Product**
+- Answer *"which rule applies here?"* by gathering what each source says, pointing out how the sources rank, and **citing every excerpt** so the analyst can verify it.
+- Run **entirely inside the company network**: no question, document or answer leaves it.
+
+**Engineering**
+- **Grounded answers:** the model answers only from retrieved excerpts, with a mandatory citation, or says it couldn't find the answer.
+- **Measurable quality:** an eval set of real HR questions with expected articles, so quality is a number rather than an impression.
+- **Provider-agnostic:** local (Ollama) or cloud (Voyage AI, Claude) models are a configuration switch, so the cost of staying offline can be measured instead of assumed.
+- **Practical to deploy:** one `docker compose` brings up the whole stack on a single machine with a consumer-grade GPU.
+
+### Success criteria
+
+| Criterion | Target | Status |
+|---|---|---|
+| Every answer cites its source, or explicitly says nothing was found | 100% of eval answers | Not measured yet (step 6) |
+| The expected article is among the retrieved excerpts | ≥ 90% of eval questions (top-5) | Not measured yet (step 6) |
+| No external network calls in the `offline` profile | 0 calls | By design; to be verified in step 9 |
+| Response time on a 6 GB consumer GPU | To be set after the GPU baseline | CPU-only today: ~100 s (see [performance](#performance-cpu-vs-gpu)) |
+
+### Non-goals
+
+- **Not legal advice, and it doesn't decide.** It organizes and cites the rules; deciding which one prevails in a specific case is legal interpretation and stays with a professional.
+- **No employee data** (salaries, timesheets, records) and **no actions** (severance calculations, scheduling). This keeps the scope clear and the LGPD exposure small.
+- **Not a generic "chat with your documents" tool.** That space is already well served. The value here is domain knowledge: knowing how labor rules relate to each other.
+
+## Who it is for
+
+**User:** HR and payroll analysts, who check the cited source before acting.
+
+**The question it answers:** *"which rule applies here?"* In Brazilian labor law, the answer is rarely in a single document. The rules form a hierarchy:
+
+| Source | What it is | How it relates to the others |
+|---|---|---|
+| **CLT** (*Consolidação das Leis do Trabalho*) | The federal labor code | The baseline of rights |
+| **Collective bargaining agreement** (*Convenção Coletiva*, CCT) | Negotiated between the unions of a professional category | Overrides the law on the topics listed in **Art. 611-A** (working hours, hour banks, breaks…), but cannot reduce what **Art. 611-B** protects (FGTS, 13th salary, vacation…) |
+| **Company-level agreement** (*Acordo Coletivo*, ACT) | Negotiated with a specific company | Overrides the collective bargaining agreement (**Art. 620**) |
+| **Internal policy** | The company's own rules | Can grant more than the law, never less |
+
+Today, answering means opening several PDFs and searching clause by clause. The assistant does the search, **shows what each source says, points out the hierarchy and cites the excerpts**. The analyst makes the call.
+
+**Why on-premise:** with the language model and embeddings running locally (Ollama), no question or document leaves the network. There is no per-request cost, and it works even in air-gapped environments.
+
+## The problem RAG solves
+
+An LLM without access to the rules answers confidently but **makes up its sources**. This is the project's model answering *without* RAG:
+
+> **Question:** *"Quantos dias de férias o trabalhador tem direito por ano?"* (How many vacation days does a worker get per year?)
 >
-> **Resposta do modelo (qwen3:8b, sem RAG):** "…direito a **30 dias de férias anuais**, conforme previsto no **Artigo 133 da CLT**. Além disso, o empregador deve pagar **1/3** do salário como **adiantamento de férias**… devem ser gozados em um período de 12 meses… conforme o **Artigo 133, §2º**…"
+> **Model answer (qwen3:8b, no RAG), translated:** "…entitled to **30 days of annual vacation**, as set out in **Article 133 of the CLT**. In addition, the employer must pay **1/3** of the salary as a **vacation advance**… to be taken within a 12-month period… as provided in **Article 133, §2**…"
 
-| O modelo disse | O que diz a lei |
+| What the model said | What the law says |
 |---|---|
-| 30 dias "conforme Art. 133" | Os 30 dias estão no **Art. 130**. O Art. 133 trata de quando o empregado **perde** o direito a férias. |
-| 1/3 é "adiantamento" previsto na CLT | É o **adicional de 1/3**, garantido pela **Constituição (art. 7º, XVII)**. A CLT (Art. 145) define o prazo de pagamento. |
-| Prazo de 12 meses no "Art. 133, §2º" | O período concessivo está no **Art. 134**. |
+| 30 days "under Art. 133" | The 30 days are in **Art. 130**. Art. 133 covers when an employee **loses** the right to vacation. |
+| The 1/3 is an "advance" defined in the CLT | It is the **one-third bonus** guaranteed by the **Federal Constitution (art. 7, XVII)**. The CLT (Art. 145) sets the payment deadline. |
+| 12-month window in "Art. 133, §2" | The window for granting vacation is in **Art. 134**. |
 
-Acertou o número e errou todas as citações. A resposta completa está em [`docs/exemplos/antes-do-rag.json`](docs/exemplos/antes-do-rag.json).
+It got the number right and every citation wrong. With no system prompt at all, it was worse: the same model claimed workers get **"15 days + 1 per year of service"** under **"Law No. 11,091/2005"**, which actually governs the careers of administrative staff at federal universities and has nothing to do with vacation under the CLT.
 
-**A solução:** RAG (*Retrieval-Augmented Generation*). Antes de responder, o sistema busca os artigos relevantes da CLT num banco vetorial e obriga o modelo a responder **só com base neles**, citando a fonte.
+| Scenario | Result |
+|---|---|
+| No system prompt | Makes up the rule **and** the law ([`sem-prompt-de-sistema.json`](docs/exemplos/sem-prompt-de-sistema.json)) |
+| With a system prompt | Gets the rule right, makes up the articles ([`antes-do-rag.json`](docs/exemplos/antes-do-rag.json)) |
+| With RAG | *Goal:* answers from the retrieved articles and cites the correct source (measured by the eval set) |
 
-## Arquitetura
+**The solution:** RAG (*Retrieval-Augmented Generation*). Before answering, the system retrieves the relevant excerpts from a vector database and requires the model to answer **only from them**, citing the source.
+
+## Architecture
 
 ```mermaid
 flowchart LR
-    U[Usuário<br/>React + TS] -->|pergunta| API[API Spring Boot<br/>Spring AI ChatClient]
-    API -->|1. embedding da pergunta| V[Voyage AI<br/>voyage-4]
-    API -->|2. top-k artigos similares| DB[(PostgreSQL<br/>+ pgvector)]
-    API -->|3. pergunta + artigos| LLM[Ollama local<br/>qwen3:8b]
-    LLM -->|4. resposta citando artigos| API
-    API -->|resposta + fontes + aviso| U
+    subgraph NET[Company network]
+        U[HR analyst<br/>React + TS] -->|question| API[Spring Boot API<br/>Spring AI ChatClient]
+        API -->|1. question embedding| EMB[Embeddings<br/>Ollama]
+        API -->|2. top-k similar excerpts| DB[(PostgreSQL<br/>+ pgvector)]
+        API -->|3. question + excerpts| LLM[Local LLM<br/>Ollama · qwen3]
+        LLM -->|4. answer citing sources| API
+        API -->|answer + sources + disclaimer| U
 
-    ING[Ingestão<br/>CLT do Planalto] -->|chunk por artigo| V
-    ING -->|vetores + metadados| DB
+        subgraph ING[Ingestion via adapters]
+            A1[CLT<br/>by article]
+            A2[Bargaining agreement<br/>by clause]
+            A3[Internal policies<br/>by section]
+        end
+        ING -->|excerpts + metadata| EMB
+        ING -->|vectors + metadata| DB
+    end
 ```
 
-| Camada | Tecnologia | Por quê |
+In the **`offline`** profile (the default), everything above runs inside the network. An optional **`cloud`** profile swaps embeddings for Voyage AI and, later, the LLM for Claude, to compare quality and latency on the eval set. Switching is a configuration change, not a code change.
+
+| Layer | Technology | Why |
 |---|---|---|
-| API | Java 25 · Spring Boot 4 · Spring AI 2 | `ChatClient` e `VectorStore` abstraem o provedor: trocar Ollama por Claude é configuração, não reescrita |
-| Banco vetorial | PostgreSQL 17 + pgvector | Um banco só para dados e vetores, sem serviço extra |
-| Embeddings | Voyage AI (`voyage-4`) | Parceira recomendada pela Anthropic; franquia gratuita cobre o corpus inteiro várias vezes |
-| LLM | Ollama (`qwen3:8b`) | Custo zero e sem limite de uso durante o desenvolvimento; bom em português |
-| Frontend | React + TypeScript | Chat com citações clicáveis para o texto oficial |
+| API | Java 25 · Spring Boot 4 · Spring AI 2 | `ChatClient`, `EmbeddingModel` and `VectorStore` abstract the provider, so going from local to cloud is configuration |
+| Vector store | PostgreSQL 17 + pgvector | One database for data and vectors, easy to host on-premise |
+| Embeddings | Ollama (offline) · Voyage AI (cloud) | Offline by default; the cloud is only a baseline for comparison |
+| LLM | Ollama (`qwen3`) | Runs locally with no per-request cost; good at Portuguese |
+| Ingestion | One adapter per source type | The CLT has its own structure (article/paragraph/item); agreements and policies arrive as PDF/DOCX |
+| Frontend | React + TypeScript | Chat with clickable citations to the text of each source |
 
-As decisões e alternativas avaliadas estão em [`docs/decisoes.md`](docs/decisoes.md).
+Decisions and the alternatives considered are in [`docs/decisoes.md`](docs/decisoes.md) (Portuguese).
 
-## Rodando localmente
+## Running locally
 
-### Pré-requisitos
-- JDK 25 e Maven 3.9+
-- Docker Desktop (no Windows, com WSL 2)
+### Prerequisites
+- JDK 25 and Maven 3.9+
+- Docker Desktop (on Windows, with WSL 2)
 - [Ollama](https://ollama.com/download)
 
-### 1. Banco vetorial
+### 1. Vector database
 ```bash
 docker compose up -d postgres
-docker ps --filter name=cltrag        # esperado: (healthy) e 0.0.0.0:5433->5432/tcp
-docker exec cltrag-postgres psql -U cltrag -d cltrag -c "\dx"   # deve listar "vector"
+docker ps --filter name=cltrag        # expected: (healthy) and 0.0.0.0:5433->5432/tcp
+docker exec cltrag-postgres psql -U cltrag -d cltrag -c "\dx"   # should list "vector"
 ```
-> O container usa a porta **5433** no host para não conflitar com um PostgreSQL já instalado na máquina.
+> The container is exposed on host port **5433** so it doesn't clash with a PostgreSQL already installed on the machine.
 
-### 2. Modelo local
+### 2. Local model
 ```bash
 ollama pull qwen3:8b
 ollama run qwen3:8b "Responda em uma frase: o que é a CLT?"
 ```
 
-| RAM disponível | Modelo sugerido | Download |
+| Available memory | Suggested model | Download |
 |---|---|---|
 | 8 GB | `qwen3:4b` | ~3 GB |
-| 16 GB | `qwen3:8b` (padrão) | ~5 GB |
-| 32 GB+ ou GPU de 12–16 GB | `qwen3:14b` | ~9 GB |
+| 16 GB | `qwen3:8b` (default) | ~5 GB |
+| 32 GB+ or a 12–16 GB GPU | `qwen3:14b` | ~9 GB |
 
-Para trocar, defina `OLLAMA_MODEL` no ambiente.
+To switch, set `OLLAMA_MODEL` in the environment.
 
-### 3. Aplicação
+### 3. Application
 ```bash
 mvn spring-boot:run
 ```
 
-### 4. Testando
+### 4. Testing
 ```bash
 curl -s http://localhost:8080/actuator/health
-# esperado: "db":{"status":"UP"...} e "status":"UP"
+# expected: "db":{"status":"UP"...} and "status":"UP"
 
 curl -s -X POST http://localhost:8080/api/smoke/chat \
   -H "Content-Type: application/json" \
   --data-binary @docs/exemplos/pergunta-ferias.json
 ```
 
-Resposta (formato):
+Response shape:
 ```json
 {
   "answer": "...",
@@ -109,65 +179,144 @@ Resposta (formato):
 }
 ```
 
-Algo deu errado? Veja o [troubleshooting](docs/troubleshooting.md), que tem os problemas reais encontrados no Windows durante o desenvolvimento.
+Something went wrong? See the [troubleshooting guide](docs/troubleshooting.md) (Portuguese), built from the real issues hit on Windows during development.
 
-### Configuração
+### Configuration
 
-| Variável | Padrão | Descrição |
+| Variable | Default | Description |
 |---|---|---|
-| `POSTGRES_HOST` / `POSTGRES_PORT` | `localhost` / `5433` | Conexão com o banco |
-| `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` | `cltrag` | Credenciais locais |
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | Servidor do Ollama |
-| `OLLAMA_MODEL` | `qwen3:8b` | Modelo de geração |
-| `VOYAGE_API_KEY` | — | Embeddings (a partir do passo 3) |
+| `POSTGRES_HOST` / `POSTGRES_PORT` | `localhost` / `5433` | Database connection |
+| `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` | `cltrag` | Local credentials |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server |
+| `OLLAMA_MODEL` | `qwen3:8b` | Generation model |
+| `VOYAGE_API_KEY` | — | Embeddings for the `cloud` profile (optional, from step 3) |
 
-Modelo em [`.env.example`](.env.example).
+Template in [`.env.example`](.env.example).
+
+### Model configuration (Ollama)
+
+From [`application.yml`](src/main/resources/application.yml):
+
+```yaml
+spring:
+  ai:
+    model:
+      embedding: none
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: ${OLLAMA_MODEL:qwen3:8b}
+          temperature: 0.2
+          think: false
+```
+
+| Property | Value | What it does |
+|---|---|---|
+| `spring.ai.model.embedding` | `none` | Disables, for now, the embedding model the Ollama starter would create by default. The embedding provider (Ollama in the `offline` profile, Voyage in `cloud`) is configured with ingestion, in step 3. |
+| `ollama.base-url` | `http://localhost:11434` | Address of Ollama's HTTP API (11434 is the default port). Changes on deployment, when Ollama runs on another host or container. |
+| `chat.options.model` | `qwen3:8b` | Which model answers. It must be pulled first (`ollama pull`), otherwise the API returns `404 model not found`. |
+| `chat.options.temperature` | `0.2` | How much randomness goes into word choice. Details below. |
+| `chat.options.think` | `false` | Turns off Qwen3's reasoning mode. Details below. |
+
+#### `temperature`: creativity vs. predictability
+
+An LLM generates text **one token at a time**. For each next token, the model scores every option in its vocabulary and turns those scores into probabilities. Then it **samples** one of them according to those probabilities.
+
+Temperature comes in **before** sampling: the scores are divided by it.
+
+- **Low temperature (close to 0):** the gaps between scores grow. The most likely option takes almost all the probability, so the model nearly always picks "the obvious word". Output is predictable, repeatable and conservative.
+- **Temperature 1:** probabilities stay as the model learned them.
+- **High temperature (above 1):** probabilities flatten and unlikely options gain ground. Output is more varied and "creative", but also more likely to drift off topic and make mistakes.
+
+An intuitive example, completing *"O trabalhador tem direito a 30 dias de…"* ("Workers are entitled to 30 days of…"):
+
+| Next token | Temp. 0.2 | Temp. 1.0 | Temp. 1.5 |
+|---|---|---|---|
+| "férias" (vacation) | ~100% | 80% | ~67% |
+| "descanso" (rest) | <1% | 15% | ~22% |
+| "folga" (time off) | ~0% | 5% | ~11% |
+
+*(Illustrative: starts from the 1.0 column's probabilities and applies the temperature formula.)*
+
+**Why `0.2` here:** in a RAG-based legal assistant, the answer should **faithfully reproduce the retrieved articles**, not "rewrite the law creatively". A low temperature keeps the model close to the source text and gives similar answers to the same question. It also matters for the **eval set**: with little randomness, a change in results tends to come from a change in the code, not from luck.
+
+**Why not `0`:** at zero temperature (always picking the most likely token), small models tend to fall into loops and repetition. `0.2` keeps things predictable with a minimal margin of variation.
+
+**What temperature does not fix:** a low temperature **does not prevent hallucination**. It only makes the model more *consistent* in what it says, even when it is wrong. The no-RAG test (see [The problem RAG solves](#the-problem-rag-solves)) already ran at `0.2` and confidently invented the articles. What fixes hallucination is RAG: giving the model the text of the law and requiring it to cite the source.
+
+> Typical use: 0–0.3 for extraction, factual answers and RAG; 0.5–0.8 for general chat; above 1 for brainstorming and creative writing.
+
+#### `think`: reasoning mode
+
+Qwen3 is a "hybrid" model: before answering, it can generate internal reasoning (*chain of thought*), which is processed but doesn't show up in the final `answer`.
+
+In the first test, with reasoning on, a short answer used **606 output tokens and 111 s**, most of it invisible reasoning. In RAG, the hard part (finding the information) is already done by the vector search. The model only needs to **read the retrieved excerpts and write the answer**, so reasoning adds latency without a matching gain.
+
+> **Current status:** calling Ollama's API directly with `"think": false` turns reasoning off (the response has no `thinking` field). Through Spring AI, the `think: false` property **had no effect** (560 tokens, 100 s). Next test: the `/no_think` command in the system prompt, which Qwen3 itself recognizes. Details in the [dev log](docs/diario-de-desenvolvimento.md).
+
+#### Performance: CPU vs. GPU
+
+All measurements so far ran **100% on CPU** (~6 tokens/s), because Ollama did not detect the development machine's GPU (RTX 3060 Laptop, 6 GB) with an outdated driver. For an on-premise install, **a GPU is a practical requirement**: on CPU, one answer takes 1 to 2 minutes. GPU numbers will be added here once measured.
 
 ## Endpoints
 
-| Método | Rota | Descrição |
+| Method | Route | Description |
 |---|---|---|
-| `GET` | `/actuator/health` | Saúde da aplicação e do banco |
-| `POST` | `/api/smoke/chat` | Pergunta direta ao LLM, **sem RAG** (teste de fumaça; será substituído no passo 4) |
+| `GET` | `/actuator/health` | Application and database health |
+| `POST` | `/api/smoke/chat` | Asks the LLM directly, **without RAG** (smoke test; replaced in step 4) |
 
 ## Roadmap
 
-- [ ] **1. Corpus e eval set:** texto oficial da CLT (Planalto) e 15–20 perguntas com o artigo esperado
-- [x] **2. Esqueleto:** Spring Boot + Spring AI, Postgres/pgvector via Docker, Ollama local
-- [ ] **3. Ingestão:** CLT → chunks por artigo → embeddings Voyage → pgvector
-- [ ] **4. Endpoint de RAG:** busca top-k + citação obrigatória do artigo
-- [ ] **5. Observabilidade e custo:** tokens, latência e custo por chamada
-- [ ] **6. Avaliação:** taxa de acerto do artigo recuperado no eval set
-- [ ] **7. Frontend:** chat React com citações clicáveis e aviso sempre visível
-- [ ] **8. Guardrails:** rate limiting, tratamento de erros, perguntas fora do escopo
-- [ ] **9. Deploy:** Azure, containerizado
-- [ ] **10. Documentação final:** diagrama, GIF, números do eval
-- [ ] **11. Divulgação**
-- [ ] **12. Checkpoint:** avaliar a troca do Ollama pelo Claude (API Anthropic) na versão final
+The project ships in layers. Each layer works on its own and can be published.
 
-O passo a passo do desenvolvimento, com problemas e soluções, está no [diário](docs/diario-de-desenvolvimento.md).
+### Layer 1: MVP with the CLT (offline)
+- [ ] **1. Corpus and eval set:** official CLT text (Planalto, the federal government's legislation portal), bundled in the repository, plus 15–20 HR questions with the expected article
+- [x] **2. Skeleton:** Spring Boot + Spring AI, Postgres/pgvector via Docker, local Ollama
+- [ ] **3. Adapter-based ingestion:** CLT adapter (one chunk per article, metadata shared across all sources) and local embeddings; `offline`/`cloud` profiles
+- [ ] **4. RAG endpoint:** top-k retrieval + mandatory source citation
+- [ ] **5. Observability:** tokens, latency and cost per call
+- [ ] **6. Evaluation:** retrieval hit rate for the correct source; `offline` vs. `cloud` comparison
+- [ ] **7. Frontend:** React chat with clickable citations and an always-visible disclaimer
+- [ ] **8. Guardrails:** error handling and out-of-scope questions
+- [ ] **9. On-premise packaging:** full `docker compose` (Postgres, Ollama with GPU, API, frontend), with no external dependencies
+- [ ] **10. Docs and launch:** diagram, GIF, eval numbers
 
-## Estrutura
+### Layer 2: the template (a second source)
+- [ ] Adapter for collective bargaining agreements (PDF, chunked by clause), tested with a real public agreement
+- [ ] Answers showing both sources side by side, with the hierarchy pointed out
+- [ ] Eval cases on topics where agreements often diverge from the CLT (breaks, hour banks)
+
+### Layer 3: the vision
+- [ ] Internal policies and company-level agreements as sources
+- [ ] Legal corpus update package for installs without internet access
+- [ ] Access control per document collection
+- [ ] Checkpoint: evaluate Claude (Anthropic API) as the `cloud` profile's LLM
+
+The step-by-step development history, with problems and fixes, is in the [dev log](docs/diario-de-desenvolvimento.md) (Portuguese).
+
+## Project structure
 
 ```
 clt-rag-assistant/
-├── docker-compose.yml              # Postgres + pgvector (porta 5433); Ollama opcional
-├── docker/postgres/init/           # cria a extensão vector
-├── docs/
-│   ├── decisoes.md                 # decisões de arquitetura e alternativas
-│   ├── diario-de-desenvolvimento.md
+├── docker-compose.yml              # Postgres + pgvector (port 5433); optional Ollama
+├── docker/postgres/init/           # creates the vector extension
+├── docs/                           # design notes (Portuguese)
+│   ├── decisoes.md                 # architecture decisions and alternatives
+│   ├── diario-de-desenvolvimento.md# dev log
 │   ├── troubleshooting.md
-│   └── exemplos/                   # requisições e respostas de referência
+│   └── exemplos/                   # reference requests and responses
 └── src/main/java/br/com/caiomilani/cltassistant/
     ├── api/SmokeController.java    # POST /api/smoke/chat
-    ├── config/ChatClientConfig.java# ChatClient + prompt de sistema
-    └── shared/Disclaimer.java      # texto único do aviso jurídico
+    ├── config/ChatClientConfig.java# ChatClient + system prompt
+    └── shared/Disclaimer.java      # single source for the legal disclaimer
 ```
 
-## Fonte dos dados
+## Data sources
 
-Texto da CLT: [Decreto-Lei nº 5.452/1943, no portal do Planalto](https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm), a publicação oficial e atualizada.
+- **CLT:** [Decree-Law No. 5,452/1943 on the Planalto portal](https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm), the official, up-to-date publication. It is the system's legal baseline and the eval set's test base.
+- **Collective bargaining agreements (Layer 2):** registered and publicly available in the Ministry of Labor's *Mediador* system.
 
-## Autor
+## Author
 
-**Caio Milani Correa**: Engenheiro de Software Full-Stack (Java/Spring Boot · React/Angular).
+**Caio Milani Correa**: Full-Stack Software Engineer (Java/Spring Boot · React/Angular).
