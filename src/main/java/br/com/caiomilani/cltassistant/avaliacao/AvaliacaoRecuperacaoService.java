@@ -1,22 +1,13 @@
 package br.com.caiomilani.cltassistant.avaliacao;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Mede a recuperação contra o eval set (docs/eval/eval-set.json): para cada pergunta, os
@@ -26,24 +17,12 @@ import tools.jackson.databind.json.JsonMapper;
 @Service
 public class AvaliacaoRecuperacaoService {
 
-    private static final String FORA_DO_ESCOPO = "fora_do_escopo";
-
     private final VectorStore vectorStore;
-    private final Path arquivoEval;
-    private final JsonMapper json = JsonMapper.builder().build();
+    private final EvalSetRepositorio evalSet;
 
-    public AvaliacaoRecuperacaoService(VectorStore vectorStore, @Value("${app.eval.arquivo}") String arquivoEval) {
+    public AvaliacaoRecuperacaoService(VectorStore vectorStore, EvalSetRepositorio evalSet) {
         this.vectorStore = vectorStore;
-        this.arquivoEval = Path.of(arquivoEval);
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    record EvalSet(String versao, List<Pergunta> perguntas) {
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    record Pergunta(String id, String tipo, String pergunta,
-                    @JsonProperty("artigos_esperados") List<String> artigosEsperados) {
+        this.evalSet = evalSet;
     }
 
     /**
@@ -65,17 +44,14 @@ public class AvaliacaoRecuperacaoService {
     }
 
     public Relatorio avaliar(int k) throws IOException {
-        EvalSet eval;
-        try (InputStream in = Files.newInputStream(arquivoEval)) {
-            eval = json.readValue(in, EvalSet.class);
-        }
+        EvalSet eval = evalSet.carregar();
 
         List<ResultadoPergunta> resultados = new ArrayList<>();
         int avaliadas = 0;
         int acertos = 0;
         double somaReciprocos = 0;
 
-        for (Pergunta p : eval.perguntas()) {
+        for (EvalSet.Pergunta p : eval.perguntas()) {
             List<Document> docs = vectorStore.similaritySearch(
                     SearchRequest.builder().query(p.pergunta()).topK(k).build());
             List<String> recuperados = docs.stream()
@@ -86,7 +62,7 @@ public class AvaliacaoRecuperacaoService {
                     .toList();
             Double scoreTop1 = docs.isEmpty() ? null : docs.get(0).getScore();
 
-            boolean foraDoEscopo = FORA_DO_ESCOPO.equals(p.tipo());
+            boolean foraDoEscopo = p.foraDoEscopo();
             boolean acerto = !foraDoEscopo && !posicoes.isEmpty() && posicoes.stream().allMatch(i -> i > 0);
             if (!foraDoEscopo) {
                 avaliadas++;

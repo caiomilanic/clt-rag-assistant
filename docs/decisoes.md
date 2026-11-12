@@ -130,3 +130,22 @@ Registro curto das decisões do projeto: o que foi escolhido, por quê e o que f
 
 **Adiado:** o perfil `cloud` (Voyage AI) foi para o passo 6, onde ele existe para ser comparado. Implementá-lo agora seria código sem uso.
 **Limitação conhecida:** artigos que saírem do corpus numa atualização da lei continuam no banco até uma limpeza da fonte inteira. Fica para o pacote de atualização (camada 3).
+
+### D17. Endpoint de RAG: pipeline explícito com verificação de citações (2026-11-12)
+**Escolha:** `POST /api/perguntas` com um pipeline escrito à mão (`RagService`): busca top-k (padrão 5) → prompt com os trechos numerados → `qwen3:4b-instruct` → extração das citações da resposta → comparação com os trechos recuperados.
+**Alternativa:** os advisors prontos do Spring AI (`QuestionAnswerAdvisor` / `RetrievalAugmentationAdvisor`), que fazem busca e montagem do prompt automaticamente.
+**Por quê:** o pipeline explícito deixa cada etapa visível e mensurável (latência da busca × latência do LLM), devolve as fontes junto com a resposta e permite a **verificação de citações**. Num projeto de portfólio, mostrar o mecanismo vale mais que esconder atrás de uma abstração. Trocar para os advisors depois é simples, se fizer sentido.
+
+**Regras do prompt, cada uma ligada a uma falha observada:**
+1. Responder só com os trechos e citar o dispositivo de cada afirmação: contra a invenção de artigos (linha de base: Art. 133 no lugar do 130).
+2. Copiar números exatamente, sem converter "dias corridos" em "dias úteis": contra o caso "Art. 130 certo, 12 dias úteis errado".
+3. Dizer o que os trechos não cobrem: para a pergunta de cobertura parcial (aviso prévio proporcional).
+4. Frase fixa de recusa quando nada responde: a primeira avaliação mostrou que um limiar de similaridade não separa as perguntas fora do escopo. A recusa precisa vir do modelo, e a frase fixa permite detectá-la.
+5. Explicar o que a lei permite negociar: para as perguntas de hierarquia (611-A, 611-B, 620).
+6. Respostas curtas, sem repetir o aviso jurídico, que o sistema já adiciona.
+
+**Verificação de citações:** a resposta traz `citacao.foraDosTrechos`, com os artigos citados que não estavam entre os trechos recuperados. Se não estava no contexto, o modelo tirou da memória: é um sinal objetivo de alucinação, medido em toda resposta e na avaliação (`POST /api/avaliacao/respostas`).
+**Contexto:** `num-ctx: 8192` (o padrão do Ollama, 4096, pode cortar 5 trechos longos), ao custo estimado de ~0,6 GB a mais de VRAM; conferir com `ollama ps` que os dois modelos continuam 100% na GPU.
+**Limitações conhecidas:** "Arts. 134 e 137" só registra o 134 na extração de citações; a detecção da recusa depende do modelo usar a frase combinada; o texto da pergunta é inserido no prompt sem sanitização (guardrails no passo 8).
+
+**Atualização da D17 após a primeira avaliação (2026-11-12):** o detector de citações passou a reconhecer "artigo N" por extenso e a ignorar artigos de outras leis citados dentro da CLT ("art. 18 da Lei nº 8.036"). A recusa passou a valer só quando a resposta começa com a frase combinada, ou a contém sem citar artigos, porque o modelo às vezes responde citando artigos e acrescenta a frase de recusa no fim. Resultados e análise em `docs/eval/README.md`.

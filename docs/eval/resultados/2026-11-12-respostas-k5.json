@@ -1,0 +1,669 @@
+{
+  "_contexto": {
+    "data": "2026-11-12",
+    "endpoint": "POST /api/avaliacao/respostas?k=5",
+    "modelo": "qwen3:4b-instruct-2507-q4_K_M",
+    "embeddings": "bge-m3",
+    "num_ctx": 8192,
+    "revisao_manual": "Fidelidade revisada à mão: 17 de 21 respostas a perguntas válidas são fiéis aos trechos (81.0%). Uma (Q15) é recusa correta diante de recuperação falha."
+  },
+  "versaoEval": "0.2",
+  "k": 5,
+  "perguntas": 24,
+  "citacao": 0.917,
+  "respostasComCitacaoForaDosTrechos": 1,
+  "recusasCorretas": "3/3",
+  "recusasIndevidas": 2,
+  "latenciaMediaMs": 1618,
+  "latenciaMaximaMs": 3449,
+  "resultados": [
+    {
+      "id": "Q01",
+      "tipo": "direta",
+      "pergunta": "Quantos dias de férias o trabalhador tem direito por ano?",
+      "esperados": [
+        "130"
+      ],
+      "recuperados": [
+        "130",
+        "134",
+        "129",
+        "133",
+        "139"
+      ],
+      "citados": [
+        "130"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 726,
+      "tokensSaida": 48,
+      "resposta": "O trabalhador tem direito a férias anuais de 30 dias corridos, quando não houver faltado ao serviço mais de 5 vezes, conforme o Art. 130, I.",
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "Q02",
+      "tipo": "direta",
+      "pergunta": "Um funcionário completou 12 meses de casa com 8 faltas injustificadas no período. Quantos dias de férias ele tem?",
+      "esperados": [
+        "130"
+      ],
+      "recuperados": [
+        "130",
+        "146",
+        "147",
+        "134",
+        "235-D"
+      ],
+      "citados": [
+        "130"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 2139,
+      "tokensSaida": 107,
+      "resposta": "O funcionário tem 30 dias corridos de férias, pois, de acordo com o Art. 130, I, quando não houver faltado ao serviço mais de 5 vezes, o empregado terá direito a 30 dias corridos de férias. Como o funcionário teve apenas 8 faltas, está dentro do limite de 5 faltas, portanto, aplica-se o item I do Art. 130.",
+      "revisao_manual": {
+        "avaliacao": "infiel",
+        "observacao": "Recuperou e citou o Art. 130 certo, mas aplicou errado: com 8 faltas são 24 dias (inciso II); o modelo disse 30 e escreveu que 8 faltas \"está dentro do limite de 5\". Erro de raciocínio, não de recuperação."
+      }
+    },
+    {
+      "id": "Q03",
+      "tipo": "direta",
+      "pergunta": "Posso dividir as férias de um colaborador em três partes? Existe tamanho mínimo para cada parte?",
+      "esperados": [
+        "134"
+      ],
+      "recuperados": [
+        "139",
+        "134",
+        "140",
+        "150",
+        "143"
+      ],
+      "citados": [
+        "134"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 2463,
+      "tokensSaida": 136,
+      "resposta": "Não, você não pode dividir as férias de um colaborador em três partes. (Art. 134, § 1º)  \nO artigo estabelece que as férias poderão ser usufruídas em até três períodos, sendo que um deles não poderá ser inferior a quatorze dias corridos e os demais não poderão ser inferiores a cinco dias corridos, cada um. (Art. 134, § 1º)  \nPortanto, há um tamanho mínimo para cada parte: 14 dias para o primeiro período e 5 dias para os demais.",
+      "revisao_manual": {
+        "avaliacao": "infiel",
+        "observacao": "Contradição: começa com \"Não, você não pode dividir\" e em seguida descreve a divisão em até três períodos. Omite a condição \"desde que haja concordância do empregado\"."
+      }
+    },
+    {
+      "id": "Q04",
+      "tipo": "direta",
+      "pergunta": "O colaborador quer vender parte das férias. Quanto ele pode vender e até quando precisa pedir?",
+      "esperados": [
+        "143"
+      ],
+      "recuperados": [
+        "143",
+        "135",
+        "139",
+        "150",
+        "134"
+      ],
+      "citados": [
+        "143"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1978,
+      "tokensSaida": 97,
+      "resposta": "O colaborador pode vender 1/3 (um terço) do período de férias a que tiver direito (Art. 143). O pedido para a conversão deve ser feito até 15 (quinze) dias antes do término do período aquisitivo (Art. 143, § 1º). Não há informação sobre vendas parciais de férias além de 1/3.",
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "Q05",
+      "tipo": "direta",
+      "pergunta": "Qual o prazo para a empresa pagar as férias?",
+      "esperados": [
+        "145"
+      ],
+      "recuperados": [
+        "145",
+        "134",
+        "137",
+        "130",
+        "146"
+      ],
+      "citados": [
+        "145"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1147,
+      "tokensSaida": 40,
+      "resposta": "O prazo para a empresa pagar as férias é até 2 (dois) dias antes do início do respectivo período, conforme o Art. 145, I.",
+      "revisao_manual": {
+        "avaliacao": "fiel",
+        "observacao": "Conteúdo certo; citou \"Art. 145, I\", mas o artigo não tem incisos."
+      }
+    },
+    {
+      "id": "Q06",
+      "tipo": "multi_artigo",
+      "pergunta": "A empresa perdeu o prazo para conceder as férias de um funcionário. O que acontece?",
+      "esperados": [
+        "137",
+        "134"
+      ],
+      "recuperados": [
+        "146",
+        "137",
+        "147",
+        "134",
+        "133"
+      ],
+      "citados": [
+        "137",
+        "134"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": false,
+      "acertoCitacao": true,
+      "latenciaMs": 2675,
+      "tokensSaida": 157,
+      "resposta": "O empregado poderá ajuizar reclamação pedindo a fixação, por sentença, da época de gozo das mesmas (Art. 137, § 1º). O empregador pagará em dobro a remuneração das férias, pois foram concedidas após o prazo previsto no art. 134 (Art. 137). A sentença cominará pena diária de 5% (cinco por cento) do salário mínimo da região, devida ao empregado até que seja cumprida (Art. 137, § 2º). Não encontrei a resposta nos trechos da CLT recuperados para esta pergunta.",
+      "revisao_manual": {
+        "avaliacao": "fiel",
+        "observacao": "Conteúdo certo (pagamento em dobro, Art. 137), mas acrescentou a frase de recusa no fim. A detecção de recusa foi ajustada depois desta rodada."
+      }
+    },
+    {
+      "id": "Q07",
+      "tipo": "direta",
+      "pergunta": "As férias de um funcionário podem começar numa quinta-feira, se sexta-feira for feriado?",
+      "esperados": [
+        "134"
+      ],
+      "recuperados": [
+        "134",
+        "130",
+        "133",
+        "139",
+        "150"
+      ],
+      "citados": [
+        "134"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1005,
+      "tokensSaida": 16,
+      "resposta": "Não. (Art. 134, § 3º)",
+      "revisao_manual": {
+        "avaliacao": "fiel",
+        "observacao": "Correta, mas seca demais: \"Não. (Art. 134, § 3º)\", sem explicar a regra dos dois dias."
+      }
+    },
+    {
+      "id": "Q08",
+      "tipo": "direta",
+      "pergunta": "Qual o adicional mínimo da hora extra?",
+      "esperados": [
+        "59"
+      ],
+      "recuperados": [
+        "241",
+        "59",
+        "296",
+        "73",
+        "305"
+      ],
+      "citados": [
+        "59"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1186,
+      "tokensSaida": 35,
+      "resposta": "O adicional mínimo da hora extra é de 50% (cinquenta por cento), conforme o Art. 59, § 1º.",
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "Q09",
+      "tipo": "direta",
+      "pergunta": "Quantas horas extras por dia um funcionário pode fazer?",
+      "esperados": [
+        "59"
+      ],
+      "recuperados": [
+        "59",
+        "304",
+        "241",
+        "235-C",
+        "235-F"
+      ],
+      "citados": [
+        "59"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1392,
+      "tokensSaida": 23,
+      "resposta": "Um funcionário pode fazer até duas horas extras por dia, conforme o Art. 59, I.",
+      "revisao_manual": {
+        "avaliacao": "fiel",
+        "observacao": "Conteúdo certo; citou \"Art. 59, I\", mas a regra está no caput."
+      }
+    },
+    {
+      "id": "Q10",
+      "tipo": "multi_artigo",
+      "pergunta": "Posso fazer banco de horas por acordo individual com o funcionário, sem passar pelo sindicato?",
+      "esperados": [
+        "59"
+      ],
+      "recuperados": [
+        "224",
+        "617",
+        "442",
+        "452-A",
+        "59-A"
+      ],
+      "citados": [],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": false,
+      "latenciaMs": 2464,
+      "tokensSaida": 110,
+      "resposta": "Não. O acordo individual sobre banco de horas não pode ser celebrado sem passar pelo sindicato, pois o artigo 617 da CLT exige que, para a celebração de Acordo Coletivo de Trabalho, os interessados deem ciência ao Sindicato representativo da categoria profissional, com prazo de oito dias para assumir a direção dos entendimentos. O trecho não menciona a possibilidade de acordo individual sobre banco de horas sem envolvimento sindical.",
+      "revisao_manual": {
+        "avaliacao": "infiel",
+        "observacao": "Recuperação falhou (o Art. 59 não veio) e o modelo respondeu \"Não\" com base no Art. 617, que trata de outra coisa. A lei permite banco de horas por acordo individual escrito, com compensação em até 6 meses (Art. 59, § 5º). É o caso mais perigoso: trecho parecido, mas que não responde, e mesmo assim nada de recusa. A citação \"artigo 617\" não foi detectada nesta rodada (detector ajustado depois)."
+      }
+    },
+    {
+      "id": "Q11",
+      "tipo": "direta",
+      "pergunta": "Qual o intervalo mínimo de almoço para quem trabalha 8 horas por dia?",
+      "esperados": [
+        "71"
+      ],
+      "recuperados": [
+        "71",
+        "308",
+        "58",
+        "382",
+        "304"
+      ],
+      "citados": [
+        "71"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1134,
+      "tokensSaida": 34,
+      "resposta": "O intervalo mínimo de almoço para quem trabalha 8 horas por dia é de 1 (uma) hora. (Art. 71)",
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "Q12",
+      "tipo": "hierarquia",
+      "pergunta": "A convenção coletiva da categoria pode reduzir o intervalo de almoço para 30 minutos?",
+      "esperados": [
+        "611-A"
+      ],
+      "recuperados": [
+        "71",
+        "611-A",
+        "611-B",
+        "235-E",
+        "452-A"
+      ],
+      "citados": [
+        "611-A"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 2164,
+      "tokensSaida": 64,
+      "resposta": "Sim, a convenção coletiva da categoria pode reduzir o intervalo de almoço para 30 minutos, desde que respeite o limite mínimo de trinta minutos para jornadas superiores a seis horas, conforme previsto no Art. 611-A, § III.",
+      "revisao_manual": {
+        "avaliacao": "fiel",
+        "observacao": "Escreveu \"§ III\" em vez de \"inciso III\"."
+      }
+    },
+    {
+      "id": "Q13",
+      "tipo": "direta",
+      "pergunta": "Se o funcionário não tirou o intervalo de almoço completo, quanto a empresa precisa pagar?",
+      "esperados": [
+        "71"
+      ],
+      "recuperados": [
+        "71",
+        "452-A",
+        "144",
+        "722",
+        "59"
+      ],
+      "citados": [
+        "71"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1860,
+      "tokensSaida": 65,
+      "resposta": "A empresa precisa pagar, de natureza indenizatória, apenas o período suprimido, com acréscimo de 50% (cinquenta por cento) sobre o valor da remuneração da hora normal de trabalho. (Art. 71, § 4º)",
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "Q14",
+      "tipo": "direta",
+      "pergunta": "Qual o descanso mínimo entre o fim de um expediente e o início do próximo?",
+      "esperados": [
+        "66"
+      ],
+      "recuperados": [
+        "71",
+        "382",
+        "66",
+        "412",
+        "308"
+      ],
+      "citados": [
+        "66"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 854,
+      "tokensSaida": 36,
+      "resposta": "O descanso mínimo entre o fim de um expediente e o início do próximo é de 11 horas consecutivas, conforme o Art. 66.",
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "Q15",
+      "tipo": "direta",
+      "pergunta": "Atrasos ou saídas de poucos minutos no ponto contam como hora extra ou geram desconto?",
+      "esperados": [
+        "58"
+      ],
+      "recuperados": [
+        "241",
+        "59",
+        "250",
+        "242",
+        "71"
+      ],
+      "citados": [],
+      "citadosForaDosTrechos": [],
+      "encontrou": false,
+      "acertoCitacao": false,
+      "latenciaMs": 1003,
+      "tokensSaida": 20,
+      "resposta": "Não encontrei a resposta nos trechos da CLT recuperados para esta pergunta.",
+      "revisao_manual": {
+        "avaliacao": "recusa",
+        "observacao": "Recuperação falhou (o Art. 58 não veio) e o modelo recusou. Comportamento correto diante dos trechos recebidos: melhor recusar que inventar."
+      }
+    },
+    {
+      "id": "Q16",
+      "tipo": "direta",
+      "pergunta": "Qual o prazo para pagar as verbas rescisórias?",
+      "esperados": [
+        "477"
+      ],
+      "recuperados": [
+        "467",
+        "478",
+        "487",
+        "477",
+        "146"
+      ],
+      "citados": [
+        "477"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1329,
+      "tokensSaida": 40,
+      "resposta": "O prazo para pagar as verbas rescisórias é de até dez dias contados a partir do término do contrato. (Art. 477, § 6º)",
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "Q17",
+      "tipo": "direta",
+      "pergunta": "Como funciona a demissão por acordo entre empresa e funcionário? O que ele recebe?",
+      "esperados": [
+        "484-A"
+      ],
+      "recuperados": [
+        "477-B",
+        "477",
+        "484-A",
+        "497",
+        "502"
+      ],
+      "citados": [
+        "18",
+        "484-A"
+      ],
+      "citadosForaDosTrechos": [
+        "18"
+      ],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 3449,
+      "tokensSaida": 216,
+      "resposta": "A demissão por acordo entre empresa e funcionário é permitida e, nesse caso, o empregado recebe:  \n- por metade: o aviso prévio, se indenizado, e a indenização sobre o saldo do Fundo de Garantia do Tempo de Serviço, prevista no § 1º do art. 18 da Lei nº 8.036, de 11 de maio de 1990;  \n- na integralidade, as demais verbas trabalhistas.  \nA extinção por acordo permite a movimentação da conta vinculada no Fundo de Garantia do Tempo de Serviço, limitada até 80% do valor dos depósitos, conforme o § 1º do art. 484-A.  \nO empregado não tem direito ao ingresso no Programa de Seguro-Desemprego, conforme o § 2º do art. 484-A.",
+      "revisao_manual": {
+        "avaliacao": "fiel",
+        "observacao": "O \"art. 18\" marcado como fora dos trechos é da Lei do FGTS, citado dentro do próprio Art. 484-A: falso positivo do detector, corrigido depois desta rodada."
+      }
+    },
+    {
+      "id": "Q18",
+      "tipo": "cobertura_parcial",
+      "pergunta": "Quantos dias de aviso prévio o funcionário tem direito?",
+      "esperados": [
+        "487"
+      ],
+      "recuperados": [
+        "487",
+        "490",
+        "491",
+        "488",
+        "29"
+      ],
+      "citados": [
+        "487"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1767,
+      "tokensSaida": 86,
+      "resposta": "O funcionário tem direito a oito dias de aviso prévio se o pagamento for efetuado por semana ou tempo inferior, e a trinta dias de aviso prévio se o pagamento for efetuado por quinzena ou mês, ou se o empregado tiver mais de 12 meses de serviço na empresa. (Art. 487, I e II)",
+      "revisao_manual": {
+        "avaliacao": "fiel",
+        "observacao": "Fiel à CLT (8 ou 30 dias), mas não avisou que a proporcionalidade do aviso prévio está fora dos trechos (regra 3 do prompt não acionada)."
+      }
+    },
+    {
+      "id": "Q19",
+      "tipo": "direta",
+      "pergunta": "Um funcionário vai se casar. Quantos dias ele pode faltar sem desconto?",
+      "esperados": [
+        "473"
+      ],
+      "recuperados": [
+        "473",
+        "130",
+        "131",
+        "487",
+        "392"
+      ],
+      "citados": [
+        "473"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1521,
+      "tokensSaida": 38,
+      "resposta": "O funcionário pode faltar até 3 (três) dias consecutivos sem desconto em virtude de casamento. (Art. 473, II)",
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "Q20",
+      "tipo": "hierarquia",
+      "pergunta": "A convenção coletiva pode reduzir o número de dias de férias?",
+      "esperados": [
+        "611-B"
+      ],
+      "recuperados": [
+        "139",
+        "611-B",
+        "611-A",
+        "143",
+        "134"
+      ],
+      "citados": [
+        "611-B"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1775,
+      "tokensSaida": 51,
+      "resposta": "Não. O número de dias de férias não pode ser reduzido por convenção coletiva, pois é considerado objeto ilícito de convenção coletiva, conforme o Art. 611-B, XI.",
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "Q21",
+      "tipo": "hierarquia",
+      "pergunta": "Se o acordo coletivo da empresa e a convenção da categoria tratam do mesmo tema de forma diferente, qual vale?",
+      "esperados": [
+        "620"
+      ],
+      "recuperados": [
+        "611-A",
+        "611",
+        "620",
+        "613",
+        "612"
+      ],
+      "citados": [
+        "620"
+      ],
+      "citadosForaDosTrechos": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1533,
+      "tokensSaida": 56,
+      "resposta": "O acordo coletivo da empresa vale, pois, de acordo com o Art. 620, as condições estabelecidas em acordo coletivo de trabalho sempre prevalecerão sobre as estipuladas em convenção coletiva de trabalho.",
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "F01",
+      "tipo": "fora_do_escopo",
+      "pergunta": "Qual a pena para o crime de furto?",
+      "esperados": [],
+      "recuperados": [
+        "733",
+        "75",
+        "351",
+        "434",
+        "153"
+      ],
+      "citados": [],
+      "citadosForaDosTrechos": [],
+      "encontrou": false,
+      "acertoCitacao": true,
+      "latenciaMs": 787,
+      "tokensSaida": 20,
+      "resposta": "Não encontrei a resposta nos trechos da CLT recuperados para esta pergunta.",
+      "revisao_manual": {
+        "avaliacao": "recusa"
+      }
+    },
+    {
+      "id": "F02",
+      "tipo": "fora_do_escopo",
+      "pergunta": "Qual a alíquota de depósito do FGTS sobre o salário?",
+      "esperados": [],
+      "recuperados": [
+        "580",
+        "911",
+        "589",
+        "586",
+        "582"
+      ],
+      "citados": [],
+      "citadosForaDosTrechos": [],
+      "encontrou": false,
+      "acertoCitacao": true,
+      "latenciaMs": 1252,
+      "tokensSaida": 20,
+      "resposta": "Não encontrei a resposta nos trechos da CLT recuperados para esta pergunta.",
+      "revisao_manual": {
+        "avaliacao": "recusa"
+      }
+    },
+    {
+      "id": "F03",
+      "tipo": "fora_do_escopo",
+      "pergunta": "Como calculo a contribuição do INSS descontada do salário?",
+      "esperados": [],
+      "recuperados": [
+        "582",
+        "580",
+        "545",
+        "911",
+        "586"
+      ],
+      "citados": [],
+      "citadosForaDosTrechos": [],
+      "encontrou": false,
+      "acertoCitacao": true,
+      "latenciaMs": 1235,
+      "tokensSaida": 20,
+      "resposta": "Não encontrei a resposta nos trechos da CLT recuperados para esta pergunta.",
+      "revisao_manual": {
+        "avaliacao": "recusa"
+      }
+    }
+  ]
+}

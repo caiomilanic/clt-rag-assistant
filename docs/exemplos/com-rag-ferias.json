@@ -1,0 +1,24 @@
+{
+  "_contexto": {
+    "data": "2026-11-12",
+    "endpoint": "POST /api/perguntas (RAG: top-5 trechos + prompt com regras de citação)",
+    "analise": [
+      "Regra certa: 30 dias corridos, condicionados a não ter mais de 5 faltas.",
+      "Artigo e inciso certos: Art. 130, I, que estava entre os trechos recuperados (em 1º lugar).",
+      "Sem 'dias úteis', sem lei inventada, sem citação fora dos trechos.",
+      "1,7 s no total (132 ms de busca + 1,6 s de LLM), 62 tokens de saída."
+    ]
+  },
+  "pergunta": "Quantos dias de férias o trabalhador tem direito por ano?",
+  "resposta": "O trabalhador tem direito a férias anuais, na proporção de 30 dias corridos, quando não houver faltado ao serviço mais de 5 vezes, conforme o Art. 130, I. (Art. 130, I)",
+  "encontrou": true,
+  "fontes": [
+    {"referencia": "Art. 130", "link": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm#art130", "score": 0.7006524205207825},
+    {"referencia": "Art. 134", "link": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm#art134", "score": 0.6739413440227509},
+    {"referencia": "Art. 129", "link": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm#art129", "score": 0.6575928628444672},
+    {"referencia": "Art. 133", "link": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm#art133", "score": 0.6426025629043579},
+    {"referencia": "Art. 139", "link": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm#art139", "score": 0.6364043354988098}
+  ],
+  "citacao": {"citados": ["130"], "foraDosTrechos": []},
+  "metricas": {"modelo": "qwen3:4b-instruct-2507-q4_K_M", "latenciaBuscaMs": 132, "latenciaLlmMs": 1592, "latenciaTotalMs": 1725, "tokensEntrada": 1817, "tokensSaida": 62}
+}

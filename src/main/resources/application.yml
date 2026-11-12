@@ -23,6 +23,9 @@ spring:
           model: ${OLLAMA_MODEL:qwen3:4b-instruct-2507-q4_K_M}
           # Respostas jurídicas: baixa criatividade, máxima aderência ao contexto.
           temperature: 0.2
+          # Janela de contexto: pergunta + 5 trechos (alguns artigos passam de 1.000 tokens).
+          # O padrão do Ollama (4096) pode cortar trechos. Custa ~0,6 GB a mais de VRAM.
+          num-ctx: 8192
     vectorstore:
       pgvector:
         # Cria as extensões (vector, hstore, uuid-ossp), a tabela e o índice na primeira execução.

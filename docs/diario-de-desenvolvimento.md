@@ -147,3 +147,26 @@ A resposta trouxe um tipo novo de erro: **artigo certo, regra errada**. "12 dias
 
 ### Primeiro número: recuperação 90,5% (top-5)
 19 de 21 perguntas com o artigo esperado entre os 5 primeiros; MRR 0,655; artigo certo em 1º lugar em 10 de 21. Os dois erros (Q10, banco de horas, Art. 59 § 5º; Q15, tolerância do ponto, Art. 58 § 1º) têm a mesma causa: **o assunto está num parágrafo e o caput trata de outra coisa**, então um vetor por artigo inteiro dilui o tema. Os scores das perguntas fora do escopo (0,54–0,60) se misturam com os das válidas (0,53–0,71): um limiar de similaridade sozinho não resolve a recusa. Análise e hipóteses (chunk por dispositivo, busca híbrida) em [eval/README.md](eval/README.md#resultados). Resultado bruto em [eval/resultados/](eval/resultados/2026-11-12-recuperacao-k5.json).
+
+## 2026-11-12: Passo 4, endpoint de RAG (código)
+
+- `POST /api/perguntas`: busca top-5 → prompt com regras → `qwen3:4b-instruct` → verificação de citações. Desenho e motivo de cada regra do prompt na D17.
+- `POST /api/avaliacao/respostas`: roda as 24 perguntas pelo RAG completo e mede citação, citações fora dos trechos, recusas e latência. A fidelidade é revisada à mão a partir das respostas devolvidas.
+- O carregamento do eval set virou um componente compartilhado (`EvalSetRepositorio`) pelas duas avaliações.
+- `num-ctx: 8192` no Ollama, para caberem 5 trechos.
+- Testes: `CitacoesTest` (extração de "Art. 130, I", "art. 145", "Art 59-A", "Art. 611-B"; parágrafo não vira artigo; recusa sem citação). Conferidos aqui com um harness; o código com Spring foi compilado contra stubs, como no passo 3.
+
+### Primeira execução: o "depois" da escada
+Pergunta de férias pelo RAG: **"30 dias corridos, quando não houver faltado ao serviço mais de 5 vezes (Art. 130, I)"**. Regra certa, artigo e inciso certos, nenhuma citação fora dos trechos. Foram **1,7 s** (132 ms de busca + 1,6 s de LLM), 1.817 tokens de entrada e 62 de saída. Com `num_ctx` 8192, o `qwen3:4b-instruct` passou a ocupar 3,8 GB; somado ao `bge-m3` (0,7 GB), tudo continua 100% na GPU.
+
+| Configuração | Resposta |
+|---|---|
+| 8B sem prompt | "15 dias + 1 por ano, Lei 11.091/2005" |
+| 8B com prompt | 30 dias, mas "Art. 133" |
+| 4B com prompt | "Art. 130", mas "12 dias úteis" |
+| **4B com RAG** | **30 dias corridos, Art. 130, I** |
+
+### Avaliação das respostas (24 perguntas)
+Citação 91,7% · fidelidade 81% (revisão manual) · recusas corretas 3/3 · latência média 1,6 s (máx. 3,4 s). As duas falhas de citação coincidem com as duas falhas de recuperação. Três tipos de falha de fidelidade: erro de raciocínio com o trecho certo (Q02: 8 faltas → respondeu 30 dias em vez de 24; Q03: contradição), trecho parecido sem recusa (Q10, a mais perigosa) e recusa por falha de recuperação (Q15). Detalhes em [eval/README.md](eval/README.md#análise-das-respostas-2026-11-12) e revisão por pergunta em [eval/resultados/](eval/resultados/2026-11-12-respostas-k5.json).
+
+O detector de citações foi ajustado com base nessa rodada ("artigo 617" por extenso; "art. 18 da Lei 8.036" não conta; recusa no fim de uma resposta com citações não conta como recusa), com testes novos no `CitacoesTest`.
