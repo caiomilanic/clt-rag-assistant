@@ -245,3 +245,10 @@ O detector de citações foi ajustado com base nessa rodada ("artigo 617" por ex
 - **Código:** `ExpansorDeConsulta` (normaliza acentos e maiúsculas, palavra inteira, a mesma expansão entra uma vez só); `Recuperador` busca pela consulta expandida; o LLM recebe a pergunta original. `?expansao=true|false` na busca e nas avaliações; `metricas.termosGlossario` na resposta.
 - **Testes:** `ExpansorDeConsultaTest` (5). O stub de log ganhou `warn`.
 - **Expectativa registrada antes de medir (D22):** ganho em Q22 a Q26 e efeito quase nulo na validação.
+
+### Medição do glossário
+- **Primeira tentativa:** os seis arquivos vieram vazios em 2 segundos. A aplicação não estava no ar: havia um `java.exe` antigo travando `target`, e depois o `clean` apagou as classes sem o IntelliJ recompilar. Ao subir, falhou com "No default constructor found" no `ExpansorDeConsulta`: dois construtores (o da aplicação e o dos testes) e nenhum marcado com `@Autowired`. Os stubs usados na compilação do lado do Claude não executam a injeção de dependências, então só a aplicação real pegou isso. Corrigido.
+- **Busca:** desenvolvimento 80,8% → 92,3% (MRR 0,597 → 0,840); validação 87,0% nos dois casos. Quatro das cinco perguntas de jargão passaram a achar o artigo em 1º.
+- **Efeito colateral:** Q12 perdeu o Art. 611-A ("almoço" puxou para o Art. 71) e a resposta ficou errada; Q24 continua sem o 59-A, com quatro expansões diluindo a consulta.
+- **Respostas:** desenvolvimento 21/26 fiéis; validação 13/23. Q25: busca certa, resposta errada (o modelo inverteu os §§ 1º e 2º do Art. 75-C). Q10, Q11 e Q15 fiéis pela primeira vez; Q02 voltou a errar sem relação com o glossário.
+- **Leitura:** o glossário funciona no que cobre e precisa de outra forma de aplicação (buscar separado e fundir). Jargão fora dele passa direto (V24, V27, V28).

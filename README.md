@@ -37,10 +37,10 @@
 | Criterion | Target | Status |
 |---|---|---|
 | Every answer cites its source, or explicitly says nothing was found | 100% of eval answers | **100%** (24/24) on the development set; on the validation set, 3/3 out-of-scope refusals but 4 answerable questions refused |
-| The expected article is among the retrieved excerpts | ≥ 90% of eval questions (top-5) | **100%** (21/21) on the development set; **78.3%** (18/23) on the held-out validation set, where HR jargon ("12x36", "home office") misses the legal wording ([validation](docs/eval/README.md#primeira-execução-da-validação-2026-11-13)) |
-| The answer says only what the cited excerpts support | 100% of eval answers | **81%** (17/21) on the development set; **48%** (11/23) on the held-out validation set, plus 5 partially correct (manual review) |
+| The expected article is among the retrieved excerpts | ≥ 90% of eval questions (top-5) | **92.3%** on the development set with the HR-to-legal glossary; **87.0%** on the held-out validation set ([glossary results](docs/eval/README.md#resultado-do-glossário-2026-11-13)) |
+| The answer says only what the cited excerpts support | 100% of eval answers | **81%** (21/26) on the development set; **57%** (13/23) on the held-out validation set, plus 4 partially correct (manual review) |
 | No external network calls in the `offline` profile | 0 calls | By design; to be verified in step 9 |
-| Response time on a 6 GB consumer GPU | ≤ 15 s per answer, including retrieval | **2.6 s average, 5.8 s max** on the validation set (down from ~90 s on CPU without RAG; see [performance](#model-choice-and-performance)) |
+| Response time on a 6 GB consumer GPU | ≤ 15 s per answer, including retrieval | **2.4 s average, 5.5 s max** on the validation set (down from ~90 s on CPU without RAG; see [performance](#model-choice-and-performance)) |
 
 ### Non-goals
 
@@ -91,19 +91,19 @@ The made-up answers also **change from run to run and from model to model**. Ask
 
 **The solution:** RAG (*Retrieval-Augmented Generation*). Before answering, the system retrieves the relevant excerpts from a vector database and requires the model to answer **only from them**, citing the source.
 
-**Results so far** (laptop GPU, everything local). The system was tuned on a **development set** of 24 questions; a **held-out validation set** of 26 new questions, frozen before its first run and never used for tuning, measures how much of that generalizes:
+**Results so far** (laptop GPU, everything local). The system is tuned on a **development set**; a **held-out validation set**, frozen before each change and never used for tuning, measures how much of that generalizes:
 
-| | Development (24) | **Held-out validation (26)** |
+| | Development (26 + 3 out of scope) | **Held-out validation (23 + 3 out of scope)** |
 |---|---|---|
-| Correct article among the top 5 retrieved | 100% | **78.3%** (18/23) |
-| Answers fully supported by their excerpts (manual review) | 81% (17/21) | **48%** (11/23) |
-| Partially supported (right rule, missing a condition or wrong citation) | 3 | 5 |
-| Wrong answers | 1 | 3 |
-| Answerable questions refused | 0 | 4 (3 because retrieval missed the article) |
+| Correct article among the top 5 retrieved | 92.3% (80.8% without the glossary) | **87.0%** |
+| Answers fully supported by their excerpts (manual review) | 81% (21/26) | **57%** (13/23) |
+| Partially supported (right rule, missing a condition or wrong citation) | 1 | 4 |
+| Wrong answers | 3 | 3 |
+| Answerable questions refused | 1 | 3 (2 because retrieval missed the article) |
 | Out-of-scope questions refused | 3/3 | **3/3** |
-| Average response time | 2.5 s | 2.6 s |
+| Average response time | 2.2 s | 2.4 s |
 
-**The held-out set exposed what the development set hid.** The development questions were written with the law open, so they shared its vocabulary. The validation questions use HR jargon, and that is where retrieval breaks: "12x36 shift" never reaches "twelve consecutive hours followed by thirty-six" (Art. 59-A), "home office" never reaches "teleworking" (Art. 75-C). When retrieval misses, the model usually **refuses instead of inventing** (3 of 5 misses), which is the safe failure. The other gaps are the 4B model picking the wrong excerpt among the right ones and falling for a trap question (pregnancy job security: the CLT grants it, but the duration is in the Constitution). Next: an HR-to-legal glossary to expand queries, and a larger model ([validation analysis](docs/eval/README.md#primeira-execução-da-validação-2026-11-13)).
+**What the held-out set showed.** The first development questions were written with the law open and shared its vocabulary, so retrieval scored 100%. Questions in HR jargon dropped it to 78%: "12x36 shift" never reaches "twelve consecutive hours followed by thirty-six" (Art. 59-A), "home office" never reaches "teleworking" (Art. 75-C). An **HR-to-legal glossary** that expands the search query fixed 4 of those 5 questions (development retrieval 80.8% → 92.3%) without hurting anything on the validation set. But it only covers the jargon it knows: new jargon in the validation set ("he quit", "demote") still misses. And when an expansion is secondary to the question, it can push out the article that matters (one regression, documented). When retrieval misses, the model usually **refuses instead of inventing**, which is the safe failure. The next bottleneck is the 4B model reading the excerpts: in one case it got the right article and still inverted its two paragraphs ([analysis](docs/eval/README.md#resultado-do-glossário-2026-11-13)).
 
 Earlier milestones on the development set: indexing by provision (each paragraph as its own vector, while the LLM still gets the whole article) took retrieval from 90.5% to 100%; hybrid keyword + vector search was measured and **rejected** because it made retrieval worse; a deterministic citation verifier now catches wrong paragraph and item numbers and reduces them to the article ([analysis](docs/eval/README.md)).
 

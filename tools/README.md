@@ -45,6 +45,9 @@ Monta `docs/eval/eval-set.json`. As perguntas e respostas de referência ficam n
 ```bash
 python tools/corpus/parse_clt.py corpus/clt/DEL5452.html target/clt-artigos.json
 python tools/eval/build_eval.py target/clt-artigos.json corpus/clt/DEL5452.html docs/eval/eval-set.json
+python tools/eval/build_eval.py target/clt-artigos.json corpus/clt/DEL5452.html docs/eval/validacao-set.json validacao
 ```
+
+O último argumento escolhe o conjunto: `desenvolvimento` (padrão, lista `Q`) ou `validacao` (lista `V`, D21). A lista `V` está congelada: não a edite para fazer o sistema passar.
 
 O SHA-256 do HTML fica registrado no eval set, para saber contra qual versão da lei ele foi montado.

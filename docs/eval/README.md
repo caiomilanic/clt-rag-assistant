@@ -238,3 +238,42 @@ done
 curl -s -X POST "http://localhost:8080/api/avaliacao/respostas?k=5&conjunto=desenvolvimento" > target/glossario-respostas-desenvolvimento.json
 curl -s -X POST "http://localhost:8080/api/avaliacao/respostas?k=5&conjunto=validacao" > target/glossario-respostas-validacao.json
 ```
+
+### Resultado do glossário (2026-11-13)
+
+Resultados com revisão manual: [desenvolvimento](resultados/2026-11-13-glossario-desenvolvimento-k5.json) e [validação](resultados/2026-11-13-glossario-validacao-k5.json).
+
+**Busca, com e sem glossário:**
+
+| | Sem glossário | **Com glossário** |
+|---|---|---|
+| Desenvolvimento 0.3 (26 perguntas) | 80,8% (MRR 0,597) | **92,3%** (MRR 0,840) |
+| Validação 0.2 (23 perguntas) | 87,0% (MRR 0,775) | 87,0% (MRR 0,775) |
+
+- **Desenvolvimento:** das cinco perguntas de jargão, quatro passaram a achar o artigo em 1º lugar (Q22 "22h", Q23 "12x36", Q25 "home office", Q26 "diploma"). Outras subiram de posição: Q04 (5º → 2º), Q16 e Q17 (3º → 1º), Q14 (2º → 1º).
+- **Efeito colateral (Q12):** "A convenção coletiva pode reduzir o intervalo de almoço para 30 minutos?" A expansão de "almoço" puxou a busca para o Art. 71, e o Art. 611-A (o que responde) saiu do top-5. Acrescentar a expansão à consulta **dilui o conceito principal da pergunta** quando o termo do glossário é secundário.
+- **Q24 continua falhando:** com quatro termos expandidos ao mesmo tempo, a consulta ficou dominada pelo trabalho noturno e o Art. 59-A (12x36) não entrou. É a mesma diluição.
+- **Validação: nenhum efeito**, como previsto na D22, porque nenhum termo do glossário aparece nela. Das cinco perguntas novas com jargão, três falharam na busca: "pediu as contas" (V24), "ônibus fretado" (V27) e "rebaixar" (V28). **O glossário corrige o que cobre; a cobertura é o limite.**
+
+**Respostas (com glossário):**
+
+| | Desenvolvimento 0.3 | Validação 0.2 |
+|---|---|---|
+| Fiéis | **21/26 (81%)** | 13/23 (57%) |
+| Parciais | 1 | 4 |
+| Infiéis | 3 | 3 |
+| Recusas indevidas | 1 | 3 |
+| Fora do escopo recusadas | 3/3 | 3/3 |
+| Latência média | 2,2 s | 2,4 s |
+
+- **Busca certa não garante resposta certa (Q25):** o glossário trouxe o Art. 75-C em 1º, mas o modelo inverteu os parágrafos e disse que a volta ao presencial exige acordo mútuo. O § 2º diz o contrário.
+- **Melhoras no desenvolvimento:** Q10, Q11 e Q15 ficaram fiéis pela primeira vez (Q11 era infiel desde a rodada 6a). Com uma execução só, não dá para separar o efeito do glossário (o Art. 71 subiu de posição na Q11) da variação do modelo.
+- **Variação do modelo:** a Q02, sem nenhum termo do glossário, voltou a errar (30 dias no lugar de 24).
+- **Quando a busca erra, o modelo recusa na maioria das vezes:** das cinco falhas de busca desta rodada, três terminaram em recusa (Q24, V24, V27). As outras duas viraram respostas erradas montadas com artigos vizinhos: Q12 e V28.
+- **Verificador:** cinco citações rebaixadas nesta rodada, todas erradas (Q04, Q09, Q22, V19, V22).
+
+**Conclusões:**
+1. O glossário funciona no que cobre (+11,5 pontos na busca do desenvolvimento) e não piora a validação.
+2. A forma de aplicar precisa mudar: em vez de acrescentar a expansão à pergunta (que dilui o conceito principal, Q12 e Q24), buscar pela pergunta original **e** pela expansão e fundir as duas listas. Assim a expansão acrescenta candidatos sem tirar os da pergunta.
+3. A cobertura é o limite: jargão novo ("pediu as contas", "rebaixar") passa direto. Em produção, o glossário cresce com o uso de cada empresa; a alternativa automática é a reescrita da pergunta pelo LLM.
+4. O gargalo seguinte é a leitura do modelo de 4B (Q25, V08, V14, V22, V23).
