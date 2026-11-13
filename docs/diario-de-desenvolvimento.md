@@ -252,3 +252,8 @@ O detector de citações foi ajustado com base nessa rodada ("artigo 617" por ex
 - **Efeito colateral:** Q12 perdeu o Art. 611-A ("almoço" puxou para o Art. 71) e a resposta ficou errada; Q24 continua sem o 59-A, com quatro expansões diluindo a consulta.
 - **Respostas:** desenvolvimento 21/26 fiéis; validação 13/23. Q25: busca certa, resposta errada (o modelo inverteu os §§ 1º e 2º do Art. 75-C). Q10, Q11 e Q15 fiéis pela primeira vez; Q02 voltou a errar sem relação com o glossário.
 - **Leitura:** o glossário funciona no que cobre e precisa de outra forma de aplicação (buscar separado e fundir). Jargão fora dele passa direto (V24, V27, V28).
+
+### Glossário: buscar separado e fundir
+- **Por quê:** concatenar a expansão à pergunta diluiu o conceito principal (Q12 perdeu o Art. 611-A) e misturou expansões diferentes (Q24 sem o 59-A).
+- **Como:** uma busca vetorial pela pergunta e uma por entrada do glossário; `Recuperador.fundirListas` junta por RRF, com prioridade para a lista da pergunta original em empate.
+- **Testes:** dois casos novos em `RecuperadorTest`, reproduzindo a Q12 (o artigo da pergunta original continua no top-5) e a Q24 (o artigo que só a expansão acha entra). Os stubs de AssertJ do lado do Claude ganharam `startsWith`, `contains`, `filteredOn` e `first`.

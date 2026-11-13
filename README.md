@@ -141,7 +141,7 @@ In the **`offline`** profile (the default), everything above runs inside the net
 | LLM | Ollama (`qwen3:4b-instruct`) | Runs locally with no per-request cost; fits a 6 GB GPU next to the embedding model |
 | Ingestion | One adapter per source type | The CLT has its own structure (article/paragraph/item); agreements and policies arrive as PDF/DOCX |
 | Retrieval | Vector and/or Postgres full-text, fused with RRF; article- or provision-level | Both options are switchable per request, so each is measured on the eval set before becoming the default |
-| Query expansion | HR-to-legal glossary (JSON file) | HR jargon ("12x36 shift", "home office") does not match the legal wording; the glossary adds the law's terms to the search query. It lives outside the code, so each company can add its own jargon |
+| Query expansion | HR-to-legal glossary (JSON file) | HR jargon ("12x36 shift", "home office") does not match the legal wording; each matching glossary entry runs an extra search in the law's vocabulary, fused with the search for the original question (RRF), so the expansion adds candidates without diluting the question. The glossary lives outside the code, so each company can add its own jargon |
 | Answer checking | Deterministic citation verifier | Every cited article, paragraph and item is checked against the retrieved text, so a wrong citation shows up in the metrics instead of in front of the analyst |
 | Frontend | React + TypeScript | Chat with clickable citations to the text of each source |
 

@@ -277,3 +277,15 @@ Resultados com revisão manual: [desenvolvimento](resultados/2026-11-13-glossari
 2. A forma de aplicar precisa mudar: em vez de acrescentar a expansão à pergunta (que dilui o conceito principal, Q12 e Q24), buscar pela pergunta original **e** pela expansão e fundir as duas listas. Assim a expansão acrescenta candidatos sem tirar os da pergunta.
 3. A cobertura é o limite: jargão novo ("pediu as contas", "rebaixar") passa direto. Em produção, o glossário cresce com o uso de cada empresa; a alternativa automática é a reescrita da pergunta pelo LLM.
 4. O gargalo seguinte é a leitura do modelo de 4B (Q25, V08, V14, V22, V23).
+
+### Glossário com busca separada e fusão (para medir)
+
+Mesmos comandos da rodada anterior, mudando o prefixo dos arquivos para comparar:
+
+```bash
+for c in desenvolvimento validacao; do
+  curl -s -X POST "http://localhost:8080/api/avaliacao/recuperacao?k=5&conjunto=$c&expansao=true" > target/fusao-recuperacao-$c.json
+done
+curl -s -X POST "http://localhost:8080/api/avaliacao/respostas?k=5&conjunto=desenvolvimento" > target/fusao-respostas-desenvolvimento.json
+curl -s -X POST "http://localhost:8080/api/avaliacao/respostas?k=5&conjunto=validacao" > target/fusao-respostas-validacao.json
+```

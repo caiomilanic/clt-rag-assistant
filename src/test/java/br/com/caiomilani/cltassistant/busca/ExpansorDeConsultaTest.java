@@ -21,6 +21,7 @@ class ExpansorDeConsultaTest {
         ExpansorDeConsulta.Expansao e = expansor.expandir("Posso adotar a escala 12x36 com o funcionário?");
 
         assertThat(e.termos()).containsExactly("12x36");
+        assertThat(e.expansoes()).containsExactly("doze horas seguidas por trinta e seis horas ininterruptas de descanso");
         assertThat(e.consulta()).isEqualTo("Posso adotar a escala 12x36 com o funcionário?\n"
                 + "doze horas seguidas por trinta e seis horas ininterruptas de descanso.");
     }
@@ -37,6 +38,7 @@ class ExpansorDeConsultaTest {
         ExpansorDeConsulta.Expansao e = expansor.expandir("Qual o prazo para pagar as férias?");
 
         assertThat(e.termos()).isEmpty();
+        assertThat(e.expansoes()).isEmpty();
         assertThat(e.consulta()).isEqualTo("Qual o prazo para pagar as férias?");
     }
 

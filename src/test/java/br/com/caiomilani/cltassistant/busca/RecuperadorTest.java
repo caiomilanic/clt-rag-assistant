@@ -53,4 +53,35 @@ class RecuperadorTest {
                 .isEqualTo("posso | fazer | banco | horas | sem | sindicato | teste");
         assertThat(Recuperador.consultaTextual("? !")).isEmpty();
     }
+
+    /** Caso Q12: a expansão de "almoço" não pode tirar o artigo que a pergunta original já trazia. */
+    @Test
+    void fundirListasMantemOQueAPerguntaOriginalTrazia() {
+        var original = List.of(c("Art. 71", "caput", 0.70), c("Art. 611-A", "III", 0.68), c("Art. 230", "caput", 0.60),
+                c("Art. 235-C", "§ 2º", 0.59), c("Art. 59-A", "caput", 0.58));
+        var expansao = List.of(c("Art. 71", "caput", 0.80), c("Art. 383", "caput", 0.75), c("Art. 382", "caput", 0.74),
+                c("Art. 412", "caput", 0.73), c("Art. 308", "caput", 0.72));
+
+        var r = Recuperador.fundir(Recuperador.fundirListas(List.of(original, expansao)), List.of(),
+                EstrategiaBusca.VETORIAL, 5);
+
+        assertThat(r).extracting(Recuperador.ArtigoRecuperado::referencia).startsWith("Art. 71").contains("Art. 611-A");
+    }
+
+    /** Caso Q23/Q24: o artigo que só a busca da expansão encontra entra no top-k. */
+    @Test
+    void fundirListasTrazOQueSoAExpansaoEncontrou() {
+        var original = List.of(c("Art. 239", "caput", 0.62), c("Art. 73", "§ 1º", 0.61), c("Art. 296", "caput", 0.60),
+                c("Art. 235", "caput", 0.59), c("Art. 234", "caput", 0.58));
+        var expansao12x36 = List.of(c("Art. 59-A", "caput", 0.82), c("Art. 235-F", "caput", 0.70));
+        var expansaoNoturno = List.of(c("Art. 73", "§ 2º", 0.85), c("Art. 381", "caput", 0.70));
+
+        var r = Recuperador.fundir(Recuperador.fundirListas(List.of(original, expansao12x36, expansaoNoturno)),
+                List.of(), EstrategiaBusca.VETORIAL, 5);
+
+        assertThat(r).extracting(Recuperador.ArtigoRecuperado::referencia).contains("Art. 59-A", "Art. 73");
+        // o candidato e o score do Art. 73 vêm da busca pela pergunta original
+        assertThat(r).filteredOn(a -> a.referencia().equals("Art. 73")).first()
+                .satisfies(a -> assertThat(a.dispositivo()).isEqualTo("§ 1º"));
+    }
 }
