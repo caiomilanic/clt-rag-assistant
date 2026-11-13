@@ -2,7 +2,7 @@
 
 > **A labor-law assistant for HR teams that runs entirely on-premise.** It answers questions about Brazilian labor law (CLT), cites the article behind every claim, and never sends a question or document outside the company network.
 
-![Java](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0-6DB33F) ![Spring AI](https://img.shields.io/badge/Spring%20AI-2.0-6DB33F) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17%20%2B%20pgvector-336791) ![Ollama](https://img.shields.io/badge/LLM-Ollama%20local-black) ![Offline](https://img.shields.io/badge/runs-100%25%20offline-blue)
+![Java](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0-6DB33F) ![Spring AI](https://img.shields.io/badge/Spring%20AI-2.0-6DB33F) ![React](https://img.shields.io/badge/React-19-61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-Vite%20%2B%20Tailwind-3178C6) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17%20%2B%20pgvector-336791) ![Ollama](https://img.shields.io/badge/LLM-Ollama%20local-black) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED) ![Python](https://img.shields.io/badge/Python-tooling-3776AB) ![Offline](https://img.shields.io/badge/runs-100%25%20offline-blue)
 
 ![Demo: a question in HR jargon answered with clickable citations, a direct search in the CLT, and an out-of-scope question refused](docs/img/demo.gif)
 
