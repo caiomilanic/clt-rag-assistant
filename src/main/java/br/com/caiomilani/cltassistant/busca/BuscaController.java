@@ -37,12 +37,14 @@ public class BuscaController {
     public List<Resultado> buscar(@RequestParam @NotBlank String q,
                                   @RequestParam(defaultValue = "5") @Min(1) @Max(20) int k,
                                   @RequestParam(required = false) String granularidade,
-                                  @RequestParam(required = false) String estrategia) {
+                                  @RequestParam(required = false) String estrategia,
+                                  @RequestParam(required = false) Boolean expansao) {
         var g = Recuperador.granularidade(granularidade);
         var e = Recuperador.estrategia(estrategia);
         return recuperador.buscar(q, k,
                         g != null ? g : recuperador.granularidadePadrao(),
-                        e != null ? e : recuperador.estrategiaPadrao())
+                        e != null ? e : recuperador.estrategiaPadrao(),
+                        expansao != null ? expansao : recuperador.expansaoPadrao())
                 .stream().map(BuscaController::paraResultado).toList();
     }
 

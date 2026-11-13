@@ -41,9 +41,9 @@ public class AvaliacaoController {
             @RequestParam(defaultValue = "5") @Min(1) @Max(20) int k,
             @RequestParam(required = false) String granularidade,
             @RequestParam(required = false) String estrategia,
-            @RequestParam(defaultValue = EvalSetRepositorio.DESENVOLVIMENTO) @Pattern(regexp = CONJUNTOS) String conjunto)
-            throws IOException {
-        return recuperacao.avaliar(k, granularidade(granularidade), estrategia(estrategia), conjunto);
+            @RequestParam(defaultValue = EvalSetRepositorio.DESENVOLVIMENTO) @Pattern(regexp = CONJUNTOS) String conjunto,
+            @RequestParam(required = false) Boolean expansao) throws IOException {
+        return recuperacao.avaliar(k, granularidade(granularidade), estrategia(estrategia), conjunto, expansao(expansao));
     }
 
     /**
@@ -55,14 +55,18 @@ public class AvaliacaoController {
             @RequestParam(defaultValue = "5") @Min(1) @Max(10) int k,
             @RequestParam(required = false) String granularidade,
             @RequestParam(required = false) String estrategia,
-            @RequestParam(defaultValue = EvalSetRepositorio.DESENVOLVIMENTO) @Pattern(regexp = CONJUNTOS) String conjunto)
-            throws IOException {
-        return respostas.avaliar(k, granularidade(granularidade), estrategia(estrategia), conjunto);
+            @RequestParam(defaultValue = EvalSetRepositorio.DESENVOLVIMENTO) @Pattern(regexp = CONJUNTOS) String conjunto,
+            @RequestParam(required = false) Boolean expansao) throws IOException {
+        return respostas.avaliar(k, granularidade(granularidade), estrategia(estrategia), conjunto, expansao(expansao));
     }
 
     private Granularidade granularidade(String valor) {
         Granularidade g = Recuperador.granularidade(valor);
         return g != null ? g : recuperador.granularidadePadrao();
+    }
+
+    private boolean expansao(Boolean valor) {
+        return valor != null ? valor : recuperador.expansaoPadrao();
     }
 
     private EstrategiaBusca estrategia(String valor) {

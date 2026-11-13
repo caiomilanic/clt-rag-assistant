@@ -38,7 +38,7 @@ public class AvaliacaoRespostasService {
                                     List<String> recuperados, List<String> citados, List<String> citadosForaDosTrechos,
                                     List<VerificadorDeCitacoes.Problema> problemasDeDispositivo,
                                     boolean encontrou, boolean acertoCitacao, long latenciaMs, Integer tokensSaida,
-                                    String resposta, String respostaOriginal) {
+                                    String resposta, String respostaOriginal, List<String> termosGlossario) {
     }
 
     /**
@@ -50,25 +50,30 @@ public class AvaliacaoRespostasService {
      * @param recusasCorretas        perguntas fora do escopo em que o sistema recusou sem citar
      * @param recusasIndevidas       perguntas válidas em que o sistema disse "não encontrei"
      */
-    public record Relatorio(String versaoEval, int k, String granularidade, String estrategia, int perguntas,
+    public record Relatorio(String versaoEval, int k, String granularidade, String estrategia, boolean expansao,
+                            int perguntas,
                             double citacao,
                             int respostasComCitacaoForaDosTrechos, int respostasComProblemaDeDispositivo,
                             String recusasCorretas, int recusasIndevidas,
                             long latenciaMediaMs, long latenciaMaximaMs, List<ResultadoPergunta> resultados) {
     }
 
-    public Relatorio avaliar(int k, Granularidade granularidade, EstrategiaBusca estrategia) throws IOException {
-        return avaliar(k, granularidade, estrategia, EvalSetRepositorio.DESENVOLVIMENTO);
+    public Relatorio avaliar(int k, Granularidade granularidade, EstrategiaBusca estrategia, boolean expandir)
+            throws IOException {
+        return avaliar(k, granularidade, estrategia, EvalSetRepositorio.DESENVOLVIMENTO, expandir);
     }
 
-    /** @param conjunto conjunto de perguntas: desenvolvimento ou validacao (ver {@link EvalSetRepositorio}) */
-    public Relatorio avaliar(int k, Granularidade granularidade, EstrategiaBusca estrategia, String conjunto)
-            throws IOException {
+    /**
+     * @param conjunto conjunto de perguntas: desenvolvimento ou validacao (ver {@link EvalSetRepositorio})
+     * @param expandir aplica o glossário RH → lei na consulta (D22)
+     */
+    public Relatorio avaliar(int k, Granularidade granularidade, EstrategiaBusca estrategia, String conjunto,
+                             boolean expandir) throws IOException {
         EvalSet eval = evalSet.carregar(conjunto);
         List<ResultadoPergunta> resultados = new ArrayList<>();
 
         for (EvalSet.Pergunta p : eval.perguntas()) {
-            RagService.Resposta r = rag.perguntar(p.pergunta(), k, granularidade, estrategia);
+            RagService.Resposta r = rag.perguntar(p.pergunta(), k, granularidade, estrategia, expandir);
             List<String> citados = r.citacao().citados();
             boolean acerto = p.foraDoEscopo()
                     ? !r.encontrou() && citados.isEmpty()
@@ -77,7 +82,7 @@ public class AvaliacaoRespostasService {
                     r.fontes().stream().map(f -> f.referencia().replace("Art. ", "")).toList(),
                     citados, r.citacao().foraDosTrechos(), r.citacao().problemasDeDispositivo(), r.encontrou(), acerto,
                     r.metricas().latenciaTotalMs(), r.metricas().tokensSaida(), r.resposta(),
-                    r.citacao().respostaOriginal()));
+                    r.citacao().respostaOriginal(), r.metricas().termosGlossario()));
         }
 
         int total = resultados.size();
@@ -95,7 +100,7 @@ public class AvaliacaoRespostasService {
         long latenciaMaxima = resultados.stream().map(ResultadoPergunta::latenciaMs)
                 .max(Comparator.naturalOrder()).orElse(0L);
 
-        return new Relatorio(eval.versao(), k, granularidade.valor(), estrategia.name().toLowerCase(), total,
+        return new Relatorio(eval.versao(), k, granularidade.valor(), estrategia.name().toLowerCase(), expandir, total,
                 total == 0 ? 0 : Math.round(1000.0 * acertos / total) / 1000.0,
                 comCitacaoFora, comProblemaDeDispositivo, recusasCorretas + "/" + foraDoEscopo, recusasIndevidas,
                 latenciaMedia, latenciaMaxima, resultados);

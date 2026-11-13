@@ -49,6 +49,10 @@ app:
     # Padrão escolhido pela medição de 2026-11-12: dispositivo + vetorial = 100% no top-5 (D18).
     granularidade: ${BUSCA_GRANULARIDADE:dispositivo}
     estrategia: ${BUSCA_ESTRATEGIA:vetorial}
+    # Expansão da consulta com o glossário RH -> lei (D22). Desligável por pergunta nas avaliações (?expansao=false).
+    expansao: ${BUSCA_EXPANSAO:true}
+    # Relativo à raiz do projeto; sem o arquivo, a busca roda sem expansão.
+    glossario: ${BUSCA_GLOSSARIO:glossario/rh-clt.json}
   llm:
     model-label: ${OLLAMA_MODEL:qwen3:4b-instruct-2507-q4_K_M}
 

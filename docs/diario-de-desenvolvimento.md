@@ -237,3 +237,11 @@ O detector de citações foi ajustado com base nessa rodada ("artigo 617" por ex
 - **Falhas do modelo com a busca certa:** V08 usou o Art. 311 (jornalistas) no lugar do 29; V22 atribuiu ao 611-A o que está no 611-B; V23 caiu na armadilha da estabilidade da gestante.
 - **Bugs achados:** "art. 10 do Ato das Disposições Constitucionais Transitórias" contava como citação da CLT fora dos trechos; "cento e vinte" virava 20 no verificador. Corrigidos com testes (o verificador agora reconhece números por extenso até 999). Rodado de novo nas três rodadas gravadas: nada mudou nas anteriores.
 - **Leitura:** o conjunto de desenvolvimento, escrito com a lei aberta, compartilhava o vocabulário dela. O gargalo real é a distância entre o jeito que o RH pergunta e o jeito que a lei escreve.
+
+## 2026-11-13: Passo 6e, glossário RH → lei
+
+- **Ordem, para a medição sair limpa:** (1) V01, V03, V07, V13 e V21 passaram para o desenvolvimento (Q22 a Q26) e entraram V24 a V28 na validação, escritas e congeladas antes do glossário; (2) o glossário foi montado só com termos das perguntas de desenvolvimento; (3) medir com e sem.
+- **Conferência automática:** cada termo do glossário aparece em alguma pergunta de desenvolvimento e em nenhuma de validação. "presencial" saiu por não aparecer em nenhuma.
+- **Código:** `ExpansorDeConsulta` (normaliza acentos e maiúsculas, palavra inteira, a mesma expansão entra uma vez só); `Recuperador` busca pela consulta expandida; o LLM recebe a pergunta original. `?expansao=true|false` na busca e nas avaliações; `metricas.termosGlossario` na resposta.
+- **Testes:** `ExpansorDeConsultaTest` (5). O stub de log ganhou `warn`.
+- **Expectativa registrada antes de medir (D22):** ganho em Q22 a Q26 e efeito quase nulo na validação.

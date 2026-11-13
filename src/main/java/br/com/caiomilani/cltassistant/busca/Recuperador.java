@@ -27,6 +27,7 @@ import br.com.caiomilani.cltassistant.ingestao.Granularidade;
  *       e o contexto do LLM são por artigo ("small-to-big").</li>
  *   <li><b>Estratégia</b>: só vetorial, ou híbrida: vetorial + busca textual do Postgres
  *       ({@code to_tsvector('portuguese', …)}), combinadas por Reciprocal Rank Fusion.</li>
+ *   <li><b>Expansão</b>: termos de RH da pergunta ganham o vocabulário da lei antes da busca (D22).</li>
  * </ul>
  */
 @Service
@@ -40,16 +41,22 @@ public class Recuperador {
     private final String tabela;
     private final Granularidade granularidadePadrao;
     private final EstrategiaBusca estrategiaPadrao;
+    private final ExpansorDeConsulta expansor;
+    private final boolean expansaoPadrao;
 
     public Recuperador(VectorStore vectorStore, JdbcTemplate jdbc,
                        @Value("${spring.ai.vectorstore.pgvector.table-name}") String tabela,
                        @Value("${app.busca.granularidade}") String granularidade,
-                       @Value("${app.busca.estrategia}") String estrategia) {
+                       @Value("${app.busca.estrategia}") String estrategia,
+                       ExpansorDeConsulta expansor,
+                       @Value("${app.busca.expansao}") boolean expansao) {
         this.vectorStore = vectorStore;
         this.jdbc = jdbc;
         this.tabela = tabela;
         this.granularidadePadrao = granularidade(granularidade);
         this.estrategiaPadrao = estrategia(estrategia);
+        this.expansor = expansor;
+        this.expansaoPadrao = expansao;
     }
 
     /**
@@ -75,15 +82,30 @@ public class Recuperador {
         return estrategiaPadrao;
     }
 
+    public boolean expansaoPadrao() {
+        return expansaoPadrao;
+    }
+
+    /** Consulta que a busca vai usar para a pergunta, com os termos do glossário aplicados (ou não). */
+    public ExpansorDeConsulta.Expansao consulta(String pergunta, boolean expandir) {
+        return expandir ? expansor.expandir(pergunta) : new ExpansorDeConsulta.Expansao(pergunta, List.of());
+    }
+
     public List<ArtigoRecuperado> buscar(String pergunta, int k) {
         return buscar(pergunta, k, granularidadePadrao, estrategiaPadrao);
     }
 
     public List<ArtigoRecuperado> buscar(String pergunta, int k, Granularidade granularidade, EstrategiaBusca estrategia) {
+        return buscar(pergunta, k, granularidade, estrategia, expansaoPadrao);
+    }
+
+    public List<ArtigoRecuperado> buscar(String pergunta, int k, Granularidade granularidade, EstrategiaBusca estrategia,
+                                         boolean expandir) {
+        String consulta = consulta(pergunta, expandir).consulta();
         int candidatos = Math.max(k * 4, 20);
-        List<Candidato> vetorial = buscaVetorial(pergunta, candidatos, granularidade);
+        List<Candidato> vetorial = buscaVetorial(consulta, candidatos, granularidade);
         List<Candidato> textual = estrategia == EstrategiaBusca.HIBRIDA
-                ? buscaTextual(pergunta, candidatos, granularidade)
+                ? buscaTextual(consulta, candidatos, granularidade)
                 : List.of();
         return fundir(vetorial, textual, estrategia, k);
     }

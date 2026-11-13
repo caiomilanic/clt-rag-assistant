@@ -221,3 +221,20 @@ python3 -I tools/eval/build_eval.py <artigos.json> corpus/clt/DEL5452.html docs/
 **5. O verificador ajudou pouco aqui.** Marcou só a V22, e o rebaixamento manteve o artigo errado ("Art. 611-A"): ele corrige o dispositivo, não o artigo. A rodada também revelou dois bugs nos detectores, corrigidos sem mudar o comportamento da busca nem do prompt: "art. 10 do Ato das Disposições Constitucionais Transitórias" contava como artigo da CLT fora dos trechos (V23), e "cento e vinte" gerava o número 20 (V22).
 
 **Conclusão:** os números do conjunto de desenvolvimento estavam otimistas, como a D21 temia. O maior gargalo é a distância entre o vocabulário do analista e o da lei; o segundo, a leitura do modelo de 4B. Próximos passos candidatos: expansão da pergunta com glossário RH → lei, e comparação com um modelo maior. Pela regra da D21, o que for ajustado por causa dessas falhas leva as perguntas correspondentes para o desenvolvimento, e entram perguntas novas na validação.
+
+## Conjuntos depois da D22 (2026-11-13)
+
+- **Desenvolvimento 0.3** (29 perguntas): as 24 originais + Q22 a Q26, que vieram da validação (V01, V03, V07, V13, V21) porque o glossário foi desenhado olhando para elas.
+- **Validação 0.2** (26 perguntas): as 21 que ficaram + V24 a V28, novas, escritas e congeladas antes do glossário, em linguagem de RH que ele não cobre.
+
+Medir com e sem o glossário:
+
+```bash
+for c in desenvolvimento validacao; do
+  for e in true false; do
+    curl -s -X POST "http://localhost:8080/api/avaliacao/recuperacao?k=5&conjunto=$c&expansao=$e" > target/glossario-recuperacao-$c-$e.json
+  done
+done
+curl -s -X POST "http://localhost:8080/api/avaliacao/respostas?k=5&conjunto=desenvolvimento" > target/glossario-respostas-desenvolvimento.json
+curl -s -X POST "http://localhost:8080/api/avaliacao/respostas?k=5&conjunto=validacao" > target/glossario-respostas-validacao.json
+```

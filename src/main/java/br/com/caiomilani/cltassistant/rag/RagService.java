@@ -56,8 +56,9 @@ public class RagService {
                           List<VerificadorDeCitacoes.Problema> problemasDeDispositivo, String respostaOriginal) {
     }
 
+    /** @param termosGlossario termos de RH da pergunta que ganharam o vocabulário da lei na busca (D22) */
     public record Metricas(String modelo, long latenciaBuscaMs, long latenciaLlmMs, long latenciaTotalMs,
-                           Integer tokensEntrada, Integer tokensSaida) {
+                           Integer tokensEntrada, Integer tokensSaida, List<String> termosGlossario) {
     }
 
     public record Resposta(String pergunta, String resposta, boolean encontrou, List<Fonte> fontes,
@@ -69,8 +70,13 @@ public class RagService {
     }
 
     public Resposta perguntar(String pergunta, int k, Granularidade granularidade, EstrategiaBusca estrategia) {
+        return perguntar(pergunta, k, granularidade, estrategia, recuperador.expansaoPadrao());
+    }
+
+    public Resposta perguntar(String pergunta, int k, Granularidade granularidade, EstrategiaBusca estrategia,
+                              boolean expandir) {
         long inicio = System.nanoTime();
-        List<Recuperador.ArtigoRecuperado> trechos = recuperador.buscar(pergunta, k, granularidade, estrategia);
+        List<Recuperador.ArtigoRecuperado> trechos = recuperador.buscar(pergunta, k, granularidade, estrategia, expandir);
         long fimBusca = System.nanoTime();
 
         ChatResponse chat = chatClient.prompt()
@@ -95,7 +101,8 @@ public class RagService {
                 (fim - fimBusca) / 1_000_000,
                 (fim - inicio) / 1_000_000,
                 uso != null ? uso.getPromptTokens() : null,
-                uso != null ? uso.getCompletionTokens() : null);
+                uso != null ? uso.getCompletionTokens() : null,
+                recuperador.consulta(pergunta, expandir).termos());
 
         // Recusa = a resposta começa com a frase combinada, ou a contém sem citar nenhum artigo.
         // (O modelo às vezes responde citando artigos e acrescenta a frase de recusa no fim.)

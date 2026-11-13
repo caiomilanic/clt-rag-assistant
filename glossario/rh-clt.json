@@ -1,0 +1,101 @@
+{
+  "descricao": "Glossário RH -> CLT usado para expandir a consulta da busca (D22). Cada entrada liga termos que o analista usa ao vocabulário da lei. Regra desta versão: só termos que aparecem nas perguntas do conjunto de DESENVOLVIMENTO (e variações de grafia deles), para que o conjunto de validação meça o que um glossário construído assim alcança. Em produção, cada empresa acrescenta os próprios termos.",
+  "entradas": [
+    {
+      "termos": [
+        "12x36",
+        "12 x 36",
+        "12 por 36",
+        "doze por trinta e seis"
+      ],
+      "expansao": "horário de trabalho de doze horas seguidas por trinta e seis horas ininterruptas de descanso",
+      "origem": "Q23, Q24"
+    },
+    {
+      "termos": [
+        "22h",
+        "22 h",
+        "turno da noite",
+        "adicional noturno",
+        "hora reduzida"
+      ],
+      "expansao": "trabalho noturno executado entre as 22 horas de um dia e as 5 horas do dia seguinte; hora do trabalho noturno; remuneração do trabalho noturno superior à do diurno",
+      "origem": "Q22, Q24"
+    },
+    {
+      "termos": [
+        "home office",
+        "homeoffice"
+      ],
+      "expansao": "teletrabalho ou trabalho remoto, prestação de serviços fora das dependências do empregador",
+      "origem": "Q25"
+    },
+    {
+      "termos": [
+        "escritorio"
+      ],
+      "expansao": "regime presencial; alteração entre regime presencial e de teletrabalho",
+      "origem": "Q25"
+    },
+    {
+      "termos": [
+        "diploma",
+        "salario alto"
+      ],
+      "expansao": "empregado portador de diploma de nível superior que perceba salário mensal igual ou superior a duas vezes o limite máximo dos benefícios do Regime Geral de Previdência Social; livre estipulação das relações contratuais",
+      "origem": "Q26"
+    },
+    {
+      "termos": [
+        "almoco"
+      ],
+      "expansao": "intervalo para repouso ou alimentação",
+      "origem": "Q11, Q12, Q13"
+    },
+    {
+      "termos": [
+        "vender parte das ferias",
+        "vender as ferias",
+        "vender ferias"
+      ],
+      "expansao": "converter um terço do período de férias em abono pecuniário",
+      "origem": "Q04"
+    },
+    {
+      "termos": [
+        "atrasos",
+        "minutos no ponto"
+      ],
+      "expansao": "variações de horário no registro de ponto",
+      "origem": "Q15"
+    },
+    {
+      "termos": [
+        "demissao por acordo"
+      ],
+      "expansao": "extinção do contrato de trabalho por acordo entre empregado e empregador",
+      "origem": "Q17"
+    },
+    {
+      "termos": [
+        "verbas rescisorias"
+      ],
+      "expansao": "pagamento das parcelas constantes do instrumento de rescisão ou recibo de quitação",
+      "origem": "Q16"
+    },
+    {
+      "termos": [
+        "casar"
+      ],
+      "expansao": "deixar de comparecer ao serviço sem prejuízo do salário em virtude de casamento",
+      "origem": "Q19"
+    },
+    {
+      "termos": [
+        "fim de um expediente"
+      ],
+      "expansao": "período mínimo de descanso entre duas jornadas de trabalho",
+      "origem": "Q14"
+    }
+  ]
+}

@@ -33,25 +33,28 @@ public class AvaliacaoRecuperacaoService {
      */
     public record ResultadoPergunta(String id, String tipo, String pergunta, List<String> esperados,
                                     List<String> recuperados, List<Integer> posicoes, boolean acerto,
-                                    Double scoreTop1) {
+                                    Double scoreTop1, List<String> termosGlossario) {
     }
 
     /**
      * @param acertoRecuperacao fração das perguntas (exceto fora do escopo) com todos os artigos esperados no top-k
      * @param mrr               média de 1/posição do primeiro artigo esperado (1.0 = sempre em primeiro)
      */
-    public record Relatorio(String versaoEval, int k, String granularidade, String estrategia,
+    public record Relatorio(String versaoEval, int k, String granularidade, String estrategia, boolean expansao,
                             int perguntasAvaliadas, int acertos,
                             double acertoRecuperacao, double mrr, List<ResultadoPergunta> resultados) {
     }
 
     public Relatorio avaliar(int k, Granularidade granularidade, EstrategiaBusca estrategia) throws IOException {
-        return avaliar(k, granularidade, estrategia, EvalSetRepositorio.DESENVOLVIMENTO);
+        return avaliar(k, granularidade, estrategia, EvalSetRepositorio.DESENVOLVIMENTO, recuperador.expansaoPadrao());
     }
 
-    /** @param conjunto conjunto de perguntas: desenvolvimento ou validacao (ver {@link EvalSetRepositorio}) */
-    public Relatorio avaliar(int k, Granularidade granularidade, EstrategiaBusca estrategia, String conjunto)
-            throws IOException {
+    /**
+     * @param conjunto conjunto de perguntas: desenvolvimento ou validacao (ver {@link EvalSetRepositorio})
+     * @param expandir aplica o glossário RH → lei na consulta (D22)
+     */
+    public Relatorio avaliar(int k, Granularidade granularidade, EstrategiaBusca estrategia, String conjunto,
+                             boolean expandir) throws IOException {
         EvalSet eval = evalSet.carregar(conjunto);
 
         List<ResultadoPergunta> resultados = new ArrayList<>();
@@ -60,7 +63,7 @@ public class AvaliacaoRecuperacaoService {
         double somaReciprocos = 0;
 
         for (EvalSet.Pergunta p : eval.perguntas()) {
-            List<Recuperador.ArtigoRecuperado> docs = recuperador.buscar(p.pergunta(), k, granularidade, estrategia);
+            List<Recuperador.ArtigoRecuperado> docs = recuperador.buscar(p.pergunta(), k, granularidade, estrategia, expandir);
             List<String> recuperados = docs.stream()
                     .map(d -> d.referencia().replace("Art. ", ""))
                     .toList();
@@ -80,12 +83,12 @@ public class AvaliacaoRecuperacaoService {
                 somaReciprocos += primeira == 0 ? 0 : 1.0 / primeira;
             }
             resultados.add(new ResultadoPergunta(p.id(), p.tipo(), p.pergunta(), p.artigosEsperados(),
-                    recuperados, posicoes, acerto, scoreTop1));
+                    recuperados, posicoes, acerto, scoreTop1, recuperador.consulta(p.pergunta(), expandir).termos()));
         }
 
         double taxa = avaliadas == 0 ? 0 : (double) acertos / avaliadas;
         double mrr = avaliadas == 0 ? 0 : somaReciprocos / avaliadas;
-        return new Relatorio(eval.versao(), k, granularidade.valor(), estrategia.name().toLowerCase(),
+        return new Relatorio(eval.versao(), k, granularidade.valor(), estrategia.name().toLowerCase(), expandir,
                 avaliadas, acertos, arredondar(taxa), arredondar(mrr), resultados);
     }
 
