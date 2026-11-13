@@ -139,3 +139,11 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/smoke/chat `
 
 ### `model "bge-m3" not found`
 **Solução:** `ollama pull bge-m3`.
+
+## Docker Compose (stack completa)
+
+- **Porta 8080 ocupada:** a aplicação rodando pelo IntelliJ usa a mesma porta. Pare-a antes do `docker compose up`, ou suba o Compose em outra porta com `APP_PORT=8081 docker compose up -d`.
+- **Primeira subida demorada:** baixa as imagens e os modelos (cerca de 4 GB) e indexa a CLT. Acompanhe com `docker compose logs -f modelos app`. A aplicação fica pronta quando o log mostrar "CLT indexada" (ou "Base já indexada").
+- **GPU não usada:** confira com `docker exec cltrag-ollama ollama ps` (coluna PROCESSOR). É preciso subir com `-f docker-compose.gpu.yml` e ter o driver NVIDIA atualizado; no Windows, o Docker Desktop com WSL 2.
+- **Ollama nativo e o do Compose ao mesmo tempo:** não conflitam (o do Compose não publica porta), mas disputam a VRAM. Feche o Ollama nativo (ícone na bandeja) antes de subir o Compose com GPU.
+- **Tag de imagem inexistente:** as versões ficam em variáveis (`OLLAMA_VERSION`) e argumentos de build (`MAVEN_IMAGE`, `JRE_IMAGE` no `Dockerfile`).

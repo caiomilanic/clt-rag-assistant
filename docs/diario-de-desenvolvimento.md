@@ -274,3 +274,18 @@ O detector de citações foi ajustado com base nessa rodada ("artigo 617" por ex
 - Busca: desenvolvimento 96,2% (25/26), MRR 0,689, exatamente como na simulação; validação 87,0%.
 - Respostas: desenvolvimento 21/26 fiéis; validação 13/23. Mesmos totais, perguntas diferentes: a variação do modelo entre execuções é do mesmo tamanho dos ganhos que estamos tentando medir.
 - Próximo gargalo: leitura do modelo (testar um modelo maior e reduzir a variação) e cobertura do glossário.
+
+## 2026-11-13: Passos 7 e 9, interface e Docker Compose
+
+- **Docker Compose completo:** `postgres`, `ollama`, `modelos` (pull único) e `app` (Dockerfile multi-stage). GPU por override. Ingestão automática na primeira subida (`IngestaoInicial`). Validado com `docker compose config`; a primeira subida real é na máquina do Caio (o ambiente do Claude não tem o serviço do Docker).
+- **Interface:** `src/main/resources/static/index.html`, sem dependências externas. Testada no Chromium com uma resposta real gravada (Q22 da avaliação final), em desktop, celular e modo escuro, sem erros no console. O screenshot do README saiu daí.
+- **API:** `Fonte` ganhou o texto do artigo (para a interface abrir ao clicar na citação). A mensagem do verificador passou a concordar em número ("não aparece" / "não aparecem").
+- **README:** reescrito de 400 para cerca de 160 linhas, com o início rápido pelo Docker no topo. Configuração do modelo, `temperature` e desempenho foram para `docs/model-and-performance.md`.
+- Decisão na D23.
+
+### Interface em React, a partir do layout do Caio
+- O Caio não gostou da página única e mandou um layout de referência (workspace estilo ferramenta de pesquisa jurídica). Decidido: React + Vite + Tailwind, com Assistente, Pesquisa na CLT e Documentos ("em breve").
+- O registro do npm está bloqueado no ambiente do Claude. Para testar, o código foi compilado com o esbuild e a API JavaScript do Tailwind 4 instalados localmente, com o `lucide-react` substituído pelos mesmos ícones Lucide do `react-icons`. Testado no Chromium contra uma API simulada com respostas reais gravadas nas avaliações: chat com citações clicáveis, recusa, pesquisa, Documentos, persistência das conversas após recarregar, e menu no celular. Nenhum erro no console.
+- Sem os tipos do React no ambiente, o `tsc` não roda aqui: o build usa só `vite build`, e a checagem de tipos fica em `npm run typecheck`.
+- O contexto dos artigos vem em maiúsculas do parser ("TÍTULO II - DAS NORMAS…"); a interface formata como "Título II · Das normas gerais… › Capítulo II · …".
+- **Bug do "Nova conversa" (achado pelo Caio na primeira subida real):** o estado do envio ficava no componente do chat, que era recriado quando a primeira pergunta criava a conversa. O indicador de carregamento sumia no meio da requisição e, se o usuário clicasse em "Nova conversa" antes da resposta chegar, a resposta o puxava de volta para a conversa antiga. Correção: o envio passou para o `App`, com a pergunta pendente registrada por conversa; a resposta é gravada na conversa certa sem mudar a tela atual.

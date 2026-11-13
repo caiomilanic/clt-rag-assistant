@@ -30,7 +30,7 @@ public class BuscaController {
 
     public record Resultado(String referencia, String documento, String contexto, String link,
                             String dispositivo, Double scoreVetorial, Integer posicaoVetorial,
-                            Integer posicaoTextual, String trecho) {
+                            Integer posicaoTextual, String trecho, String texto) {
     }
 
     @GetMapping
@@ -52,6 +52,6 @@ public class BuscaController {
         String texto = a.texto() == null ? "" : a.texto();
         return new Resultado(a.referencia(), a.documento(), a.contexto(), a.link(), a.dispositivo(),
                 a.scoreVetorial(), a.posicaoVetorial(), a.posicaoTextual(),
-                texto.length() > 400 ? texto.substring(0, 400) + "…" : texto);
+                texto.length() > 400 ? texto.substring(0, 400) + "…" : texto, texto);
     }
 }

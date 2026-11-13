@@ -1,0 +1,13 @@
+target/
+.git/
+.idea/
+*.iml
+.vscode/
+.env
+tools/
+docs/
+!docs/eval/eval-set.json
+!docs/eval/validacao-set.json
+frontend/node_modules/
+frontend/dist/
+src/main/resources/static/

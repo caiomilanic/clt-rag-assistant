@@ -37,6 +37,9 @@ spring:
         index-type: HNSW
 
 app:
+  ingestao:
+    # Indexa a CLT ao subir, se a base estiver vazia. Ligado no Docker Compose (APP_INGESTAO_AUTOMATICA=true).
+    automatica: ${APP_INGESTAO_AUTOMATICA:false}
   corpus:
     # Relativo ao diretório de onde a aplicação é iniciada (a raiz do projeto).
     clt: ${CORPUS_CLT:corpus/clt/DEL5452.html}

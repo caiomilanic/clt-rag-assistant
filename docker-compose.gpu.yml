@@ -1,0 +1,12 @@
+# Acrescenta a GPU NVIDIA ao Ollama. Requer o driver NVIDIA e, no Windows, o Docker Desktop com WSL 2
+# (no Linux, o NVIDIA Container Toolkit).
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

@@ -162,7 +162,8 @@ public final class VerificadorDeCitacoes {
                     .filter(n -> !daPergunta.contains(n)).toList();
             if (!ausentes.isEmpty()) {
                 problemas.add(new Problema(c.rotulo(), "numero_ausente",
-                        "A frase menciona " + String.join(", ", ausentes) + ", que não aparece(m) em " + c.rotulo()));
+                        "A frase menciona " + String.join(", ", ausentes)
+                        + (ausentes.size() == 1 ? ", que não aparece em " : ", que não aparecem em ") + c.rotulo()));
             }
         }
         return problemas;

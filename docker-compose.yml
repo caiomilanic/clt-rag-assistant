@@ -1,3 +1,11 @@
+# Sobe o assistente inteiro, offline depois do primeiro download dos modelos:
+#   docker compose up -d                                           (CPU)
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d   (GPU NVIDIA)
+# Interface: http://localhost:8080
+#
+# Na primeira subida: baixa os modelos (~3 GB) e indexa a CLT (alguns minutos em CPU).
+# Nas seguintes, sobe em segundos: modelos e índice ficam em volumes.
+
 services:
   postgres:
     image: pgvector/pgvector:pg17
@@ -7,6 +15,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-cltrag}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cltrag}
     ports:
+      # Exposto só para desenvolvimento local (rodar a aplicação fora do Docker).
       - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -17,17 +26,55 @@ services:
       timeout: 3s
       retries: 10
 
-  # Opcional. Recomendado é rodar o Ollama nativo na máquina (usa GPU / Apple Silicon
-  # direto). Use este serviço só se preferir tudo em container:
-  #   docker compose --profile ollama-docker up -d
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:${OLLAMA_VERSION:-0.40.16}
     container_name: cltrag-ollama
-    profiles: ["ollama-docker"]
-    ports:
-      - "11434:11434"
+    # Sem porta publicada: só a aplicação fala com ele, pela rede interna do Compose.
+    # (Assim também não conflita com um Ollama instalado na máquina, na 11434.)
     volumes:
       - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Baixa os modelos uma vez (ficam no volume "ollama") e termina.
+  modelos:
+    image: ollama/ollama:${OLLAMA_VERSION:-0.40.16}
+    container_name: cltrag-modelos
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:4b-instruct-2507-q4_K_M}
+      OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-bge-m3}
+    entrypoint: ["/bin/sh", "-c", "ollama pull \"$$OLLAMA_MODEL\" && ollama pull \"$$OLLAMA_EMBEDDING_MODEL\""]
+    restart: "no"
+
+  app:
+    build: .
+    image: clt-rag-assistant:local
+    container_name: cltrag-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      modelos:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-cltrag}
+      POSTGRES_USER: ${POSTGRES_USER:-cltrag}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cltrag}
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:4b-instruct-2507-q4_K_M}
+      OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-bge-m3}
+      # Indexa a CLT na primeira subida, se a base estiver vazia.
+      APP_INGESTAO_AUTOMATICA: "true"
+    ports:
+      - "${APP_PORT:-8080}:8080"
 
 volumes:
   pgdata:

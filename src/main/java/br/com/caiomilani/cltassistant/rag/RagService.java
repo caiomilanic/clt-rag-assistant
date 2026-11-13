@@ -39,8 +39,9 @@ public class RagService {
      * @param dispositivo dispositivo que trouxe o artigo na busca (ex.: "§ 5º"), ou "artigo"
      * @param score       similaridade vetorial; null quando o artigo veio só da busca textual
      */
+    /** @param texto texto do artigo inteiro, como foi entregue ao modelo (a interface mostra ao clicar na citação) */
     public record Fonte(String referencia, String documento, String contexto, String link,
-                        String dispositivo, Double score) {
+                        String dispositivo, Double score, String texto) {
     }
 
     /**
@@ -117,6 +118,7 @@ public class RagService {
     }
 
     private static Fonte fonte(Recuperador.ArtigoRecuperado a) {
-        return new Fonte(a.referencia(), a.documento(), a.contexto(), a.link(), a.dispositivo(), a.scoreVetorial());
+        return new Fonte(a.referencia(), a.documento(), a.contexto(), a.link(), a.dispositivo(), a.scoreVetorial(),
+                a.texto());
     }
 }
