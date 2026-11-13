@@ -36,11 +36,11 @@
 
 | Criterion | Target | Status |
 |---|---|---|
-| Every answer cites its source, or explicitly says nothing was found | 100% of eval answers | **100%** (24/24) with provision-level search (was 91.7%) |
-| The expected article is among the retrieved excerpts | ≥ 90% of eval questions (top-5) | **100%** (21/21) with provision-level search, up from 90.5%; hybrid search was measured and rejected ([comparison](docs/eval/README.md#comparação-de-configurações-de-busca-2026-11-12)) |
-| The answer says only what the cited excerpts support | 100% of eval answers | **85.7%** (18/21, manual review) + 2 partially correct; up from 81% ([eval notes](docs/eval/README.md#respostas-com-a-busca-por-dispositivo-2026-11-12)) |
+| Every answer cites its source, or explicitly says nothing was found | 100% of eval answers | **100%** (24/24) on the development set; on the validation set, 3/3 out-of-scope refusals but 4 answerable questions refused |
+| The expected article is among the retrieved excerpts | ≥ 90% of eval questions (top-5) | **100%** (21/21) on the development set; **78.3%** (18/23) on the held-out validation set, where HR jargon ("12x36", "home office") misses the legal wording ([validation](docs/eval/README.md#primeira-execução-da-validação-2026-11-13)) |
+| The answer says only what the cited excerpts support | 100% of eval answers | **81%** (17/21) on the development set; **48%** (11/23) on the held-out validation set, plus 5 partially correct (manual review) |
 | No external network calls in the `offline` profile | 0 calls | By design; to be verified in step 9 |
-| Response time on a 6 GB consumer GPU | ≤ 15 s per answer, including retrieval | **1.9 s average, 5.2 s max** across the eval set (down from ~90 s on CPU without RAG; see [performance](#model-choice-and-performance)) |
+| Response time on a 6 GB consumer GPU | ≤ 15 s per answer, including retrieval | **2.6 s average, 5.8 s max** on the validation set (down from ~90 s on CPU without RAG; see [performance](#model-choice-and-performance)) |
 
 ### Non-goals
 
@@ -91,17 +91,21 @@ The made-up answers also **change from run to run and from model to model**. Ask
 
 **The solution:** RAG (*Retrieval-Augmented Generation*). Before answering, the system retrieves the relevant excerpts from a vector database and requires the model to answer **only from them**, citing the source.
 
-**Results so far** (24-question eval set, laptop GPU, everything local):
+**Results so far** (laptop GPU, everything local). The system was tuned on a **development set** of 24 questions; a **held-out validation set** of 26 new questions, frozen before its first run and never used for tuning, measures how much of that generalizes:
 
-| | |
-|---|---|
-| Correct article among the top 5 retrieved | **100%** (was 90.5% before indexing by provision) |
-| Answers citing the expected article (or correctly refusing) | **100%** |
-| Answers fully supported by their excerpts (manual review) | **85.7%** (+2 partially: right rule, missing a condition) |
-| Out-of-scope questions refused | **3/3** |
-| Average response time | **1.9 s** |
+| | Development (24) | **Held-out validation (26)** |
+|---|---|---|
+| Correct article among the top 5 retrieved | 100% | **78.3%** (18/23) |
+| Answers fully supported by their excerpts (manual review) | 81% (17/21) | **48%** (11/23) |
+| Partially supported (right rule, missing a condition or wrong citation) | 3 | 5 |
+| Wrong answers | 1 | 3 |
+| Answerable questions refused | 0 | 4 (3 because retrieval missed the article) |
+| Out-of-scope questions refused | 3/3 | **3/3** |
+| Average response time | 2.5 s | 2.6 s |
 
-Indexing by provision (each paragraph as its own vector, while the LLM still gets the whole article) took retrieval from 90.5% to 100% and fixed the most dangerous failure: a confident "No" built on an unrelated article. Hybrid keyword + vector search was measured too, and **rejected** because it made retrieval worse. The remaining issues are documented, not hidden: the 4B model sometimes leaves out a condition ("up to 6 months") or cites the wrong item number within the right article, and once misread an article it had retrieved ([analysis](docs/eval/README.md#respostas-com-a-busca-por-dispositivo-2026-11-12)).
+**The held-out set exposed what the development set hid.** The development questions were written with the law open, so they shared its vocabulary. The validation questions use HR jargon, and that is where retrieval breaks: "12x36 shift" never reaches "twelve consecutive hours followed by thirty-six" (Art. 59-A), "home office" never reaches "teleworking" (Art. 75-C). When retrieval misses, the model usually **refuses instead of inventing** (3 of 5 misses), which is the safe failure. The other gaps are the 4B model picking the wrong excerpt among the right ones and falling for a trap question (pregnancy job security: the CLT grants it, but the duration is in the Constitution). Next: an HR-to-legal glossary to expand queries, and a larger model ([validation analysis](docs/eval/README.md#primeira-execução-da-validação-2026-11-13)).
+
+Earlier milestones on the development set: indexing by provision (each paragraph as its own vector, while the LLM still gets the whole article) took retrieval from 90.5% to 100%; hybrid keyword + vector search was measured and **rejected** because it made retrieval worse; a deterministic citation verifier now catches wrong paragraph and item numbers and reduces them to the article ([analysis](docs/eval/README.md)).
 
 **First result (retrieval only):** for **90.5%** of the eval questions, the correct CLT article is among the top 5 excerpts retrieved, from 834 articles ingested in 40 seconds on a laptop GPU. Asked *"Qual o prazo para a empresa pagar as férias?"* ("When must the company pay vacation?"), the search returns Art. 145 first, the exact article the model without RAG couldn't cite. The two misses share one cause, documented in the [eval analysis](docs/eval/README.md#resultados).
 

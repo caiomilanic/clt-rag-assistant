@@ -204,6 +204,20 @@ class VerificadorDeCitacoesTest {
     }
 
     @Test
+    void numeroAcimaDeCemPorExtenso() {
+        // V22 (validação): "120" na resposta, "cento e vinte" na lei; e "cento e vinte" não pode virar 20
+        String art611B = """
+                CLT, Art. 611-B
+                Art. 611-B. Constituem objeto ilícito de convenção coletiva ou de acordo coletivo de trabalho, exclusivamente, a supressão ou a redução dos seguintes direitos:
+                XIII - licença-maternidade com a duração mínima de cento e vinte dias;""";
+        String resposta = "Não, a licença-maternidade tem duração mínima de 120 dias, a \"cento e vinte dias\" da lei (Art. 611-B, XIII).";
+
+        assertThat(VerificadorDeCitacoes.verificar(resposta, "Pode reduzir para 90 dias?", Map.of("611-B", art611B)))
+                .isEmpty();
+        assertThat(VerificadorDeCitacoes.porExtenso(120)).containsExactly("cento e vinte");
+    }
+
+    @Test
     void porExtenso() {
         assertThat(VerificadorDeCitacoes.porExtenso(24)).containsExactly("vinte e quatro");
         assertThat(VerificadorDeCitacoes.porExtenso(2)).containsExactly("dois", "duas");

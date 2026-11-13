@@ -41,7 +41,9 @@ app:
     # Relativo ao diretório de onde a aplicação é iniciada (a raiz do projeto).
     clt: ${CORPUS_CLT:corpus/clt/DEL5452.html}
   eval:
+    # Conjunto de desenvolvimento (padrão) e de validação (D21); escolhido por ?conjunto= nas avaliações.
     arquivo: ${EVAL_ARQUIVO:docs/eval/eval-set.json}
+    validacao: ${EVAL_VALIDACAO:docs/eval/validacao-set.json}
   busca:
     # artigo | dispositivo e vetorial | hibrida (D18). Sobrescrevíveis por pergunta na API de busca e nas avaliações.
     # Padrão escolhido pela medição de 2026-11-12: dispositivo + vetorial = 100% no top-5 (D18).

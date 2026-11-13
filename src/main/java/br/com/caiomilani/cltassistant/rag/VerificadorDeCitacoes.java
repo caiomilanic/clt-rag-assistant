@@ -28,7 +28,7 @@ public final class VerificadorDeCitacoes {
     // ("Art. 59, § 6º" virava "59-B, § 6º"). O (?!\\d) faz o papel que o possessivo fazia no número.
     private static final String ARTIGO = "(?i:art(?:igo)?)\\.?\\s*(\\d{1,4})(?!\\d)(?:\\s*[º°])?(?:-([A-Z])(?![\\p{L}]))?(?![-º°])";
     private static final String OUTRA_LEI =
-            "(?!\\s*,?\\s*(?:(?:§\\s*\\d+º?|[IVXLC]+)\\s*,?\\s*)?(?i:d[aoe]s?\\s+(?:Lei|Decreto|Medida|Constitui)))";
+            "(?!\\s*,?\\s*(?:(?:§\\s*\\d+º?|[IVXLC]+)\\s*,?\\s*)?(?i:d[aoe]s?\\s+(?:Lei|Decreto|Medida|Constitui|Ato\\s+das\\s+Disposi|ADCT)))";
     private static final String DISPOSITIVO = "(§\\s*\\d+\\s*º?|§\\s*[IVXLC]+\\b|[IVXLC]+\\b|(?i:par[áa]grafo [úu]nico))";
 
     /** "Art. 130, I", "Art. 134, § 1º", "Art. 487, I e II", "Art. 59-B, parágrafo único". */
@@ -248,13 +248,18 @@ public final class VerificadorDeCitacoes {
      * Números da frase, em algarismos ou por extenso ("duas horas" -> "2"). "um/uma" fica de fora:
      * na maioria das vezes é artigo indefinido, não número.
      */
+    private static final Pattern ACIMA_DE_CEM = Pattern.compile(
+            "(?<![\\p{L}])(?:cento|duzent[oa]s|trezent[oa]s|quatrocent[oa]s|quinhent[oa]s|seiscent[oa]s|setecent[oa]s"
+                    + "|oitocent[oa]s|novecent[oa]s|mil)(?:\\s+e\\s+[\\p{L}]+){0,2}(?![\\p{L}])");
+
     static Set<String> numeros(String texto) {
         Set<String> ns = new LinkedHashSet<>();
         Matcher m = NUMERO.matcher(texto);
         while (m.find()) {
             ns.add(m.group(1));
         }
-        String resto = texto.toLowerCase(Locale.ROOT);
+        // Números acima de cem por extenso ("cento e vinte") saem antes, para "vinte" não virar 20.
+        String resto = ACIMA_DE_CEM.matcher(texto.toLowerCase(Locale.ROOT)).replaceAll(" ");
         for (int n = 100; n >= 2; n--) {
             for (String forma : porExtenso(n)) {
                 Matcher w = Pattern.compile("(?<![\\p{L}])" + forma + "(?![\\p{L}])").matcher(resto);
@@ -272,13 +277,28 @@ public final class VerificadorDeCitacoes {
     private static final String[] DEZENAS = {"", "", "vinte", "trinta", "quarenta", "cinquenta|cinqüenta", "sessenta", "setenta",
             "oitenta", "noventa"};
 
-    /** Formas por extenso de 1 a 100 ("24" -> "vinte e quatro"); vazio fora dessa faixa. */
+    private static final String[] CENTENAS = {"", "cento", "duzentos|duzentas", "trezentos|trezentas",
+            "quatrocentos|quatrocentas", "quinhentos|quinhentas", "seiscentos|seiscentas", "setecentos|setecentas",
+            "oitocentos|oitocentas", "novecentos|novecentas"};
+
+    /** Formas por extenso de 1 a 999 ("24" -> "vinte e quatro", "120" -> "cento e vinte"); vazio fora dessa faixa. */
     static List<String> porExtenso(int n) {
-        if (n <= 0 || n > 100) {
+        if (n <= 0 || n > 999) {
             return List.of();
         }
         if (n == 100) {
             return List.of("cem");
+        }
+        if (n > 100) {
+            List<String> formas = new ArrayList<>();
+            for (String c : CENTENAS[n / 100].split("\\|")) {
+                if (n % 100 == 0) {
+                    formas.add(c);
+                } else {
+                    porExtenso(n % 100).forEach(r -> formas.add(c + " e " + r));
+                }
+            }
+            return formas;
         }
         if (n < 20) {
             return List.of(UNIDADES[n].split("\\|"));

@@ -58,7 +58,13 @@ public class AvaliacaoRespostasService {
     }
 
     public Relatorio avaliar(int k, Granularidade granularidade, EstrategiaBusca estrategia) throws IOException {
-        EvalSet eval = evalSet.carregar();
+        return avaliar(k, granularidade, estrategia, EvalSetRepositorio.DESENVOLVIMENTO);
+    }
+
+    /** @param conjunto conjunto de perguntas: desenvolvimento ou validacao (ver {@link EvalSetRepositorio}) */
+    public Relatorio avaliar(int k, Granularidade granularidade, EstrategiaBusca estrategia, String conjunto)
+            throws IOException {
+        EvalSet eval = evalSet.carregar(conjunto);
         List<ResultadoPergunta> resultados = new ArrayList<>();
 
         for (EvalSet.Pergunta p : eval.perguntas()) {

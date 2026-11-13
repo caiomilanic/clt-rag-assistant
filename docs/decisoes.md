@@ -193,3 +193,15 @@ A resposta da API traz `citacao.problemasDeDispositivo` e a avaliação conta `r
 **Por quê:** para o analista de RH, uma citação menos precisa e certa vale mais que uma precisa e errada. O artigo completo já aparece nas fontes da resposta.
 **Validação:** aplicado às duas rodadas gravadas, rebaixou 5 citações (Q02, Q05 e Q09 na anterior; Q09 e Q12 na 6b), todas erradas, sem tocar nas certas.
 **Limitação:** só corrige o que o verificador detecta. Inciso que existe, mas é o errado, numa frase sem números (Q17, Q20) continua passando.
+
+### D21. Conjunto de validação separado (2026-11-13)
+**Problema:** busca (D18), prompt (D17, D19) e verificador (D19, D20) foram ajustados olhando as mesmas 24 perguntas. Os números delas podem estar otimistas: é o sobreajuste de quem calibra e mede no mesmo conjunto.
+**Escolha:** um segundo conjunto, `docs/eval/validacao-set.json`, com 26 perguntas de temas que o primeiro não cobre (trabalho noturno, tempo parcial, 12x36, insalubridade, periculosidade, CTPS, salário, descontos, transferência, intermitente, teletrabalho, gestante, aviso de férias, justa causa, aviso prévio trabalhado, negociação individual do hipersuficiente). Mesmo formato e mesmo gerador: gabarito copiado do corpus pelo `tools/eval/build_eval.py`. A API escolhe o conjunto por `?conjunto=validacao`; o padrão continua sendo o de desenvolvimento.
+**Regras:**
+1. O conjunto foi congelado antes da primeira execução.
+2. Nada no sistema é ajustado olhando para ele. Se uma falha da validação motivar uma mudança, a pergunta vira caso de desenvolvimento e entra uma nova no lugar, para a validação continuar limpa.
+3. O desenvolvimento continua sendo onde se itera; a validação é rodada só para confirmar.
+**Armadilhas de propósito:** V23 (a CLT garante a estabilidade da gestante, mas a duração está na Constituição), VF01 e VF02 (13º salário e seguro-desemprego aparecem no Art. 611-B, mas as regras estão em outras leis), V07 (combinar a regra do trabalho noturno com a exceção da 12x36).
+**Limitação:** as perguntas foram escritas pelo mesmo par (Caio e Claude) que construiu o sistema, ainda que antes de qualquer execução. Perguntas escritas por um analista de RH de fora seriam o teste mais forte.
+
+**Resultado da primeira execução (2026-11-13):** recuperação de 78,3% (contra 100% no desenvolvimento) e 11 de 23 respostas fiéis (48%, contra 81%). O sobreajuste existia: o conjunto de desenvolvimento usava o vocabulário da lei, e a validação, o do RH. Detalhes em `docs/eval/README.md`. Duas correções de bug nos detectores (ADCT e números acima de cem) vieram desta rodada; são genéricas e não mexem em busca nem em prompt, então a validação continua válida para medir essas duas partes.

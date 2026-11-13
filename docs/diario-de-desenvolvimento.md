@@ -221,3 +221,19 @@ O detector de citações foi ajustado com base nessa rodada ("artigo 617" por ex
 - **Teste com dados reais:** nas duas rodadas gravadas, 5 citações rebaixadas, todas erradas (Q02, Q05, Q09; Q09, Q12), nenhuma certa alterada.
 - **Testes:** mais 4 em `VerificadorDeCitacoesTest` (17 no total).
 - Decisão na D20.
+
+## 2026-11-13: Passo 6d, conjunto de validação
+
+- **Por quê:** tudo até aqui foi ajustado e medido nas mesmas 24 perguntas. Sem um conjunto separado, não dá para saber se as melhorias generalizam.
+- **O quê:** 26 perguntas novas em `docs/eval/validacao-set.json`, com gabarito copiado do corpus pelo mesmo `build_eval.py` (agora com o argumento `validacao`). Regenerar o conjunto de desenvolvimento pelo script deu um arquivo idêntico ao salvo, então a mudança no gerador não alterou nada.
+- **Escolha dos temas:** só assuntos fora do conjunto de desenvolvimento; o único artigo repetido é o 611-B, num inciso diferente (XIII, licença-maternidade). Todos os artigos esperados existem no índice.
+- **Armadilhas:** estabilidade da gestante (garantia na CLT, prazo na Constituição), 13º salário e seguro-desemprego (citados no 611-B, regulados em outras leis), 12x36 noturna (regra geral mais exceção).
+- **API:** `?conjunto=validacao` nos dois endpoints de avaliação; arquivo configurável em `app.eval.validacao`.
+- Decisão na D21.
+
+### Primeira execução da validação
+- **Busca:** 78,3% (18/23) contra 100% no desenvolvimento. Cinco falhas totais, quatro por jargão: "12x36", "home office", "gerente com diploma e salário alto", "das 22h às 5h".
+- **Respostas:** 11 fiéis, 5 parciais, 3 infiéis, 4 recusas indevidas (3 por falha de busca, 1 do modelo, V14). Fora do escopo: 3/3, inclusive as duas armadilhas citadas no 611-B.
+- **Falhas do modelo com a busca certa:** V08 usou o Art. 311 (jornalistas) no lugar do 29; V22 atribuiu ao 611-A o que está no 611-B; V23 caiu na armadilha da estabilidade da gestante.
+- **Bugs achados:** "art. 10 do Ato das Disposições Constitucionais Transitórias" contava como citação da CLT fora dos trechos; "cento e vinte" virava 20 no verificador. Corrigidos com testes (o verificador agora reconhece números por extenso até 999). Rodado de novo nas três rodadas gravadas: nada mudou nas anteriores.
+- **Leitura:** o conjunto de desenvolvimento, escrito com a lei aberta, compartilhava o vocabulário dela. O gargalo real é a distância entre o jeito que o RH pergunta e o jeito que a lei escreve.

@@ -178,3 +178,46 @@ Nenhum falso positivo nas outras 20 respostas. Os acertos do inciso certo com n�
 ### Rebaixamento da citação marcada (D20)
 
 A partir daqui, a resposta entregue já sai com as citações marcadas pelo verificador trocadas pelo artigo; `respostaOriginal` guarda o texto do modelo. Na revisão manual, avalie a resposta entregue e use `problemasDeDispositivo` e `respostaOriginal` para saber o que o sistema corrigiu. Aplicado às rodadas gravadas: 5 citações rebaixadas, todas erradas, nenhuma certa alterada.
+
+## Conjunto de validação (D21)
+
+[`validacao-set.json`](validacao-set.json): 26 perguntas novas (19 diretas, 1 multi-artigo, 2 de hierarquia, 1 de cobertura parcial, 3 fora do escopo), de temas que o conjunto de desenvolvimento não cobre. Congelado em 2026-11-13, antes da primeira execução.
+
+**Regra:** nada no sistema é ajustado olhando para essas perguntas. Se uma falha da validação motivar uma mudança, a pergunta passa para o conjunto de desenvolvimento e outra nova entra no lugar.
+
+```bash
+curl -s -X POST "http://localhost:8080/api/avaliacao/recuperacao?k=5&conjunto=validacao" > target/validacao-recuperacao.json
+curl -s -X POST "http://localhost:8080/api/avaliacao/respostas?k=5&conjunto=validacao" > target/validacao-respostas.json
+```
+
+Para regenerar o arquivo (só se o corpus mudar):
+
+```bash
+python3 -I tools/eval/build_eval.py <artigos.json> corpus/clt/DEL5452.html docs/eval/validacao-set.json validacao
+```
+
+### Primeira execução da validação (2026-11-13)
+
+[Resultado com revisão manual](resultados/2026-11-13-validacao-k5.json). Mesma configuração da rodada 6b (dispositivo + vetorial, `qwen3:4b-instruct`).
+
+| | Desenvolvimento (6b) | **Validação** |
+|---|---|---|
+| Recuperação top-5 | 100% (MRR 0,716) | **78,3%** (18/23, MRR 0,71) |
+| Fiéis | 17/21 (81%) | **11/23 (48%)** |
+| Parciais | 3 | 5 |
+| Infiéis | 1 | 3 |
+| Recusas indevidas | 0 | 4 |
+| Fora do escopo recusadas | 3/3 | 3/3 |
+| Latência média / máx. | 2,5 s / 12,2 s | 2,6 s / 5,8 s |
+
+**1. A busca não entende jargão de RH (5 falhas, todas totais).** O MRR igual mostra que, quando acha, a busca acerta a posição; quando erra, o artigo some do top-5. Quatro das cinco falhas são vocabulário: "12x36" (V03, V07) não chega a "doze horas seguidas por trinta e seis" (Art. 59-A); "home office"/"escritório" (V13) não chega a "teletrabalho"/"presencial" (Art. 75-C); "gerente com diploma e salário alto" (V21) não chega ao Art. 444; "das 22h às 5h" (V01) não chega ao Art. 73. As perguntas de desenvolvimento foram escritas com a lei aberta e já usavam o vocabulário dela; daí os 100%.
+
+**2. Quando a busca falha, o modelo em geral recusa (3 de 5).** V01, V03 e V07 terminaram em "Não encontrei…", a falha segura. V13 e V21 responderam mesmo assim: a V21 inventou relações entre artigos ("pelo Art. 622, a convenção tem prevalência sobre a lei").
+
+**3. Com a busca certa, o 4B ainda erra a escolha do trecho.** V08: o Art. 29 veio em 2º, mas o modelo usou o Art. 311 (registro de jornalistas) e respondeu "60 dias" no lugar de 5 dias úteis. V14: o Art. 75-D veio em 1º e o modelo recusou. V22: conclusão certa, mas atribuída ao 611-A no lugar do 611-B.
+
+**4. A armadilha da cobertura parcial pegou (V23).** O modelo afirmou que a estabilidade da gestante dura "o período da licença" e que "não há limite de tempo", quando o Art. 391-A remete o prazo ao ADCT. As duas armadilhas de fora do escopo (13º e seguro-desemprego, citados no 611-B) foram recusadas corretamente.
+
+**5. O verificador ajudou pouco aqui.** Marcou só a V22, e o rebaixamento manteve o artigo errado ("Art. 611-A"): ele corrige o dispositivo, não o artigo. A rodada também revelou dois bugs nos detectores, corrigidos sem mudar o comportamento da busca nem do prompt: "art. 10 do Ato das Disposições Constitucionais Transitórias" contava como artigo da CLT fora dos trechos (V23), e "cento e vinte" gerava o número 20 (V22).
+
+**Conclusão:** os números do conjunto de desenvolvimento estavam otimistas, como a D21 temia. O maior gargalo é a distância entre o vocabulário do analista e o da lei; o segundo, a leitura do modelo de 4B. Próximos passos candidatos: expansão da pergunta com glossário RH → lei, e comparação com um modelo maior. Pela regra da D21, o que for ajustado por causa dessas falhas leva as perguntas correspondentes para o desenvolvimento, e entram perguntas novas na validação.

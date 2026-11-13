@@ -49,4 +49,11 @@ class CitacoesTest {
         assertThat(Citacoes.extrair("na forma do art. 20-A da Lei nº 8.036 e do Art. 477"))
                 .containsExactly("477");
     }
+
+    /** Caso real (V23, validação): o Art. 391-A remete ao art. 10 do ADCT, que não é artigo da CLT. */
+    @Test
+    void ignoraArtigoDoAdct() {
+        assertThat(Citacoes.extrair("prevista na alínea b do inciso II do art. 10 do Ato das Disposições "
+                + "Constitucionais Transitórias (Art. 391-A)")).containsExactly("391-A");
+    }
 }

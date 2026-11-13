@@ -1,0 +1,1330 @@
+{
+  "_contexto": {
+    "data": "2026-11-13",
+    "conjunto": "validacao-0.1 (D21), primeira execução",
+    "endpoints": [
+      "POST /api/avaliacao/recuperacao?k=5&conjunto=validacao",
+      "POST /api/avaliacao/respostas?k=5&conjunto=validacao"
+    ],
+    "modelo": "qwen3:4b-instruct-2507-q4_K_M",
+    "busca": "dispositivo + vetorial",
+    "criterios_revisao": {
+      "fiel": "conteúdo correto e com as condições essenciais",
+      "parcial": "essencial correto, mas omite condição essencial ou inclui afirmação sem suporte",
+      "infiel": "afirma algo errado",
+      "recusa_indevida": "recusou uma pergunta que o corpus responde"
+    },
+    "recuperacao": {
+      "versaoEval": "validacao-0.1",
+      "k": 5,
+      "granularidade": "dispositivo",
+      "estrategia": "vetorial",
+      "perguntasAvaliadas": 23,
+      "acertos": 18,
+      "acertoRecuperacao": 0.783,
+      "mrr": 0.71
+    },
+    "revisao_manual": "23 perguntas válidas: 11 fiéis, 5 parciais, 3 infiéis, 4 recusas indevidas (3 por falha de busca, 1 do modelo); fora do escopo: 3/3 recusas",
+    "nota_detectores": "Gerado antes de duas correções nos detectores, motivadas por esta rodada: (1) \"art. 10 do Ato das Disposições Constitucionais Transitórias\" contava como citação fora dos trechos (V23); (2) \"cento e vinte\" gerava o número 20 no verificador (V22). Com as correções, respostasComCitacaoForaDosTrechos = 0 e o problema da V22 é só \"120\"."
+  },
+  "versaoEval": "validacao-0.1",
+  "k": 5,
+  "granularidade": "dispositivo",
+  "estrategia": "vetorial",
+  "perguntas": 26,
+  "citacao": 0.692,
+  "respostasComCitacaoForaDosTrechos": 1,
+  "respostasComProblemaDeDispositivo": 1,
+  "recusasCorretas": "3/3",
+  "recusasIndevidas": 4,
+  "latenciaMediaMs": 2597,
+  "latenciaMaximaMs": 5817,
+  "resultados": [
+    {
+      "id": "V01",
+      "tipo": "direta",
+      "pergunta": "Um funcionário trabalha das 22h às 5h. Quanto ele recebe a mais e como as horas dele são contadas?",
+      "esperados": [
+        "73"
+      ],
+      "recuperados": [
+        "241",
+        "59",
+        "61",
+        "232",
+        "235-C"
+      ],
+      "citados": [],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": false,
+      "acertoCitacao": false,
+      "latenciaMs": 2479,
+      "tokensSaida": 20,
+      "resposta": "Não encontrei a resposta nos trechos da CLT recuperados para esta pergunta.",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "recusa_indevida",
+        "observacao": "Falha de busca: Art. 73 fora do top-5 (\"das 22h às 5h\" vs \"entre as 22 horas de um dia e as 5 horas\"). O modelo recusou em vez de inventar: falha segura."
+      }
+    },
+    {
+      "id": "V02",
+      "tipo": "direta",
+      "pergunta": "Qual o limite de horas por semana no regime de meio período? Esse funcionário pode fazer hora extra?",
+      "esperados": [
+        "58-A"
+      ],
+      "recuperados": [
+        "58-A",
+        "235-D",
+        "61",
+        "242",
+        "241"
+      ],
+      "citados": [
+        "58-A"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 2936,
+      "tokensSaida": 110,
+      "resposta": "O limite de horas por semana no regime de meio período é de vinte e seis horas semanais (Art. 58-A, § 4º). Esse funcionário pode fazer hora extra, desde que não exceda seis horas suplementares semanais (Art. 58-A, § 4º). As horas suplementares serão pagas com o acréscimo de 50% sobre o salário-hora normal (Art. 58-A, § 3º).",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "parcial",
+        "observacao": "Diz que o limite é de 26 horas; omite a modalidade de até 30 horas sem hora extra."
+      }
+    },
+    {
+      "id": "V03",
+      "tipo": "direta",
+      "pergunta": "Posso adotar a escala 12x36 combinando direto com o funcionário, sem o sindicato?",
+      "esperados": [
+        "59-A"
+      ],
+      "recuperados": [
+        "590",
+        "586",
+        "461",
+        "534",
+        "573"
+      ],
+      "citados": [],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": false,
+      "acertoCitacao": false,
+      "latenciaMs": 1406,
+      "tokensSaida": 20,
+      "resposta": "Não encontrei a resposta nos trechos da CLT recuperados para esta pergunta.",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "recusa_indevida",
+        "observacao": "Falha de busca: \"12x36\" não alcança \"doze horas seguidas por trinta e seis\" (Art. 59-A). Recusa segura."
+      }
+    },
+    {
+      "id": "V04",
+      "tipo": "direta",
+      "pergunta": "O descanso semanal do funcionário precisa cair no domingo?",
+      "esperados": [
+        "67"
+      ],
+      "recuperados": [
+        "385",
+        "307",
+        "67",
+        "68",
+        "386"
+      ],
+      "citados": [
+        "385",
+        "67",
+        "307",
+        "68"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 3187,
+      "tokensSaida": 211,
+      "resposta": "O descanso semanal do funcionário precisa cair no domingo, salvo motivo de conveniência pública ou necessidade imperiosa de serviço, a juízo da autoridade competente, na forma das disposições gerais (Art. 385, parágrafo único). (Art. 67) Também prevê que, salvo esses motivos, o descanso semanal deverá coincidir com o domingo, no todo ou em parte. (Art. 307) No entanto, em serviços que exijam trabalho aos domingos, com exceção dos elencos teatrais, será estabelecida escala de revezamento, mensalmente organizada (Art. 67). Para os casos de trabalho nos domingos, a permissão é concedida sob forma transitória, com discriminação do período autorizado, que não excederá de 60 dias (Art. 68).",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "fiel",
+        "observacao": "Correta no essencial, mas mistura artigos de categorias específicas (Art. 385, mulher; Art. 307, jornalistas) com a regra geral (Art. 67)."
+      }
+    },
+    {
+      "id": "V05",
+      "tipo": "direta",
+      "pergunta": "Quais os percentuais do adicional de insalubridade e sobre qual valor eles são calculados?",
+      "esperados": [
+        "192"
+      ],
+      "recuperados": [
+        "192",
+        "394-A",
+        "193",
+        "194",
+        "142"
+      ],
+      "citados": [
+        "192",
+        "193",
+        "142"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 4433,
+      "tokensSaida": 234,
+      "resposta": "Os percentuais do adicional de insalubridade são de 40% (quarenta por cento) para o grau máximo, 20% (vinte por cento) para o grau médio e 10% (dez por cento) para o grau mínimo, calculados sobre o salário-mínimo da região (Art. 192).  \nO adicional de insalubridade é calculado sobre o salário-mínimo da região, conforme estabelecido no Art. 192.  \nO adicional de periculosidade, mencionado no Art. 193, é de 30% (trinta por cento) sobre o salário sem os acréscimos resultantes de gratificações, prêmios ou participações nos lucros da empresa.  \nOs adicionais de insalubridade e periculosidade são computados no salário que servirá de base ao cálculo da remuneração das férias (Art. 142, § 5º).",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "fiel",
+        "observacao": "Correta; acrescenta periculosidade e base de férias, que não foram perguntadas."
+      }
+    },
+    {
+      "id": "V06",
+      "tipo": "direta",
+      "pergunta": "Um vigilante de segurança patrimonial tem direito a adicional de periculosidade? De quanto?",
+      "esperados": [
+        "193"
+      ],
+      "recuperados": [
+        "193",
+        "194",
+        "223-G",
+        "200",
+        "192"
+      ],
+      "citados": [
+        "193"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 3339,
+      "tokensSaida": 79,
+      "resposta": "Sim, o vigilante de segurança patrimonial tem direito a adicional de periculosidade. O adicional é de 30% (trinta por cento) sobre o salário sem os acréscimos resultantes de gratificações, prêmios ou participações nos lucros da empresa (Art. 193, § 1º).",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "V07",
+      "tipo": "multi_artigo",
+      "pergunta": "Funcionário em escala 12x36 no turno da noite: ele tem adicional noturno e hora reduzida?",
+      "esperados": [
+        "59-A",
+        "73"
+      ],
+      "recuperados": [
+        "239",
+        "73",
+        "296",
+        "235",
+        "234"
+      ],
+      "citados": [],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": false,
+      "acertoCitacao": false,
+      "latenciaMs": 1478,
+      "tokensSaida": 20,
+      "resposta": "Não encontrei a resposta nos trechos da CLT recuperados para esta pergunta.",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "recusa_indevida",
+        "observacao": "Falha de busca: Art. 59-A fora do top-5 (mesmo jargão \"12x36\"); Art. 73 veio em 2º. Recusa segura."
+      }
+    },
+    {
+      "id": "V08",
+      "tipo": "direta",
+      "pergunta": "Contratei um funcionário hoje. Qual o prazo para registrar a carteira de trabalho dele?",
+      "esperados": [
+        "29"
+      ],
+      "recuperados": [
+        "311",
+        "29",
+        "917",
+        "543",
+        "41"
+      ],
+      "citados": [
+        "311"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": false,
+      "latenciaMs": 2339,
+      "tokensSaida": 87,
+      "resposta": "O prazo para registrar a carteira de trabalho do funcionário é de 60 dias corridos, conforme estabelecido no Art. 311, § 2º. Este prazo se aplica aos novos empregados e o registro é condicionado à apresentação da carteira de trabalho e previdência social. (Art. 311, § 2º)",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "infiel",
+        "observacao": "O Art. 29 veio em 2º, mas o modelo usou o Art. 311 (registro de jornalistas) e respondeu \"60 dias corridos\". O certo é 5 dias úteis (Art. 29). Erro de escolha do trecho pelo modelo."
+      }
+    },
+    {
+      "id": "V09",
+      "tipo": "direta",
+      "pergunta": "Até que dia do mês a empresa precisa pagar o salário mensal?",
+      "esperados": [
+        "459"
+      ],
+      "recuperados": [
+        "459",
+        "465",
+        "145",
+        "478",
+        "360"
+      ],
+      "citados": [
+        "459"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1846,
+      "tokensSaida": 44,
+      "resposta": "A empresa precisa pagar o salário mensal, o mais tardar, até o quinto dia útil do mês subsequente ao vencido (Art. 459, § 1º).",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "V10",
+      "tipo": "direta",
+      "pergunta": "Um funcionário quebrou um equipamento da empresa sem querer. Posso descontar do salário dele?",
+      "esperados": [
+        "462"
+      ],
+      "recuperados": [
+        "462",
+        "483",
+        "439",
+        "479",
+        "545"
+      ],
+      "citados": [
+        "462"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 2350,
+      "tokensSaida": 116,
+      "resposta": "Não, não é possível descontar do salário do funcionário que quebrou um equipamento sem querer, pois o desconto somente é lícito em caso de dano causado pelo empregado, desde que esta possibilidade tenha sido acordada ou na ocorrência de dolo do empregado (Art. 462, § 1º). Como o ato foi cometido sem querer, não há dolo, e, portanto, não se aplica a exceção do artigo.",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "parcial",
+        "observacao": "Conclui \"não é possível\" pela ausência de dolo, ignorando que o desconto é lícito se tiver sido acordado."
+      }
+    },
+    {
+      "id": "V11",
+      "tipo": "direta",
+      "pergunta": "Preciso transferir um funcionário para outra cidade. Posso fazer isso sem ele concordar? Tenho que pagar algo a mais?",
+      "esperados": [
+        "469"
+      ],
+      "recuperados": [
+        "469",
+        "469-A",
+        "470",
+        "300",
+        "543"
+      ],
+      "citados": [
+        "469"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 2966,
+      "tokensSaida": 156,
+      "resposta": "Não, você não pode transferir o funcionário para outra cidade sem sua concordância, salvo se houver necessidade de serviço e o empregado estiver em cargo de confiança ou se o contrato já prevê a transferência como condição (Art. 469, § 1º). Em caso de necessidade de serviço, é obrigatório o pagamento suplementar, nunca inferior a 25% (vinte e cinco por cento) dos salários que o empregado percebia naquela localidade, enquanto durar a situação (Art. 469, § 3º). A transferência sem consentimento do empregado é vedada (Art. 469).",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "fiel",
+        "observacao": "Correta no essencial (anuência, exceções, 25%); redação um pouco confusa sobre a necessidade de serviço."
+      }
+    },
+    {
+      "id": "V12",
+      "tipo": "direta",
+      "pergunta": "No contrato intermitente, com quanta antecedência preciso chamar o funcionário e quanto tempo ele tem para responder?",
+      "esperados": [
+        "452-A"
+      ],
+      "recuperados": [
+        "452-A",
+        "476-A",
+        "487",
+        "472",
+        "478"
+      ],
+      "citados": [
+        "452-A"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 2185,
+      "tokensSaida": 66,
+      "resposta": "Deve-se convocar o funcionário com pelo menos três dias corridos de antecedência (§ 1º do Art. 452-A). O funcionário terá o prazo de um dia útil para responder ao chamado (§ 2º do Art. 452-A).",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "V13",
+      "tipo": "direta",
+      "pergunta": "Quero trazer de volta ao escritório um funcionário que está em home office. Preciso da concordância dele?",
+      "esperados": [
+        "75-C"
+      ],
+      "recuperados": [
+        "496",
+        "75-B",
+        "366",
+        "855-B",
+        "469-A"
+      ],
+      "citados": [
+        "75-B"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": false,
+      "latenciaMs": 3398,
+      "tokensSaida": 189,
+      "resposta": "Não há disposição na CLT que exige a concordância do empregado para a mudança do regime de teletrabalho para presencial, mas o artigo 75-B, § 9º, permite que o acordo individual dispor sobre os horários e meios de comunicação, desde que assegurados os repousos legais. (Art. 75-B, § 9º)  \nO regime de teletrabalho pode ser alterado, mas não há exigência explícita de concordância do empregado, salvo em acordo individual. (Art. 75-B, § 9º)  \nA mudança de regime de trabalho (de home office para escritório) não é abordada diretamente nos trechos fornecidos. (Não encontrei a resposta nos trechos da CLT recuperados para esta pergunta.)",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "parcial",
+        "observacao": "Falha de busca: Art. 75-C fora do top-5 (\"home office\"/\"escritório\" vs \"teletrabalho\"/\"presencial\"). A conclusão (não exige concordância) coincide com a lei, mas sem base nos trechos, generalizando sobre a CLT inteira; termina com a frase de recusa entre parênteses."
+      }
+    },
+    {
+      "id": "V14",
+      "tipo": "direta",
+      "pergunta": "A empresa é obrigada a pagar a internet e o computador de quem trabalha de casa?",
+      "esperados": [
+        "75-D"
+      ],
+      "recuperados": [
+        "75-D",
+        "75-C",
+        "389",
+        "75-B",
+        "83"
+      ],
+      "citados": [],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": false,
+      "acertoCitacao": false,
+      "latenciaMs": 1075,
+      "tokensSaida": 20,
+      "resposta": "Não encontrei a resposta nos trechos da CLT recuperados para esta pergunta.",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "recusa_indevida",
+        "observacao": "O Art. 75-D veio em 1º e responde à pergunta, mas o modelo recusou. Erro do modelo, não da busca."
+      }
+    },
+    {
+      "id": "V15",
+      "tipo": "direta",
+      "pergunta": "Uma funcionária descobriu que está grávida durante o aviso prévio. Ela tem estabilidade?",
+      "esperados": [
+        "391-A"
+      ],
+      "recuperados": [
+        "391-A",
+        "394",
+        "499",
+        "392",
+        "394-A"
+      ],
+      "citados": [
+        "391-A"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1667,
+      "tokensSaida": 19,
+      "resposta": "Sim, a funcionária tem estabilidade. (Art. 391-A)",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "fiel",
+        "observacao": "Correta, mas curta (\"Sim\")."
+      }
+    },
+    {
+      "id": "V16",
+      "tipo": "direta",
+      "pergunta": "Quantos dias de licença-maternidade a funcionária tem, e a partir de quando ela pode começar?",
+      "esperados": [
+        "392"
+      ],
+      "recuperados": [
+        "392",
+        "396",
+        "394-A",
+        "393",
+        "392-B"
+      ],
+      "citados": [
+        "392"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 2446,
+      "tokensSaida": 68,
+      "resposta": "A funcionária tem direito a 120 dias de licença-maternidade (Art. 392). Ela pode começar o afastamento a partir do 28º dia antes do parto até a ocorrência do parto (Art. 392, § 1º).",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "V17",
+      "tipo": "direta",
+      "pergunta": "A funcionária voltou da licença e está amamentando. Ela tem direito a pausas durante o expediente?",
+      "esperados": [
+        "396"
+      ],
+      "recuperados": [
+        "396",
+        "392",
+        "383",
+        "394-A",
+        "382"
+      ],
+      "citados": [
+        "396"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 2370,
+      "tokensSaida": 117,
+      "resposta": "Sim, a funcionária tem direito a pausas durante o expediente enquanto amamenta. (Art. 396, caput) As pausas são de meia hora cada, durante a jornada de trabalho, para amamentar seu filho, inclusive se advindo de adoção, até que este complete 6 (seis) meses de idade. Os horários dos descansos deverão ser definidos em acordo individual entre a mulher e o empregador. (Art. 396, § 2º)",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "fiel"
+      }
+    },
+    {
+      "id": "V18",
+      "tipo": "direta",
+      "pergunta": "Com quanto tempo de antecedência preciso avisar o funcionário das férias dele?",
+      "esperados": [
+        "135"
+      ],
+      "recuperados": [
+        "139",
+        "135",
+        "133",
+        "143",
+        "145"
+      ],
+      "citados": [
+        "135"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1921,
+      "tokensSaida": 36,
+      "resposta": "Preciso avisar o funcionário das férias dele com antecedência mínima de 30 (trinta) dias (Art. 135).",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "parcial",
+        "observacao": "Diz os 30 dias, mas omite \"por escrito\", condição explícita do Art. 135."
+      }
+    },
+    {
+      "id": "V19",
+      "tipo": "direta",
+      "pergunta": "Em quais situações a empresa pode demitir por justa causa?",
+      "esperados": [
+        "482"
+      ],
+      "recuperados": [
+        "482",
+        "502",
+        "483",
+        "497",
+        "479"
+      ],
+      "citados": [
+        "482"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 5817,
+      "tokensSaida": 355,
+      "resposta": "A empresa pode demitir por justa causa nos seguintes casos: ato de improbidade; incontinência de conduta ou mau procedimento; negociação habitual por conta própria ou alheia sem permissão do empregador, quando constitui ato de concorrência à empresa ou for prejudicial ao serviço; condenação criminal do empregado, passada em julgado, caso não tenha havido suspensão da execução da pena; desídia no desempenho das funções; embriaguez habitual ou em serviço; violação de segredo da empresa; ato de indisciplina ou de insubordinação; abandono de emprego; ato lesivo da honra ou da boa fama praticado no serviço contra qualquer pessoa, ou ofensas físicas, nas mesmas condições, salvo em caso de legítima defesa, própria ou de outrem; ato lesivo da honra ou da boa fama ou ofensas físicas praticadas contra o empregador e superiores hierárquicos, salvo em caso de legítima defesa, própria ou de outrem; prática constante de jogos de azar; e perda da habilitação ou dos requisitos estabelecidos em lei para o exercício da profissão, em decorrência de conduta dolosa do empregado (Art. 482).  \nConstitui igualmente justa causa a prática, devidamente comprovada em inquérito administrativo, de atos atentatórios à segurança nacional (Art. 482, parágrafo único).",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "fiel",
+        "observacao": "Correta e completa, mas transcreve a lista inteira (5,8 s, a mais lenta)."
+      }
+    },
+    {
+      "id": "V20",
+      "tipo": "direta",
+      "pergunta": "O funcionário foi demitido e está cumprindo aviso prévio. A jornada dele diminui?",
+      "esperados": [
+        "488"
+      ],
+      "recuperados": [
+        "488",
+        "490",
+        "491",
+        "487",
+        "489"
+      ],
+      "citados": [
+        "488"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 1404,
+      "tokensSaida": 57,
+      "resposta": "Sim, a jornada do funcionário diminui, durante o prazo do aviso prévio, de 2 (duas) horas diárias, desde que a rescisão tenha sido promovida pelo empregador (Art. 488).",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "fiel",
+        "observacao": "Correta; omite a alternativa de faltar 7 dias corridos sem a redução."
+      }
+    },
+    {
+      "id": "V21",
+      "tipo": "hierarquia",
+      "pergunta": "Um gerente com diploma de nível superior e salário alto pode negociar direto com a empresa condições diferentes das da convenção coletiva?",
+      "esperados": [
+        "444"
+      ],
+      "recuperados": [
+        "622",
+        "611-A",
+        "507-A",
+        "611",
+        "612"
+      ],
+      "citados": [
+        "622",
+        "611-A"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": false,
+      "latenciaMs": 4624,
+      "tokensSaida": 267,
+      "resposta": "Sim, um gerente com diploma de nível superior e salário alto pode negociar direto com a empresa condições diferentes da convenção coletiva, desde que o contrato individual de trabalho estabeleça condições contrárias ao que foi ajustado em convenção ou acordo coletivo de trabalho, e que não haja cláusula que reduza o salário ou a jornada, pois, segundo o Art. 622, a convenção coletiva tem prevalência sobre a lei (Art. 622), mas a negociação individual é permitida (Art. 611-A, I), desde que não contrarie os limites constitucionais ou os princípios da CLT. No entanto, se a convenção coletiva tiver pactuado cláusula que reduza o salário ou a jornada, deverá prever a proteção dos empregados contra dispensa imotivada durante o prazo de vigência do instrumento coletivo (Art. 611-A, § 3º). A negociação individual é permitida, mas não pode contrariar os limites mínimos estabelecidos pela lei (Art. 611-A, I).",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "infiel",
+        "observacao": "Falha de busca: Art. 444 fora do top-5. O modelo inventou relações: diz que pelo Art. 622 \"a convenção coletiva tem prevalência sobre a lei\" (o 622 trata de multa) e que a negociação individual é permitida pelo Art. 611-A, I."
+      }
+    },
+    {
+      "id": "V22",
+      "tipo": "hierarquia",
+      "pergunta": "A convenção coletiva pode reduzir a licença-maternidade para 90 dias?",
+      "esperados": [
+        "611-B"
+      ],
+      "recuperados": [
+        "392",
+        "611-B",
+        "611-A",
+        "614",
+        "616"
+      ],
+      "citados": [
+        "611-A"
+      ],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [
+        {
+          "citacao": "Art. 611-A, XIII",
+          "tipo": "numero_ausente",
+          "detalhe": "A frase menciona 120, que não aparece(m) em Art. 611-A, XIII"
+        },
+        {
+          "citacao": "Art. 611-A, XIII",
+          "tipo": "numero_ausente",
+          "detalhe": "A frase menciona 20, que não aparece(m) em Art. 611-A, XIII"
+        }
+      ],
+      "encontrou": true,
+      "acertoCitacao": false,
+      "latenciaMs": 2930,
+      "tokensSaida": 113,
+      "resposta": "Não. A convenção coletiva não pode reduzir a licença-maternidade para 90 dias, pois a duração mínima da licença-maternidade é de 120 dias, conforme estabelecido no Art. 611-A, que diz que \"a licença-maternidade com a duração mínima de cento e vinte dias\" é objeto ilícito de convenção coletiva. (Art. 611-A)",
+      "respostaOriginal": "Não. A convenção coletiva não pode reduzir a licença-maternidade para 90 dias, pois a duração mínima da licença-maternidade é de 120 dias, conforme estabelecido no Art. 611-A, XIII, que diz que \"a licença-maternidade com a duração mínima de cento e vinte dias\" é objeto ilícito de convenção coletiva. (Art. 611-A, XIII)",
+      "revisao_manual": {
+        "avaliacao": "parcial",
+        "observacao": "Conclusão certa (não pode; mínimo de 120 dias), mas atribui ao Art. 611-A, XIII o que está no Art. 611-B, XIII. O verificador marcou (120 não está no 611-A, XIII) e rebaixou para \"Art. 611-A\": a citação ficou menos precisa, mas continua no artigo errado. O rebaixamento não corrige artigo errado."
+      }
+    },
+    {
+      "id": "V23",
+      "tipo": "cobertura_parcial",
+      "pergunta": "Por quanto tempo dura a estabilidade da funcionária gestante?",
+      "esperados": [
+        "391-A"
+      ],
+      "recuperados": [
+        "391-A",
+        "392",
+        "394-A",
+        "396",
+        "395"
+      ],
+      "citados": [
+        "392",
+        "10",
+        "391-A"
+      ],
+      "citadosForaDosTrechos": [
+        "10"
+      ],
+      "problemasDeDispositivo": [],
+      "encontrou": true,
+      "acertoCitacao": true,
+      "latenciaMs": 5385,
+      "tokensSaida": 310,
+      "resposta": "A estabilidade da funcionária gestante é garantida por todo o período da licença-maternidade, conforme o artigo 392, § 1º, que prevê a notificação do início do afastamento entre o 28º dia antes do parto e a ocorrência do parto, e a garantia de estabilidade provisória prevista na alínea b do inciso II do art. 10 do Ato das Disposições Constitucionais Transitórias (Art. 391-A). \n\nO prazo da licença-maternidade é de 120 dias, conforme o Art. 392, caput. Em caso de parto antecipado, a mulher tem direito aos 120 dias previstos (Art. 392, § 3º). A licença pode ser prorrogada por 60 dias em caso de nascimento ou adoção de criança com deficiência permanente decorrente de síndrome congênita associada ao vírus Zika (Art. 392, § 6º). \n\nA estabilidade provisória é garantida desde que a gravidez seja confirmada durante o contrato de trabalho (Art. 391-A). Não há limite de tempo específico para a estabilidade, pois está vinculada à vigência da licença-maternidade e à proteção constitucional.",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "infiel",
+        "observacao": "Caiu na armadilha: diz que a estabilidade dura \"por todo o período da licença-maternidade\" e que \"não há limite de tempo específico\". O Art. 391-A remete ao ADCT, e o sistema deveria dizer que o prazo não está nos trechos. Também revelou um bug no detector: \"art. 10 do Ato das Disposições...\" contava como artigo da CLT fora dos trechos (corrigido)."
+      }
+    },
+    {
+      "id": "VF01",
+      "tipo": "fora_do_escopo",
+      "pergunta": "Como calculo o 13º salário proporcional de quem foi demitido?",
+      "esperados": [],
+      "recuperados": [
+        "479",
+        "147",
+        "487",
+        "478",
+        "223-G"
+      ],
+      "citados": [],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": false,
+      "acertoCitacao": true,
+      "latenciaMs": 1306,
+      "tokensSaida": 20,
+      "resposta": "Não encontrei a resposta nos trechos da CLT recuperados para esta pergunta.",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "recusa"
+      }
+    },
+    {
+      "id": "VF02",
+      "tipo": "fora_do_escopo",
+      "pergunta": "Quantas parcelas de seguro-desemprego o funcionário demitido sem justa causa vai receber?",
+      "esperados": [],
+      "recuperados": [
+        "147",
+        "499",
+        "497",
+        "479",
+        "478"
+      ],
+      "citados": [],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": false,
+      "acertoCitacao": true,
+      "latenciaMs": 1142,
+      "tokensSaida": 20,
+      "resposta": "Não encontrei a resposta nos trechos da CLT recuperados para esta pergunta.",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "recusa"
+      }
+    },
+    {
+      "id": "VF03",
+      "tipo": "fora_do_escopo",
+      "pergunta": "Qual o desconto máximo do vale-transporte no salário do funcionário?",
+      "esperados": [],
+      "recuperados": [
+        "235-E",
+        "503",
+        "462",
+        "71",
+        "235-G"
+      ],
+      "citados": [],
+      "citadosForaDosTrechos": [],
+      "problemasDeDispositivo": [],
+      "encontrou": false,
+      "acertoCitacao": true,
+      "latenciaMs": 1107,
+      "tokensSaida": 20,
+      "resposta": "Não encontrei a resposta nos trechos da CLT recuperados para esta pergunta.",
+      "respostaOriginal": null,
+      "revisao_manual": {
+        "avaliacao": "recusa"
+      }
+    }
+  ],
+  "recuperacao_por_pergunta": [
+    {
+      "id": "V01",
+      "tipo": "direta",
+      "pergunta": "Um funcionário trabalha das 22h às 5h. Quanto ele recebe a mais e como as horas dele são contadas?",
+      "esperados": [
+        "73"
+      ],
+      "recuperados": [
+        "241",
+        "59",
+        "61",
+        "232",
+        "235-C"
+      ],
+      "posicoes": [
+        0
+      ],
+      "acerto": false,
+      "scoreTop1": 0.6179017722606659
+    },
+    {
+      "id": "V02",
+      "tipo": "direta",
+      "pergunta": "Qual o limite de horas por semana no regime de meio período? Esse funcionário pode fazer hora extra?",
+      "esperados": [
+        "58-A"
+      ],
+      "recuperados": [
+        "58-A",
+        "235-D",
+        "61",
+        "242",
+        "241"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.6790542900562286
+    },
+    {
+      "id": "V03",
+      "tipo": "direta",
+      "pergunta": "Posso adotar a escala 12x36 combinando direto com o funcionário, sem o sindicato?",
+      "esperados": [
+        "59-A"
+      ],
+      "recuperados": [
+        "590",
+        "586",
+        "461",
+        "534",
+        "573"
+      ],
+      "posicoes": [
+        0
+      ],
+      "acerto": false,
+      "scoreTop1": 0.5221694111824036
+    },
+    {
+      "id": "V04",
+      "tipo": "direta",
+      "pergunta": "O descanso semanal do funcionário precisa cair no domingo?",
+      "esperados": [
+        "67"
+      ],
+      "recuperados": [
+        "385",
+        "307",
+        "67",
+        "68",
+        "386"
+      ],
+      "posicoes": [
+        3
+      ],
+      "acerto": true,
+      "scoreTop1": 0.6812268197536469
+    },
+    {
+      "id": "V05",
+      "tipo": "direta",
+      "pergunta": "Quais os percentuais do adicional de insalubridade e sobre qual valor eles são calculados?",
+      "esperados": [
+        "192"
+      ],
+      "recuperados": [
+        "192",
+        "394-A",
+        "193",
+        "194",
+        "142"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.656913548707962
+    },
+    {
+      "id": "V06",
+      "tipo": "direta",
+      "pergunta": "Um vigilante de segurança patrimonial tem direito a adicional de periculosidade? De quanto?",
+      "esperados": [
+        "193"
+      ],
+      "recuperados": [
+        "193",
+        "194",
+        "223-G",
+        "200",
+        "192"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.5730248391628265
+    },
+    {
+      "id": "V07",
+      "tipo": "multi_artigo",
+      "pergunta": "Funcionário em escala 12x36 no turno da noite: ele tem adicional noturno e hora reduzida?",
+      "esperados": [
+        "59-A",
+        "73"
+      ],
+      "recuperados": [
+        "239",
+        "73",
+        "296",
+        "235",
+        "234"
+      ],
+      "posicoes": [
+        0,
+        2
+      ],
+      "acerto": false,
+      "scoreTop1": 0.6210109293460846
+    },
+    {
+      "id": "V08",
+      "tipo": "direta",
+      "pergunta": "Contratei um funcionário hoje. Qual o prazo para registrar a carteira de trabalho dele?",
+      "esperados": [
+        "29"
+      ],
+      "recuperados": [
+        "311",
+        "29",
+        "917",
+        "543",
+        "41"
+      ],
+      "posicoes": [
+        2
+      ],
+      "acerto": true,
+      "scoreTop1": 0.6389406621456146
+    },
+    {
+      "id": "V09",
+      "tipo": "direta",
+      "pergunta": "Até que dia do mês a empresa precisa pagar o salário mensal?",
+      "esperados": [
+        "459"
+      ],
+      "recuperados": [
+        "459",
+        "465",
+        "145",
+        "478",
+        "360"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.6341061890125275
+    },
+    {
+      "id": "V10",
+      "tipo": "direta",
+      "pergunta": "Um funcionário quebrou um equipamento da empresa sem querer. Posso descontar do salário dele?",
+      "esperados": [
+        "462"
+      ],
+      "recuperados": [
+        "462",
+        "483",
+        "439",
+        "479",
+        "545"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.6016523540019989
+    },
+    {
+      "id": "V11",
+      "tipo": "direta",
+      "pergunta": "Preciso transferir um funcionário para outra cidade. Posso fazer isso sem ele concordar? Tenho que pagar algo a mais?",
+      "esperados": [
+        "469"
+      ],
+      "recuperados": [
+        "469",
+        "469-A",
+        "470",
+        "300",
+        "543"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.7114305794239044
+    },
+    {
+      "id": "V12",
+      "tipo": "direta",
+      "pergunta": "No contrato intermitente, com quanta antecedência preciso chamar o funcionário e quanto tempo ele tem para responder?",
+      "esperados": [
+        "452-A"
+      ],
+      "recuperados": [
+        "452-A",
+        "476-A",
+        "487",
+        "472",
+        "478"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.6425199210643768
+    },
+    {
+      "id": "V13",
+      "tipo": "direta",
+      "pergunta": "Quero trazer de volta ao escritório um funcionário que está em home office. Preciso da concordância dele?",
+      "esperados": [
+        "75-C"
+      ],
+      "recuperados": [
+        "496",
+        "75-B",
+        "366",
+        "855-B",
+        "469-A"
+      ],
+      "posicoes": [
+        0
+      ],
+      "acerto": false,
+      "scoreTop1": 0.5370580852031708
+    },
+    {
+      "id": "V14",
+      "tipo": "direta",
+      "pergunta": "A empresa é obrigada a pagar a internet e o computador de quem trabalha de casa?",
+      "esperados": [
+        "75-D"
+      ],
+      "recuperados": [
+        "75-D",
+        "75-C",
+        "389",
+        "75-B",
+        "83"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.6137196719646454
+    },
+    {
+      "id": "V15",
+      "tipo": "direta",
+      "pergunta": "Uma funcionária descobriu que está grávida durante o aviso prévio. Ela tem estabilidade?",
+      "esperados": [
+        "391-A"
+      ],
+      "recuperados": [
+        "391-A",
+        "394",
+        "499",
+        "392",
+        "394-A"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.687065839767456
+    },
+    {
+      "id": "V16",
+      "tipo": "direta",
+      "pergunta": "Quantos dias de licença-maternidade a funcionária tem, e a partir de quando ela pode começar?",
+      "esperados": [
+        "392"
+      ],
+      "recuperados": [
+        "392",
+        "396",
+        "394-A",
+        "393",
+        "392-B"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.6886366903781891
+    },
+    {
+      "id": "V17",
+      "tipo": "direta",
+      "pergunta": "A funcionária voltou da licença e está amamentando. Ela tem direito a pausas durante o expediente?",
+      "esperados": [
+        "396"
+      ],
+      "recuperados": [
+        "396",
+        "392",
+        "383",
+        "394-A",
+        "382"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.6664993762969971
+    },
+    {
+      "id": "V18",
+      "tipo": "direta",
+      "pergunta": "Com quanto tempo de antecedência preciso avisar o funcionário das férias dele?",
+      "esperados": [
+        "135"
+      ],
+      "recuperados": [
+        "139",
+        "135",
+        "133",
+        "143",
+        "145"
+      ],
+      "posicoes": [
+        2
+      ],
+      "acerto": true,
+      "scoreTop1": 0.7056475281715393
+    },
+    {
+      "id": "V19",
+      "tipo": "direta",
+      "pergunta": "Em quais situações a empresa pode demitir por justa causa?",
+      "esperados": [
+        "482"
+      ],
+      "recuperados": [
+        "482",
+        "502",
+        "483",
+        "497",
+        "479"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.6469767093658447
+    },
+    {
+      "id": "V20",
+      "tipo": "direta",
+      "pergunta": "O funcionário foi demitido e está cumprindo aviso prévio. A jornada dele diminui?",
+      "esperados": [
+        "488"
+      ],
+      "recuperados": [
+        "488",
+        "490",
+        "491",
+        "487",
+        "489"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.6750926077365875
+    },
+    {
+      "id": "V21",
+      "tipo": "hierarquia",
+      "pergunta": "Um gerente com diploma de nível superior e salário alto pode negociar direto com a empresa condições diferentes das da convenção coletiva?",
+      "esperados": [
+        "444"
+      ],
+      "recuperados": [
+        "622",
+        "611-A",
+        "507-A",
+        "611",
+        "612"
+      ],
+      "posicoes": [
+        0
+      ],
+      "acerto": false,
+      "scoreTop1": 0.5614542365074158
+    },
+    {
+      "id": "V22",
+      "tipo": "hierarquia",
+      "pergunta": "A convenção coletiva pode reduzir a licença-maternidade para 90 dias?",
+      "esperados": [
+        "611-B"
+      ],
+      "recuperados": [
+        "392",
+        "611-B",
+        "611-A",
+        "614",
+        "616"
+      ],
+      "posicoes": [
+        2
+      ],
+      "acerto": true,
+      "scoreTop1": 0.5701147615909576
+    },
+    {
+      "id": "V23",
+      "tipo": "cobertura_parcial",
+      "pergunta": "Por quanto tempo dura a estabilidade da funcionária gestante?",
+      "esperados": [
+        "391-A"
+      ],
+      "recuperados": [
+        "391-A",
+        "392",
+        "394-A",
+        "396",
+        "395"
+      ],
+      "posicoes": [
+        1
+      ],
+      "acerto": true,
+      "scoreTop1": 0.6242243647575378
+    },
+    {
+      "id": "VF01",
+      "tipo": "fora_do_escopo",
+      "pergunta": "Como calculo o 13º salário proporcional de quem foi demitido?",
+      "esperados": [],
+      "recuperados": [
+        "479",
+        "147",
+        "487",
+        "478",
+        "223-G"
+      ],
+      "posicoes": [],
+      "acerto": false,
+      "scoreTop1": 0.5428503453731537
+    },
+    {
+      "id": "VF02",
+      "tipo": "fora_do_escopo",
+      "pergunta": "Quantas parcelas de seguro-desemprego o funcionário demitido sem justa causa vai receber?",
+      "esperados": [],
+      "recuperados": [
+        "147",
+        "499",
+        "497",
+        "479",
+        "478"
+      ],
+      "posicoes": [],
+      "acerto": false,
+      "scoreTop1": 0.6029238402843475
+    },
+    {
+      "id": "VF03",
+      "tipo": "fora_do_escopo",
+      "pergunta": "Qual o desconto máximo do vale-transporte no salário do funcionário?",
+      "esperados": [],
+      "recuperados": [
+        "235-E",
+        "503",
+        "462",
+        "71",
+        "235-G"
+      ],
+      "posicoes": [],
+      "acerto": false,
+      "scoreTop1": 0.5659543573856354
+    }
+  ]
+}
