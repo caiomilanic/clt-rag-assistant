@@ -28,9 +28,16 @@ export default function ChatView({ conversa, conectado, enviadaEm, onEnviar }: P
   const enviando = enviadaEm !== undefined;
   const segundos = enviando ? Math.max(0, Math.floor((agora - enviadaEm) / 1000)) : 0;
 
+  // Pergunta enviada: rola até o fim (pergunta e indicador de carregamento).
+  // Resposta chegou: rola até o início dela, não até o fim, que mostraria só a lista de fontes.
   useEffect(() => {
-    fim.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [mensagens.length, enviando]);
+    const ultima = mensagens[mensagens.length - 1];
+    if (ultima?.papel === "assistente" && !enviando) {
+      document.getElementById(`msg-${ultima.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      fim.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  }, [mensagens.length, enviando]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!enviando) return;
@@ -85,7 +92,9 @@ export default function ChatView({ conversa, conectado, enviadaEm, onEnviar }: P
                   <p className="mt-0.5 text-[15px] whitespace-pre-wrap text-navy">{m.texto}</p>
                 </div>
               ) : (
-                <AssistantMessage key={m.id} mensagem={m} />
+                <div key={m.id} id={`msg-${m.id}`} className="scroll-mt-4">
+                  <AssistantMessage mensagem={m} />
+                </div>
               ),
             )}
             {enviando && <Pensando segundos={segundos} />}

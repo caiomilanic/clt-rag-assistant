@@ -4,9 +4,9 @@
 
 ![Java](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0-6DB33F) ![Spring AI](https://img.shields.io/badge/Spring%20AI-2.0-6DB33F) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17%20%2B%20pgvector-336791) ![Ollama](https://img.shields.io/badge/LLM-Ollama%20local-black) ![Offline](https://img.shields.io/badge/runs-100%25%20offline-blue)
 
-![The assistant answering a question about night work, with clickable citations and legal sources](docs/img/interface.png)
+![Demo: a question in HR jargon answered with clickable citations, a direct search in the CLT, and an out-of-scope question refused](docs/img/demo.gif)
 
-<sub>A real answer recorded in the evaluation run. The question uses HR jargon ("22h"), which the glossary translates into the law's wording; a paragraph citation the model got wrong was automatically reduced to the article. Clicking a citation opens the article's text.</sub>
+<sub>The answers in this recording are real outputs of the system, recorded during the evaluation run and replayed with their measured response time (2.6 s on a 6 GB laptop GPU). The first question uses HR jargon ("22h"), which the glossary translates into the law's wording; a paragraph citation the model got wrong was automatically reduced to the article. The last question is outside the CLT, and the assistant says so instead of inventing an answer.</sub>
 
 > ⚠️ **Not legal advice.** The assistant organizes and cites the rules; the decision belongs to a professional. Every answer carries this disclaimer.
 

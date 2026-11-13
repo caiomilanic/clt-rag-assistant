@@ -2,7 +2,7 @@
 
 /* Identidade: navy, azul, fundo claro e verde de sucesso. Fonte Inter empacotada (funciona offline). */
 @theme {
-  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
   --color-navy: #111827;
   --color-brand: #2563eb;
   --color-brand-soft: #eff4ff;
