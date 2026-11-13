@@ -2,7 +2,7 @@
 
 > **A labor-law assistant for HR teams that runs entirely on-premise.** It answers questions about Brazilian labor law (CLT), cites the article behind every claim, and never sends a question or document outside the company network.
 
-![Java](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0-6DB33F) ![Spring AI](https://img.shields.io/badge/Spring%20AI-2.0-6DB33F) ![React](https://img.shields.io/badge/React-19-61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-Vite%20%2B%20Tailwind-3178C6) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17%20%2B%20pgvector-336791) ![Ollama](https://img.shields.io/badge/LLM-Ollama%20local-black) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED) ![Python](https://img.shields.io/badge/Python-tooling-3776AB) ![Offline](https://img.shields.io/badge/runs-100%25%20offline-blue)
+![Java](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0-6DB33F) ![Spring AI](https://img.shields.io/badge/Spring%20AI-2.0-6DB33F) ![React](https://img.shields.io/badge/React-19-61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-Vite%20%2B%20Tailwind-3178C6) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17%20%2B%20pgvector-336791) ![Ollama](https://img.shields.io/badge/LLM-Ollama%20local-black) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED) ![Python](https://img.shields.io/badge/Python-3.10%2B%20%28tooling%29-3776AB) ![Offline](https://img.shields.io/badge/runs-100%25%20offline-blue)
 
 ![Demo: a question in HR jargon answered with clickable citations, a direct search in the CLT, and an out-of-scope question refused](docs/img/demo.gif)
 
@@ -103,7 +103,7 @@ flowchart LR
 
 ### What the Python is for
 
-The running system is Java (API) and TypeScript (interface). Python is used only for engineering tools in [`tools/`](tools/), which is why GitHub shows it in the language bar:
+The running system is Java (API) and TypeScript (interface). Python (3.10+, tested on 3.13; the parser needs `beautifulsoup4` and `lxml`) is used only for engineering tools in [`tools/`](tools/), which is why GitHub shows it in the language bar:
 
 - **`tools/corpus/parse_clt.py`:** a quick prototype of the CLT parser, written before the Java one and then kept as an independent second implementation. Comparing both outputs article by article caught real bugs in the Java parser (an article read wrongly, another dropped by mistake).
 - **`tools/eval/build_eval.py`:** builds both evaluation sets. The questions and expected articles are written in the script, which is most of its size; the legal excerpts that justify each answer are **copied from the official text, never typed by hand**, and the script fails if one isn't found. It also records the SHA-256 of the CLT file, so every answer key is tied to a specific version of the law.

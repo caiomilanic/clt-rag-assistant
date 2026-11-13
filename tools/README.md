@@ -4,7 +4,7 @@ Scripts usados para preparar o corpus e o eval set. Não fazem parte da aplicaç
 
 > **O parser de referência agora é o Java** (`src/main/java/.../ingestao/clt/CltHtmlParser.java`, desde o passo 3). Ele extrai 835 artigos, contra 826 do protótipo, e corrige casos que o protótipo perde (ver D16 em `docs/decisoes.md`). O protótipo continua aqui porque gera os trechos do eval set. No passo 3 foi conferido que os 33 trechos do eval aparecem literalmente na saída do parser Java; se o eval for regenerado, vale repetir essa conferência.
 
-Requisitos: Python 3.10+ com `beautifulsoup4` e `lxml` (`pip install beautifulsoup4 lxml`).
+Requisitos: Python 3.10+ (testado com 3.13) com `beautifulsoup4` e `lxml` (`pip install beautifulsoup4 lxml`).
 
 ## `corpus/parse_clt.py`: protótipo do parser da CLT
 
