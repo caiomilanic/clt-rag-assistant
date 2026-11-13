@@ -99,6 +99,14 @@ flowchart LR
 | Models | Ollama: `qwen3:4b-instruct` (chat) + `bge-m3` (embeddings), together ~4 GB of VRAM |
 | Interface | React 19 · TypeScript · Vite · Tailwind CSS · Lucide icons; fonts bundled, so it works offline. Assistant, direct search in the CLT, and a Documents screen reserved for the next layer |
 | Packaging | Docker Compose, optional NVIDIA GPU |
+| Tooling | Python scripts in [`tools/`](tools/): parser prototype and evaluation-set builder (not part of the running app) |
+
+### What the Python is for
+
+The running system is Java (API) and TypeScript (interface). Python is used only for engineering tools in [`tools/`](tools/), which is why GitHub shows it in the language bar:
+
+- **`tools/corpus/parse_clt.py`:** a quick prototype of the CLT parser, written before the Java one and then kept as an independent second implementation. Comparing both outputs article by article caught real bugs in the Java parser (an article read wrongly, another dropped by mistake).
+- **`tools/eval/build_eval.py`:** builds both evaluation sets. The questions and expected articles are written in the script, which is most of its size; the legal excerpts that justify each answer are **copied from the official text, never typed by hand**, and the script fails if one isn't found. It also records the SHA-256 of the CLT file, so every answer key is tied to a specific version of the law.
 
 ## Results
 
