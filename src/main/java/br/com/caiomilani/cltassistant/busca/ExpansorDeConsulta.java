@@ -25,8 +25,8 @@ import tools.jackson.databind.json.JsonMapper;
  *
  * <p>A pergunta "Posso adotar a escala 12x36?" não chega, por similaridade de embeddings, ao texto
  * "doze horas seguidas por trinta e seis horas ininterruptas de descanso" (Art. 59-A). Quando a pergunta
- * contém um termo do glossário, a expansão correspondente vira uma busca a mais, fundida com a busca pela
- * pergunta original (ver {@link Recuperador}). O LLM continua recebendo a pergunta original.
+ * contém um termo do glossário, a pergunta seguida das expansões vira uma segunda busca, intercalada com a
+ * busca pela pergunta original (ver {@link Recuperador}). O LLM continua recebendo a pergunta original.
  *
  * <p>O glossário é um arquivo JSON fora do código ({@code app.busca.glossario}), para que cada empresa
  * acrescente os próprios termos sem recompilar. Sem o arquivo, a busca funciona sem expansão.
@@ -44,9 +44,8 @@ public class ExpansorDeConsulta {
     }
 
     /**
-     * @param consulta  a pergunta seguida das expansões (usada na busca textual da estratégia híbrida)
-     * @param expansoes uma expansão por entrada do glossário encontrada; cada uma vira uma busca vetorial
-     *                  separada, fundida com a busca pela pergunta original (D22)
+     * @param consulta  a pergunta seguida das expansões: a segunda busca vetorial e a busca textual da híbrida
+     * @param expansoes uma expansão por entrada do glossário encontrada
      * @param termos    termos do glossário encontrados na pergunta (vazio = nada expandido)
      */
     public record Expansao(String consulta, List<String> expansoes, List<String> termos) {

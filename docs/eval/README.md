@@ -278,14 +278,38 @@ Resultados com revisão manual: [desenvolvimento](resultados/2026-11-13-glossari
 3. A cobertura é o limite: jargão novo ("pediu as contas", "rebaixar") passa direto. Em produção, o glossário cresce com o uso de cada empresa; a alternativa automática é a reescrita da pergunta pelo LLM.
 4. O gargalo seguinte é a leitura do modelo de 4B (Q25, V08, V14, V22, V23).
 
-### Glossário com busca separada e fusão (para medir)
+### Glossário com busca separada e fusão
 
-Mesmos comandos da rodada anterior, mudando o prefixo dos arquivos para comparar:
+| Busca no desenvolvimento | Top-5 | MRR |
+|---|---|---|
+| Sem glossário | 80,8% | 0,597 |
+| Expansão concatenada | 92,3% | 0,840 |
+| Buscas separadas, fusão por RRF ([descartada](resultados/2026-11-13-glossario-rrf-descartado-k5.json)) | 88,5% | 0,670 |
+| Pergunta intercalada com a expansão sozinha ([descartada](resultados/2026-11-13-glossario-intercalado-expansao-descartado-k5.json)) | 92,3% | 0,663 |
+| **Pergunta intercalada com a pergunta concatenada** ([final](resultados/2026-11-13-glossario-final-desenvolvimento-k5.json)) | **96,2%** | 0,689 |
+
+O RRF piorou porque soma pontos de todas as listas e favorece artigos presentes nas duas buscas, mesmo em posições medianas. A intercalação com a expansão sozinha recuperou a Q12, mas perdeu a Q23: sem a pergunta, a expansão não acha o Art. 59-A. Intercalar a pergunta original com a pergunta concatenada mantém as duas (simulação exata no top-5 a partir das listas medidas). Comandos para medir:
 
 ```bash
 for c in desenvolvimento validacao; do
-  curl -s -X POST "http://localhost:8080/api/avaliacao/recuperacao?k=5&conjunto=$c&expansao=true" > target/fusao-recuperacao-$c.json
+  curl -s -X POST "http://localhost:8080/api/avaliacao/recuperacao?k=5&conjunto=$c&expansao=true" > target/final-recuperacao-$c.json
 done
-curl -s -X POST "http://localhost:8080/api/avaliacao/respostas?k=5&conjunto=desenvolvimento" > target/fusao-respostas-desenvolvimento.json
-curl -s -X POST "http://localhost:8080/api/avaliacao/respostas?k=5&conjunto=validacao" > target/fusao-respostas-validacao.json
+curl -s -X POST "http://localhost:8080/api/avaliacao/respostas?k=5&conjunto=desenvolvimento" > target/final-respostas-desenvolvimento.json
+curl -s -X POST "http://localhost:8080/api/avaliacao/respostas?k=5&conjunto=validacao" > target/final-respostas-validacao.json
 ```
+
+### Versão final do glossário (2026-11-13)
+
+A medição confirmou a simulação: **96,2%** no desenvolvimento (só a Q24 falha) e 87,0% na validação. Resultados com revisão manual: [desenvolvimento](resultados/2026-11-13-glossario-final-desenvolvimento-k5.json) e [validação](resultados/2026-11-13-glossario-final-validacao-k5.json).
+
+| Respostas | Desenvolvimento | Validação |
+|---|---|---|
+| Fiéis | 21/26 (81%) | 13/23 (57%) |
+| Parciais | 1 | 4 |
+| Infiéis | 3 | 3 |
+| Recusas indevidas | 1 | 3 |
+| Fora do escopo recusadas | 3/3 | 3/3 |
+
+O total é igual ao da rodada anterior, mas as perguntas trocaram: Q12 e Q02 passaram a acertar; Q11, Q15 e Q26 pioraram, por variação do modelo. **A busca deixou de ser o gargalo no desenvolvimento.** O que limita agora:
+1. **A leitura do modelo de 4B**, instável entre execuções: Q11 (conclui o contrário da regra que cita), Q25 e Q26 (invertem o parágrafo), V08 (usa o artigo errado), V14 (recusa com o artigo certo em 1º), V23 (cai na armadilha).
+2. **Jargão fora do glossário** na validação: V24, V27, V28.

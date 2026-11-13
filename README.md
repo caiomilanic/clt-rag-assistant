@@ -37,7 +37,7 @@
 | Criterion | Target | Status |
 |---|---|---|
 | Every answer cites its source, or explicitly says nothing was found | 100% of eval answers | **100%** (24/24) on the development set; on the validation set, 3/3 out-of-scope refusals but 4 answerable questions refused |
-| The expected article is among the retrieved excerpts | ≥ 90% of eval questions (top-5) | **92.3%** on the development set with the HR-to-legal glossary; **87.0%** on the held-out validation set ([glossary results](docs/eval/README.md#resultado-do-glossário-2026-11-13)) |
+| The expected article is among the retrieved excerpts | ≥ 90% of eval questions (top-5) | **96.2%** on the development set with the HR-to-legal glossary; **87.0%** on the held-out validation set ([glossary results](docs/eval/README.md#resultado-do-glossário-2026-11-13)) |
 | The answer says only what the cited excerpts support | 100% of eval answers | **81%** (21/26) on the development set; **57%** (13/23) on the held-out validation set, plus 4 partially correct (manual review) |
 | No external network calls in the `offline` profile | 0 calls | By design; to be verified in step 9 |
 | Response time on a 6 GB consumer GPU | ≤ 15 s per answer, including retrieval | **2.4 s average, 5.5 s max** on the validation set (down from ~90 s on CPU without RAG; see [performance](#model-choice-and-performance)) |
@@ -95,15 +95,15 @@ The made-up answers also **change from run to run and from model to model**. Ask
 
 | | Development (26 + 3 out of scope) | **Held-out validation (23 + 3 out of scope)** |
 |---|---|---|
-| Correct article among the top 5 retrieved | 92.3% (80.8% without the glossary) | **87.0%** |
+| Correct article among the top 5 retrieved | 96.2% (80.8% without the glossary) | **87.0%** |
 | Answers fully supported by their excerpts (manual review) | 81% (21/26) | **57%** (13/23) |
 | Partially supported (right rule, missing a condition or wrong citation) | 1 | 4 |
 | Wrong answers | 3 | 3 |
 | Answerable questions refused | 1 | 3 (2 because retrieval missed the article) |
 | Out-of-scope questions refused | 3/3 | **3/3** |
-| Average response time | 2.2 s | 2.4 s |
+| Average response time | 2.3 s | 2.3 s |
 
-**What the held-out set showed.** The first development questions were written with the law open and shared its vocabulary, so retrieval scored 100%. Questions in HR jargon dropped it to 78%: "12x36 shift" never reaches "twelve consecutive hours followed by thirty-six" (Art. 59-A), "home office" never reaches "teleworking" (Art. 75-C). An **HR-to-legal glossary** that expands the search query fixed 4 of those 5 questions (development retrieval 80.8% → 92.3%) without hurting anything on the validation set. But it only covers the jargon it knows: new jargon in the validation set ("he quit", "demote") still misses. And when an expansion is secondary to the question, it can push out the article that matters (one regression, documented). When retrieval misses, the model usually **refuses instead of inventing**, which is the safe failure. The next bottleneck is the 4B model reading the excerpts: in one case it got the right article and still inverted its two paragraphs ([analysis](docs/eval/README.md#resultado-do-glossário-2026-11-13)).
+**What the held-out set showed.** The first development questions were written with the law open and shared its vocabulary, so retrieval scored 100%. Questions in HR jargon dropped it to 78%: "12x36 shift" never reaches "twelve consecutive hours followed by thirty-six" (Art. 59-A), "home office" never reaches "teleworking" (Art. 75-C). An **HR-to-legal glossary** that expands the search query fixed 4 of those 5 questions (development retrieval 80.8% → 96.2%) without hurting anything on the validation set. But it only covers the jargon it knows: new jargon in the validation set ("he quit", "demote") still misses. Getting the combination right took four measured attempts: simply appending the expansion to the question pushed out the article that mattered in one question, and two fusion strategies were rejected before interleaving the original and the expanded searches kept both. When retrieval misses, the model usually **refuses instead of inventing**, which is the safe failure. The next bottleneck is the 4B model reading the excerpts: in one case it got the right article and still inverted its two paragraphs ([analysis](docs/eval/README.md#resultado-do-glossário-2026-11-13)).
 
 Earlier milestones on the development set: indexing by provision (each paragraph as its own vector, while the LLM still gets the whole article) took retrieval from 90.5% to 100%; hybrid keyword + vector search was measured and **rejected** because it made retrieval worse; a deterministic citation verifier now catches wrong paragraph and item numbers and reduces them to the article ([analysis](docs/eval/README.md)).
 
@@ -141,7 +141,7 @@ In the **`offline`** profile (the default), everything above runs inside the net
 | LLM | Ollama (`qwen3:4b-instruct`) | Runs locally with no per-request cost; fits a 6 GB GPU next to the embedding model |
 | Ingestion | One adapter per source type | The CLT has its own structure (article/paragraph/item); agreements and policies arrive as PDF/DOCX |
 | Retrieval | Vector and/or Postgres full-text, fused with RRF; article- or provision-level | Both options are switchable per request, so each is measured on the eval set before becoming the default |
-| Query expansion | HR-to-legal glossary (JSON file) | HR jargon ("12x36 shift", "home office") does not match the legal wording; each matching glossary entry runs an extra search in the law's vocabulary, fused with the search for the original question (RRF), so the expansion adds candidates without diluting the question. The glossary lives outside the code, so each company can add its own jargon |
+| Query expansion | HR-to-legal glossary (JSON file) | HR jargon ("12x36 shift", "home office") does not match the legal wording; a second search, with the question followed by the law's vocabulary, is interleaved with the search for the original question, so the expansion adds candidates without pushing out what the question already found. Three other ways to combine them were measured and rejected, including rank fusion with RRF, which rewards overlap between searches that are complementary on purpose. The glossary lives outside the code, so each company can add its own jargon |
 | Answer checking | Deterministic citation verifier | Every cited article, paragraph and item is checked against the retrieved text, so a wrong citation shows up in the metrics instead of in front of the analyst |
 | Frontend | React + TypeScript | Chat with clickable citations to the text of each source |
 

@@ -257,3 +257,20 @@ O detector de citações foi ajustado com base nessa rodada ("artigo 617" por ex
 - **Por quê:** concatenar a expansão à pergunta diluiu o conceito principal (Q12 perdeu o Art. 611-A) e misturou expansões diferentes (Q24 sem o 59-A).
 - **Como:** uma busca vetorial pela pergunta e uma por entrada do glossário; `Recuperador.fundirListas` junta por RRF, com prioridade para a lista da pergunta original em empate.
 - **Testes:** dois casos novos em `RecuperadorTest`, reproduzindo a Q12 (o artigo da pergunta original continua no top-5) e a Q24 (o artigo que só a expansão acha entra). Os stubs de AssertJ do lado do Claude ganharam `startsWith`, `contains`, `filteredOn` e `first`.
+
+### RRF descartado, intercalação no lugar
+- **Medição da fusão por RRF:** desenvolvimento 88,5% (MRR 0,670), contra 92,3% (MRR 0,840) da concatenação. Q12 sem o 611-A, e Q23 perdeu o 59-A. A hipótese estava errada.
+- **Por quê:** com 20 candidatos por lista, artigos que aparecem nas duas buscas em posições medianas somam mais que o 1º lugar de uma lista só. Na Q23, o 59-A (1º da expansão) perdeu para os Arts. 71, 66 e 586, presentes nas duas.
+- **Correção:** `fundirListas` agora intercala as listas. O caso real da Q23 virou teste (`fundirListasNaoDeixaASobreposicaoTirarO1oDaExpansao`).
+- Resultado guardado em `docs/eval/resultados/2026-11-13-glossario-rrf-descartado-k5.json`.
+
+### Intercalação: com a expansão sozinha, depois com a pergunta concatenada
+- **1ª medição da intercalação inválida:** a aplicação ainda rodava a versão RRF (classe compilada às 15:59, código novo gravado às 16:12, avaliação às 16:13). Resultados idênticos aos do RRF, byte a byte. A configuração de execução do IntelliJ não compila antes de rodar: é preciso Build → Rebuild Project.
+- **Medição válida (pergunta + expansão sozinha):** 92,3%, MRR 0,663. Q12 voltou, mas Q23 caiu: a expansão sem a pergunta não acha o 59-A.
+- **Simulação (pergunta + pergunta concatenada):** 96,2% (25/26), MRR 0,689. Calculada a partir das listas top-5 já medidas, intercalando e sem repetir artigo. Implementada; falta confirmar na aplicação.
+- **Variação do modelo:** mesmas listas, respostas diferentes (Q11, Q26). As configurações de busca passam a ser comparadas pela recuperação.
+
+### Versão final do glossário confirmada
+- Busca: desenvolvimento 96,2% (25/26), MRR 0,689, exatamente como na simulação; validação 87,0%.
+- Respostas: desenvolvimento 21/26 fiéis; validação 13/23. Mesmos totais, perguntas diferentes: a variação do modelo entre execuções é do mesmo tamanho dos ganhos que estamos tentando medir.
+- Próximo gargalo: leitura do modelo (testar um modelo maior e reduzir a variação) e cobertura do glossário.

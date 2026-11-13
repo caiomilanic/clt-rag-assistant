@@ -84,4 +84,22 @@ class RecuperadorTest {
         assertThat(r).filteredOn(a -> a.referencia().equals("Art. 73")).first()
                 .satisfies(a -> assertThat(a.dispositivo()).isEqualTo("§ 1º"));
     }
+
+    /**
+     * Caso Q23 real (rodada com RRF): artigos medianos que aparecem nas duas buscas não podem tirar o
+     * 1º lugar exclusivo da expansão.
+     */
+    @Test
+    void fundirListasNaoDeixaASobreposicaoTirarO1oDaExpansao() {
+        var original = List.of(c("Art. 590", "caput", 0.55), c("Art. 71", "caput", 0.54), c("Art. 586", "caput", 0.53),
+                c("Art. 66", "caput", 0.52), c("Art. 461", "caput", 0.51));
+        var expansao = List.of(c("Art. 59-A", "caput", 0.80), c("Art. 66", "caput", 0.70), c("Art. 71", "caput", 0.69),
+                c("Art. 586", "caput", 0.60), c("Art. 590", "caput", 0.59));
+
+        var r = Recuperador.fundir(Recuperador.fundirListas(List.of(original, expansao)), List.of(),
+                EstrategiaBusca.VETORIAL, 5);
+
+        assertThat(r).extracting(Recuperador.ArtigoRecuperado::referencia)
+                .containsExactly("Art. 590", "Art. 59-A", "Art. 71", "Art. 66", "Art. 586");
+    }
 }

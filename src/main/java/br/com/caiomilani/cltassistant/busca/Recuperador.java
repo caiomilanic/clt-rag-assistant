@@ -27,8 +27,8 @@ import br.com.caiomilani.cltassistant.ingestao.Granularidade;
  *       e o contexto do LLM são por artigo ("small-to-big").</li>
  *   <li><b>Estratégia</b>: só vetorial, ou híbrida: vetorial + busca textual do Postgres
  *       ({@code to_tsvector('portuguese', …)}), combinadas por Reciprocal Rank Fusion.</li>
- *   <li><b>Expansão</b>: termos de RH da pergunta geram buscas extras no vocabulário da lei, fundidas
- *       por RRF com a busca pela pergunta original (D22).</li>
+ *   <li><b>Expansão</b>: quando a pergunta tem termos de RH do glossário, uma segunda busca, com a pergunta
+ *       seguida do vocabulário da lei, é intercalada com a busca pela pergunta original (D22).</li>
  * </ul>
  */
 @Service
@@ -106,12 +106,10 @@ public class Recuperador {
         int candidatos = Math.max(k * 4, 20);
         List<Candidato> vetorial = buscaVetorial(pergunta, candidatos, granularidade);
         if (expansao.expandiu()) {
-            // Uma busca pela pergunta e uma por expansão, fundidas: a expansão acrescenta candidatos sem
-            // diluir a pergunta. Concatenar tudo numa consulta só tirou o Art. 611-A da Q12 (D22).
-            List<List<Candidato>> listas = new ArrayList<>();
-            listas.add(vetorial);
-            expansao.expansoes().forEach(e -> listas.add(buscaVetorial(e, candidatos, granularidade)));
-            vetorial = fundirListas(listas);
+            // Duas buscas intercaladas: a pergunta original e a pergunta seguida das expansões (D22).
+            // Só a concatenada perde o que a pergunta já achava (Q12, Art. 611-A); só a expansão, sem a
+            // pergunta, perde o contexto que leva ao artigo certo (Q23, Art. 59-A).
+            vetorial = fundirListas(List.of(vetorial, buscaVetorial(expansao.consulta(), candidatos, granularidade)));
         }
         List<Candidato> textual = estrategia == EstrategiaBusca.HIBRIDA
                 ? buscaTextual(expansao.consulta(), candidatos, granularidade)
@@ -120,21 +118,29 @@ public class Recuperador {
     }
 
     /**
-     * Junta várias listas de candidatos numa só, ordenada pelo RRF da posição de cada artigo em cada lista.
-     * Para cada artigo fica o candidato da primeira lista em que ele apareceu (a da pergunta original tem
-     * prioridade), com o seu score.
+     * Junta várias listas de candidatos intercalando-as: o 1º da primeira lista, o 1º da segunda, o 2º da
+     * primeira, o 2º da segunda, e assim por diante, sem repetir artigo. Garante no topo os
+     * melhores de cada busca. A primeira versão usava RRF, que soma os pontos de todas as listas e por isso
+     * favorece quem aparece em várias delas, mesmo em posições ruins: o 1º lugar exclusivo da expansão
+     * (Art. 59-A na Q23) perdia para artigos medianos presentes nas duas buscas (D22).
      */
     static List<Candidato> fundirListas(List<List<Candidato>> listas) {
-        Map<String, Candidato> candidato = new LinkedHashMap<>();
-        Map<String, Double> pontos = new LinkedHashMap<>();
+        Map<String, Candidato> porArtigo = new LinkedHashMap<>();
+        List<List<String>> ordens = new ArrayList<>();
         for (List<Candidato> lista : listas) {
-            Map<String, Integer> posicoes = posicoesPorArtigo(lista, candidato);
-            posicoes.forEach((ref, pos) -> pontos.merge(ref, 1.0 / (RRF_K + pos), Double::sum));
+            List<String> ordem = new ArrayList<>(posicoesPorArtigo(lista, porArtigo).keySet());
+            ordens.add(ordem);
         }
-        return pontos.entrySet().stream()
-                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
-                .map(e -> candidato.get(e.getKey()))
-                .toList();
+        Set<String> vistos = new LinkedHashSet<>();
+        int maior = ordens.stream().mapToInt(List::size).max().orElse(0);
+        for (int i = 0; i < maior; i++) {
+            for (List<String> ordem : ordens) {
+                if (i < ordem.size()) {
+                    vistos.add(ordem.get(i));
+                }
+            }
+        }
+        return vistos.stream().map(porArtigo::get).toList();
     }
 
     /** Agrupa os candidatos por artigo e ordena: pela posição vetorial ou pelo RRF das duas listas. */
