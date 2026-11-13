@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -58,6 +59,8 @@ public class ExpansorDeConsulta {
 
     private final List<Regra> regras;
 
+    /** Construtor usado pelo Spring (há outro, para testes; com dois, o Spring precisa saber qual usar). */
+    @Autowired
     public ExpansorDeConsulta(@Value("${app.busca.glossario}") String arquivo) {
         this(carregar(Path.of(arquivo)));
     }
