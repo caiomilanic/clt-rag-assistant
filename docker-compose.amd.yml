@@ -1,0 +1,12 @@
+# GPU AMD no Linux (ROCm). Requer o driver amdgpu com ROCm instalado no host.
+#   docker compose -f docker-compose.yml -f docker-compose.amd.yml up -d
+# No Windows e no macOS o Docker não repassa GPUs AMD/Apple para containers:
+# use o Ollama instalado na máquina (docker-compose.ollama-local.yml).
+services:
+  ollama:
+    image: ollama/ollama:${OLLAMA_VERSION:-0.40.16}-rocm
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    group_add:
+      - video

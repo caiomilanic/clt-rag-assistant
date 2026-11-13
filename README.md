@@ -20,9 +20,11 @@ The whole stack (vector database, local models, API and web interface) comes up 
 git clone https://github.com/caiomilanic/clt-rag-assistant.git
 cd clt-rag-assistant
 
-docker compose up -d                                                    # CPU
 docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d    # NVIDIA GPU (recommended)
+docker compose up -d                                                    # no GPU: runs on CPU, slower
 ```
+
+Other hardware (AMD, Apple Silicon): see [hardware](#hardware).
 
 Then open **http://localhost:8080**.
 
@@ -35,7 +37,32 @@ The first run downloads the models (about 4 GB) and indexes the CLT, which takes
 | `modelos` | Pulls both models once, then exits |
 | `app` | Spring Boot API + React interface, on the same port. Indexes the CLT on first start if the database is empty |
 
-The GPU option needs an NVIDIA driver (on Windows, Docker Desktop with WSL 2). On a 6 GB laptop GPU, answers take about 2–3 s; on CPU, expect several times that.
+### Hardware
+
+The language model generates text by running billions of operations per token, so speed depends almost entirely on the GPU, and the model must fit entirely in its memory (VRAM). Both models together take about 4 GB.
+
+| Machine | How to run | What to expect |
+|---|---|---|
+| **NVIDIA GPU, 6 GB+ VRAM** | `-f docker-compose.gpu.yml` (needs the NVIDIA driver; on Windows, Docker Desktop with WSL 2) | **About 2–3 s per answer** (measured on an RTX 3060 Laptop, 6 GB) |
+| NVIDIA GPU with less VRAM | same | Works, but the model is split between GPU and CPU, which is several times slower |
+| **AMD GPU on Linux** | `-f docker-compose.amd.yml` (ROCm image; needs the ROCm driver on the host) | GPU speed, depending on the card. Not tested by the author |
+| **AMD GPU on Windows, or Apple Silicon Mac** | Install [Ollama](https://ollama.com/download) on the machine, pull the models, then `-f docker-compose.ollama-local.yml` | Docker can't use these GPUs; Ollama installed natively can. Not tested by the author |
+| No GPU | `docker compose up -d` | Works, but answers take many times longer, and the first indexing takes longer too. Not measured yet |
+
+**Memory:** reserve about 8 GB of RAM for Docker (on Windows, check the WSL 2 memory limit) and about 10 GB of disk for images and models.
+
+<details>
+<summary>Using Ollama installed on the machine</summary>
+
+```bash
+ollama pull qwen3:4b-instruct-2507-q4_K_M
+ollama pull bge-m3
+docker compose -f docker-compose.yml -f docker-compose.ollama-local.yml up -d
+```
+
+The `ollama` and `modelos` containers are skipped and the app talks to the host's Ollama at `host.docker.internal:11434`. On Linux, start Ollama with `OLLAMA_HOST=0.0.0.0` so the container can reach it.
+
+</details>
 
 ## Why
 

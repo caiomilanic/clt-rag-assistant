@@ -1,0 +1,19 @@
+# Usa o Ollama instalado na máquina, em vez do container. É o caminho para aproveitar a GPU onde o Docker
+# não a enxerga: AMD no Windows e Apple Silicon (M1–M4) no macOS. Os modelos são baixados no próprio host:
+#   ollama pull qwen3:4b-instruct-2507-q4_K_M
+#   ollama pull bge-m3
+#   docker compose -f docker-compose.yml -f docker-compose.ollama-local.yml up -d
+# No Linux, o Ollama do host precisa aceitar conexões de fora do localhost: OLLAMA_HOST=0.0.0.0.
+services:
+  ollama:
+    profiles: ["desligado"]   # não sobe: quem responde é o Ollama do host
+  modelos:
+    profiles: ["desligado"]
+  app:
+    depends_on: !override
+      postgres:
+        condition: service_healthy
+    environment:
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # já existe no Docker Desktop; necessário no Linux
