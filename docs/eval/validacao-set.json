@@ -1,5 +1,5 @@
 {
-  "versao": "validacao-0.1",
+  "versao": "validacao-0.2",
   "descricao": "Conjunto de VALIDAÇÃO do assistente de normas trabalhistas (D21): perguntas novas, congeladas em 2026-11-13 antes da primeira execução e nunca usadas para ajustar o sistema.",
   "corpus": {
     "fonte": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm",
@@ -22,30 +22,6 @@
   },
   "perguntas": [
     {
-      "id": "V01",
-      "tema": "jornada",
-      "tipo": "direta",
-      "pergunta": "Um funcionário trabalha das 22h às 5h. Quanto ele recebe a mais e como as horas dele são contadas?",
-      "artigos_esperados": [
-        "73"
-      ],
-      "resposta_referencia": "Trabalho entre 22h e 5h é noturno; tem acréscimo de pelo menos 20% sobre a hora diurna, e cada hora noturna conta como 52 minutos e 30 segundos (Art. 73, caput e §§ 1º e 2º).",
-      "trechos_justificativos": [
-        {
-          "artigo": "73",
-          "texto": "Art. 73. Salvo nos casos de revezamento semanal ou quinzenal, o trabalho noturno terá remuneração superior a do diurno e, para esse efeito, sua remuneração terá um acréscimo de 20 % (vinte por cento), pelo menos, sobre a hora diurna."
-        },
-        {
-          "artigo": "73",
-          "texto": "§ 1º A hora do trabalho noturno será computada como de 52 minutos e 30 segundos."
-        },
-        {
-          "artigo": "73",
-          "texto": "§ 2º Considera-se noturno, para os efeitos deste artigo, o trabalho executado entre as 22 horas de um dia e as 5 horas do dia seguinte."
-        }
-      ]
-    },
-    {
       "id": "V02",
       "tema": "jornada",
       "tipo": "direta",
@@ -62,22 +38,6 @@
         {
           "artigo": "58-A",
           "texto": "§ 3º As horas suplementares à duração do trabalho semanal normal serão pagas com o acréscimo de 50% (cinquenta por cento) sobre o salário-hora normal."
-        }
-      ]
-    },
-    {
-      "id": "V03",
-      "tema": "jornada",
-      "tipo": "direta",
-      "pergunta": "Posso adotar a escala 12x36 combinando direto com o funcionário, sem o sindicato?",
-      "artigos_esperados": [
-        "59-A"
-      ],
-      "resposta_referencia": "Sim. A escala de 12 horas de trabalho por 36 de descanso pode ser feita por acordo individual escrito, convenção ou acordo coletivo, observados ou indenizados os intervalos (Art. 59-A).",
-      "trechos_justificativos": [
-        {
-          "artigo": "59-A",
-          "texto": "Art. 59-A. Em exceção ao disposto no art. 59 desta Consolidação, é facultado às partes, mediante acordo individual escrito, convenção coletiva ou acordo coletivo de trabalho, estabelecer horário de trabalho de doze horas seguidas por trinta e seis horas ininterruptas de descanso, observados ou indenizados os intervalos para repouso e alimentação."
         }
       ]
     },
@@ -136,32 +96,6 @@
           "texto": "§ 1º - O trabalho em condições de periculosidade assegura ao empregado um adicional de 30% (trinta por cento) sobre o salário sem os acréscimos resultantes de gratificações, prêmios ou participações nos lucros da empresa."
         }
       ]
-    },
-    {
-      "id": "V07",
-      "tema": "jornada",
-      "tipo": "multi_artigo",
-      "pergunta": "Funcionário em escala 12x36 no turno da noite: ele tem adicional noturno e hora reduzida?",
-      "artigos_esperados": [
-        "59-A",
-        "73"
-      ],
-      "resposta_referencia": "Sim, o trabalho entre 22h e 5h segue o Art. 73 (acréscimo de pelo menos 20% e hora de 52 minutos e 30 segundos). Na 12x36, a remuneração mensal já abrange o descanso semanal e os feriados, e as prorrogações do trabalho noturno são consideradas compensadas (Art. 59-A, parágrafo único).",
-      "trechos_justificativos": [
-        {
-          "artigo": "59-A",
-          "texto": "Parágrafo único. A remuneração mensal pactuada pelo horário previsto no caput deste artigo abrange os pagamentos devidos pelo descanso semanal remunerado e pelo descanso em feriados, e serão considerados compensados os feriados e as prorrogações de trabalho noturno, quando houver, de que tratam o art. 70 e o § 5º do art. 73 desta Consolidação."
-        },
-        {
-          "artigo": "73",
-          "texto": "§ 1º A hora do trabalho noturno será computada como de 52 minutos e 30 segundos."
-        },
-        {
-          "artigo": "73",
-          "texto": "Art. 73. Salvo nos casos de revezamento semanal ou quinzenal, o trabalho noturno terá remuneração superior a do diurno e, para esse efeito, sua remuneração terá um acréscimo de 20 % (vinte por cento), pelo menos, sobre a hora diurna."
-        }
-      ],
-      "observacoes": "Pergunta difícil de propósito: exige combinar a regra geral do trabalho noturno com a exceção da 12x36."
     },
     {
       "id": "V08",
@@ -248,22 +182,6 @@
         {
           "artigo": "452-A",
           "texto": "§ 2º Recebida a convocação, o empregado terá o prazo de um dia útil para responder ao chamado, presumindo-se, no silêncio, a recusa."
-        }
-      ]
-    },
-    {
-      "id": "V13",
-      "tema": "teletrabalho",
-      "tipo": "direta",
-      "pergunta": "Quero trazer de volta ao escritório um funcionário que está em home office. Preciso da concordância dele?",
-      "artigos_esperados": [
-        "75-C"
-      ],
-      "resposta_referencia": "Não. A volta ao presencial pode ser determinada pelo empregador, com prazo de transição de pelo menos 15 dias e registro em aditivo contratual (Art. 75-C, § 2º).",
-      "trechos_justificativos": [
-        {
-          "artigo": "75-C",
-          "texto": "§ 2º Poderá ser realizada a alteração do regime de teletrabalho para o presencial por determinação do empregador, garantido prazo de transição mínimo de quinze dias, com correspondente registro em aditivo contratual."
         }
       ]
     },
@@ -404,23 +322,6 @@
       ]
     },
     {
-      "id": "V21",
-      "tema": "hierarquia",
-      "tipo": "hierarquia",
-      "pergunta": "Um gerente com diploma de nível superior e salário alto pode negociar direto com a empresa condições diferentes das da convenção coletiva?",
-      "artigos_esperados": [
-        "444"
-      ],
-      "resposta_referencia": "Sim, nos temas do Art. 611-A: o empregado com diploma de nível superior e salário mensal igual ou superior a duas vezes o teto dos benefícios do RGPS pode negociar individualmente, com a mesma eficácia e preponderância sobre os instrumentos coletivos (Art. 444, parágrafo único).",
-      "trechos_justificativos": [
-        {
-          "artigo": "444",
-          "texto": "Parágrafo único. A livre estipulação a que se refere o caput deste artigo aplica-se às hipóteses previstas no art. 611-A desta Consolidação, com a mesma eficácia legal e preponderância sobre os instrumentos coletivos, no caso de empregado portador de diploma de nível superior e que perceba salário mensal igual ou superior a duas vezes o limite máximo dos benefícios do Regime Geral de Previdência Social."
-        }
-      ],
-      "observacoes": "Citar também o Art. 611-A é correto e esperado como bônus."
-    },
-    {
       "id": "V22",
       "tema": "hierarquia",
       "tipo": "hierarquia",
@@ -452,6 +353,94 @@
         }
       ],
       "observacoes": "Armadilha: o prazo (da confirmação da gravidez até 5 meses após o parto) é conhecido, mas está na Constituição, não na CLT."
+    },
+    {
+      "id": "V24",
+      "tema": "rescisao",
+      "tipo": "direta",
+      "pergunta": "Um funcionário pediu as contas e não quer cumprir o aviso. O que a empresa pode fazer?",
+      "artigos_esperados": [
+        "487"
+      ],
+      "resposta_referencia": "Se o empregado não der o aviso prévio, a empresa pode descontar os salários correspondentes ao prazo do aviso (Art. 487, § 2º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "487",
+          "texto": "§ 2º - A falta de aviso prévio por parte do empregado dá ao empregador o direito de descontar os salários correspondentes ao prazo respectivo."
+        }
+      ]
+    },
+    {
+      "id": "V25",
+      "tema": "contrato",
+      "tipo": "direta",
+      "pergunta": "Qual o prazo máximo do contrato de experiência?",
+      "artigos_esperados": [
+        "445"
+      ],
+      "resposta_referencia": "90 dias (Art. 445, parágrafo único).",
+      "trechos_justificativos": [
+        {
+          "artigo": "445",
+          "texto": "Parágrafo único. O contrato de experiência não poderá exceder de 90 (noventa) dias."
+        }
+      ]
+    },
+    {
+      "id": "V26",
+      "tema": "ferias",
+      "tipo": "direta",
+      "pergunta": "Quero dar férias coletivas para a empresa toda no fim do ano. Preciso avisar alguém?",
+      "artigos_esperados": [
+        "139"
+      ],
+      "resposta_referencia": "Sim: comunicar o órgão local do Ministério do Trabalho com pelo menos 15 dias de antecedência, com as datas de início e fim e os setores abrangidos; no mesmo prazo, enviar cópia aos sindicatos da categoria e afixar aviso nos locais de trabalho (Art. 139, §§ 2º e 3º). As férias coletivas podem ser divididas em até 2 períodos de pelo menos 10 dias corridos (§ 1º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "139",
+          "texto": "§ 2º - Para os fins previstos neste artigo, o empregador comunicará ao órgão local do Ministério do Trabalho, com a antecedência mínima de 15 (quinze) dias, as datas de início e fim das férias, precisando quais os estabelecimentos ou setores abrangidos pela medida."
+        },
+        {
+          "artigo": "139",
+          "texto": "§ 3º - Em igual prazo, o empregador enviará cópia da aludida comunicação aos sindicatos representativos da respectiva categoria profissional, e providenciará a afixação de aviso nos locais de trabalho."
+        }
+      ]
+    },
+    {
+      "id": "V27",
+      "tema": "jornada",
+      "tipo": "direta",
+      "pergunta": "O tempo que o funcionário passa no ônibus fretado pela empresa conta como hora trabalhada?",
+      "artigos_esperados": [
+        "58"
+      ],
+      "resposta_referencia": "Não. O tempo de deslocamento de casa até o posto de trabalho e a volta, por qualquer meio de transporte, inclusive o fornecido pelo empregador, não é computado na jornada (Art. 58, § 2º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "58",
+          "texto": "§ 2º O tempo despendido pelo empregado desde a sua residência até a efetiva ocupação do posto de trabalho e para o seu retorno, caminhando ou por qualquer meio de transporte, inclusive o fornecido pelo empregador, não será computado na jornada de trabalho, por não ser tempo à disposição do empregador."
+        }
+      ]
+    },
+    {
+      "id": "V28",
+      "tema": "contrato",
+      "tipo": "direta",
+      "pergunta": "Posso rebaixar um funcionário que está num cargo de confiança e cortar a gratificação dele?",
+      "artigos_esperados": [
+        "468"
+      ],
+      "resposta_referencia": "Sim. A reversão ao cargo efetivo, deixando a função de confiança, não é considerada alteração unilateral proibida, e o empregado não tem direito a manter a gratificação, que não se incorpora ao salário, independentemente do tempo na função (Art. 468, §§ 1º e 2º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "468",
+          "texto": "§ 1º Não se considera alteração unilateral a determinação do empregador para que o respectivo empregado reverta ao cargo efetivo, anteriormente ocupado, deixando o exercício de função de confiança."
+        },
+        {
+          "artigo": "468",
+          "texto": "§ 2º A alteração de que trata o § 1º deste artigo, com ou sem justo motivo, não assegura ao empregado o direito à manutenção do pagamento da gratificação correspondente, que não será incorporada, independentemente do tempo de exercício da respectiva função."
+        }
+      ]
     },
     {
       "id": "VF01",

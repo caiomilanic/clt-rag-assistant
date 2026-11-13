@@ -1,5 +1,5 @@
 {
-  "versao": "0.2",
+  "versao": "0.3",
   "descricao": "Eval set do assistente de normas trabalhistas. Perguntas na linguagem do analista de RH/DP, com o artigo esperado e o trecho da CLT que justifica a resposta.",
   "corpus": {
     "fonte": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452.htm",
@@ -427,6 +427,108 @@
       "artigos_esperados": [],
       "resposta_referencia": "Deve dizer que a resposta não está no corpus: contribuição previdenciária é regida pela legislação da Previdência, não pela CLT.",
       "trechos_justificativos": []
+    },
+    {
+      "id": "Q22",
+      "tema": "jornada",
+      "tipo": "direta",
+      "pergunta": "Um funcionário trabalha das 22h às 5h. Quanto ele recebe a mais e como as horas dele são contadas?",
+      "artigos_esperados": [
+        "73"
+      ],
+      "resposta_referencia": "Trabalho entre 22h e 5h é noturno; tem acréscimo de pelo menos 20% sobre a hora diurna, e cada hora noturna conta como 52 minutos e 30 segundos (Art. 73, caput e §§ 1º e 2º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "73",
+          "texto": "Art. 73. Salvo nos casos de revezamento semanal ou quinzenal, o trabalho noturno terá remuneração superior a do diurno e, para esse efeito, sua remuneração terá um acréscimo de 20 % (vinte por cento), pelo menos, sobre a hora diurna."
+        },
+        {
+          "artigo": "73",
+          "texto": "§ 1º A hora do trabalho noturno será computada como de 52 minutos e 30 segundos."
+        },
+        {
+          "artigo": "73",
+          "texto": "§ 2º Considera-se noturno, para os efeitos deste artigo, o trabalho executado entre as 22 horas de um dia e as 5 horas do dia seguinte."
+        }
+      ],
+      "observacoes": "Veio da validação (V01) em 2026-11-13: a busca falhou por jargão de RH, e a correção (glossário, D22) foi desenhada olhando para ela (regra da D21)."
+    },
+    {
+      "id": "Q23",
+      "tema": "jornada",
+      "tipo": "direta",
+      "pergunta": "Posso adotar a escala 12x36 combinando direto com o funcionário, sem o sindicato?",
+      "artigos_esperados": [
+        "59-A"
+      ],
+      "resposta_referencia": "Sim. A escala de 12 horas de trabalho por 36 de descanso pode ser feita por acordo individual escrito, convenção ou acordo coletivo, observados ou indenizados os intervalos (Art. 59-A).",
+      "trechos_justificativos": [
+        {
+          "artigo": "59-A",
+          "texto": "Art. 59-A. Em exceção ao disposto no art. 59 desta Consolidação, é facultado às partes, mediante acordo individual escrito, convenção coletiva ou acordo coletivo de trabalho, estabelecer horário de trabalho de doze horas seguidas por trinta e seis horas ininterruptas de descanso, observados ou indenizados os intervalos para repouso e alimentação."
+        }
+      ],
+      "observacoes": "Veio da validação (V03) em 2026-11-13: a busca falhou por jargão de RH, e a correção (glossário, D22) foi desenhada olhando para ela (regra da D21)."
+    },
+    {
+      "id": "Q24",
+      "tema": "jornada",
+      "tipo": "multi_artigo",
+      "pergunta": "Funcionário em escala 12x36 no turno da noite: ele tem adicional noturno e hora reduzida?",
+      "artigos_esperados": [
+        "59-A",
+        "73"
+      ],
+      "resposta_referencia": "Sim, o trabalho entre 22h e 5h segue o Art. 73 (acréscimo de pelo menos 20% e hora de 52 minutos e 30 segundos). Na 12x36, a remuneração mensal já abrange o descanso semanal e os feriados, e as prorrogações do trabalho noturno são consideradas compensadas (Art. 59-A, parágrafo único).",
+      "trechos_justificativos": [
+        {
+          "artigo": "59-A",
+          "texto": "Parágrafo único. A remuneração mensal pactuada pelo horário previsto no caput deste artigo abrange os pagamentos devidos pelo descanso semanal remunerado e pelo descanso em feriados, e serão considerados compensados os feriados e as prorrogações de trabalho noturno, quando houver, de que tratam o art. 70 e o § 5º do art. 73 desta Consolidação."
+        },
+        {
+          "artigo": "73",
+          "texto": "§ 1º A hora do trabalho noturno será computada como de 52 minutos e 30 segundos."
+        },
+        {
+          "artigo": "73",
+          "texto": "Art. 73. Salvo nos casos de revezamento semanal ou quinzenal, o trabalho noturno terá remuneração superior a do diurno e, para esse efeito, sua remuneração terá um acréscimo de 20 % (vinte por cento), pelo menos, sobre a hora diurna."
+        }
+      ],
+      "observacoes": "Pergunta difícil de propósito: exige combinar a regra geral do trabalho noturno com a exceção da 12x36. Veio da validação (V07) em 2026-11-13: a busca falhou por jargão de RH, e a correção (glossário, D22) foi desenhada olhando para ela (regra da D21)."
+    },
+    {
+      "id": "Q25",
+      "tema": "teletrabalho",
+      "tipo": "direta",
+      "pergunta": "Quero trazer de volta ao escritório um funcionário que está em home office. Preciso da concordância dele?",
+      "artigos_esperados": [
+        "75-C"
+      ],
+      "resposta_referencia": "Não. A volta ao presencial pode ser determinada pelo empregador, com prazo de transição de pelo menos 15 dias e registro em aditivo contratual (Art. 75-C, § 2º).",
+      "trechos_justificativos": [
+        {
+          "artigo": "75-C",
+          "texto": "§ 2º Poderá ser realizada a alteração do regime de teletrabalho para o presencial por determinação do empregador, garantido prazo de transição mínimo de quinze dias, com correspondente registro em aditivo contratual."
+        }
+      ],
+      "observacoes": "Veio da validação (V13) em 2026-11-13: a busca falhou por jargão de RH, e a correção (glossário, D22) foi desenhada olhando para ela (regra da D21)."
+    },
+    {
+      "id": "Q26",
+      "tema": "hierarquia",
+      "tipo": "hierarquia",
+      "pergunta": "Um gerente com diploma de nível superior e salário alto pode negociar direto com a empresa condições diferentes das da convenção coletiva?",
+      "artigos_esperados": [
+        "444"
+      ],
+      "resposta_referencia": "Sim, nos temas do Art. 611-A: o empregado com diploma de nível superior e salário mensal igual ou superior a duas vezes o teto dos benefícios do RGPS pode negociar individualmente, com a mesma eficácia e preponderância sobre os instrumentos coletivos (Art. 444, parágrafo único).",
+      "trechos_justificativos": [
+        {
+          "artigo": "444",
+          "texto": "Parágrafo único. A livre estipulação a que se refere o caput deste artigo aplica-se às hipóteses previstas no art. 611-A desta Consolidação, com a mesma eficácia legal e preponderância sobre os instrumentos coletivos, no caso de empregado portador de diploma de nível superior e que perceba salário mensal igual ou superior a duas vezes o limite máximo dos benefícios do Regime Geral de Previdência Social."
+        }
+      ],
+      "observacoes": "Citar também o Art. 611-A é correto e esperado como bônus. Veio da validação (V21) em 2026-11-13: a busca falhou por jargão de RH, e a correção (glossário, D22) foi desenhada olhando para ela (regra da D21)."
     }
   ]
 }
